@@ -3,7 +3,7 @@ const keys = {
   googleClientSecret: "GOOGLE_CLIENT_SECRET",
   nextAuthSecret: "NEXTAUTH_SECRET",
 } as const;
-type Key = (typeof keys)[keyof typeof keys];
+type Key = typeof keys[keyof typeof keys];
 
 type GetEnv = () => { [key in Key]: string };
 export const getEnv: GetEnv = () => ({
@@ -16,7 +16,7 @@ export const getEnv: GetEnv = () => ({
 });
 
 type Unwrap = (value: Value, key: Key) => string;
-type Value = (typeof process.env)[string];
+type Value = typeof process.env[string];
 const unwrap: Unwrap = (value, key) => {
   if (!value) {
     throw new Error(`環境変数"${key}"が設定されていません`);
