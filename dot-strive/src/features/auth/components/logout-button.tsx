@@ -12,8 +12,7 @@ import type { FC, MouseEventHandler } from "react";
 export const LogoutButton: FC = () => {
   const onClick: MouseEventHandler<HTMLButtonElement> = async (_) => {
     await signOut({
-      // callbackUrl: `${getBaseUrl()}${"/login" satisfies Route}`,
-      callbackUrl: `${getBaseUrl()}${"/" satisfies Route}`,
+      callbackUrl: `${getBaseUrl()}${"/login" satisfies Route}`,
     });
   };
 

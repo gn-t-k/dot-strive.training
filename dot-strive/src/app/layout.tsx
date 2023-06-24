@@ -1,7 +1,7 @@
 import { ChakraUIProvider } from "@/libs/chakra-ui/provider";
 import { NextAuthProvider } from "@/libs/next-auth/provider";
 
-import type { Layout } from "./_types/layout";
+import type { Layout } from "./_utils/types";
 
 const RootLayout: Layout = ({ children }) => {
   return (
