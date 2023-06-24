@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
 import { nextAuthOptions } from "@/libs/next-auth/options";
-import prisma from "@/libs/prisma/client";
+import { prisma } from "@/libs/prisma/client";
 
 import type { Layout } from "@/app/_utils/types";
 import type { Route } from "next";

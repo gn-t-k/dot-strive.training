@@ -1,6 +1,7 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { Text } from "@/libs/chakra-ui";
+import { Container, Heading, Stack, Text } from "@/libs/chakra-ui";
 
 import { getAllExercisesBySession } from "@/features/exercise/get-all-by-session";
 import { getFetcher } from "@/features/http-client/fetcher";
@@ -23,7 +24,25 @@ const Page: NextPage = async (props) => {
   if (exercisesResult.isErr()) {
     return <Text>種目の取得に失敗しました</Text>;
   }
+  const exercises = exercisesResult.value;
 
-  return <Text>{JSON.stringify(exercisesResult.value)}</Text>;
+  return (
+    <Container>
+      <Stack direction="column">
+        <Heading>種目一覧</Heading>
+        {exercises.map((exercise) => {
+          return (
+            <Link
+              href={`/trainees/${traineeId}/exercises/${exercise.id}`}
+              key={exercise.id}
+            >
+              {exercise.name}
+            </Link>
+          );
+        })}
+        <Link href={`/trainees/${traineeId}`}>トレーニーページ</Link>
+      </Stack>
+    </Container>
+  );
 };
 export default Page;
