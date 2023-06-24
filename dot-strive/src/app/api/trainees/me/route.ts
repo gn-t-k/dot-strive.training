@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { nextAuthOptions } from "@/libs/next-auth/options";
-import prisma from "@/libs/prisma/client";
+import { prisma } from "@/libs/prisma/client";
 
 import { validateTrainee } from "@/features/trainee";
 

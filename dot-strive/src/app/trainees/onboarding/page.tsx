@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { Container, Heading } from "@/libs/chakra-ui";
 import { nextAuthOptions } from "@/libs/next-auth/options";
-import prisma from "@/libs/prisma/client";
+import { prisma } from "@/libs/prisma/client";
 
 import { LogoutButton } from "@/features/auth/components/logout-button";
 
