@@ -1,5 +1,3 @@
-import { Text } from "@/libs/chakra-ui";
-
 import { getExerciseById } from "@/features/exercise/get-by-id";
 import { getFetcher } from "@/features/http-client/fetcher";
 
@@ -16,9 +14,9 @@ export const ExerciseDetail: FC<Props> = async (props) => {
   });
 
   if (result.isErr()) {
-    return <Text>種目データの取得に失敗しました</Text>;
+    return <p>種目データの取得に失敗しました</p>;
   }
   const exercise = result.value;
 
-  return <Text>{JSON.stringify(exercise)}</Text>;
+  return <p>{JSON.stringify(exercise)}</p>;
 };

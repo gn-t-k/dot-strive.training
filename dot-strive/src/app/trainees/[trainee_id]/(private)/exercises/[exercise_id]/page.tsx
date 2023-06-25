@@ -2,9 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { Container, Heading, Stack } from "@/libs/chakra-ui";
-
 import { Loading } from "@/features/navigation/components/loading";
+import { container, stack } from "styled-system/patterns";
 
 import { ExerciseDetail } from "./_components/exercise-detail";
 
@@ -19,17 +18,17 @@ const Page: NextPage = (props) => {
   }
 
   return (
-    <Container>
-      <Stack direction="column">
-        <Heading>種目詳細</Heading>
+    <main className={container()}>
+      <section className={stack({ direction: "column" })}>
+        <h1>種目詳細</h1>
         <Suspense
           fallback={<Loading description="種目データを取得しています" />}
         >
           <ExerciseDetail traineeId={traineeId} exerciseId={exerciseId} />
         </Suspense>
         <Link href={`/trainees/${traineeId}/exercises`}>種目一覧</Link>
-      </Stack>
-    </Container>
+      </section>
+    </main>
   );
 };
 export default Page;

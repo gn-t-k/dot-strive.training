@@ -3,15 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import {
-  Button,
-  FormControl,
-  FormErrorMessage,
-  Input,
-  Stack,
-  Text,
-  useToast,
-} from "@/libs/chakra-ui";
+import { useToast } from "@/libs/chakra-ui";
 
 import { getFetcher } from "@/features/http-client/fetcher";
 import { getMutator } from "@/features/http-client/mutator";
@@ -19,6 +11,7 @@ import { deleteMuscle } from "@/features/muscle/delete";
 import { getAllMusclesBySession } from "@/features/muscle/get-all-by-session";
 import { updateMuscle } from "@/features/muscle/update";
 import { useMuscleForm } from "@/features/muscle/use-muscle-form";
+import { stack } from "styled-system/patterns";
 
 import type { Muscle } from "@/features/muscle";
 import type { MuscleField } from "@/features/muscle/use-muscle-form";
@@ -146,64 +139,47 @@ export const MuscleEditor: FC<Props> = (props) => {
     );
     setIsConfirmingDelete(false);
     router.refresh();
+    if (result.isOk()) {
+      router.replace(`/trainees/${props.traineeId}/muscles`);
+    }
   };
 
   return isEditing ? (
     <form onSubmit={handleSubmit(onClickSaveButton)}>
-      <FormControl isInvalid={!!errors.name}>
-        <Stack direction="column">
-          <Input {...register("name")} aria-label="部位名" />
-          {!!errors.name && (
-            <FormErrorMessage>{errors.name.message}</FormErrorMessage>
-          )}
-          <Stack direction="row" justify="end">
-            <Button
-              onClick={onClickCancelEditButton}
-              isLoading={isEditLoading}
-              isDisabled={isEditLoading}
-            >
-              編集をやめる
-            </Button>
-            <Button
-              type="submit"
-              isLoading={isEditLoading}
-              isDisabled={isEditLoading}
-            >
-              変更を保存する
-            </Button>
-          </Stack>
-          <Button isDisabled={true}>{props.muscle.name}を削除する</Button>
-        </Stack>
-      </FormControl>
+      <div className={stack({ direction: "column" })}>
+        <input {...register("name")} aria-label="部位名" />
+        {!!errors.name && <p>{errors.name.message}</p>}
+        <div className={stack({ direction: "row", justify: "end" })}>
+          <button type="submit" disabled={isEditLoading}>
+            変更を保存する
+          </button>
+          <button onClick={onClickCancelEditButton} disabled={isEditLoading}>
+            変更しない
+          </button>
+        </div>
+        <button disabled={true}>{props.muscle.name}を削除する</button>
+      </div>
     </form>
   ) : isConfirmingDelete ? (
-    <Stack direction="column">
-      <Text>{props.muscle.name}</Text>
-      <Button isDisabled={true}>{props.muscle.name}を編集する</Button>
-      <Stack direction="row" justify="end">
-        <Button
-          onClick={onClickCancelDeleteButton}
-          isLoading={isDeleteLoading}
-          isDisabled={isDeleteLoading}
-        >
-          削除しない
-        </Button>
-        <Button
-          onClick={onClickConfirmDeleteButton}
-          isLoading={isDeleteLoading}
-          isDisabled={isDeleteLoading}
-        >
+    <div className={stack({ direction: "column" })}>
+      <p>{props.muscle.name}</p>
+      <button disabled={true}>{props.muscle.name}を編集する</button>
+      <div className={stack({ direction: "row", justify: "end" })}>
+        <button onClick={onClickConfirmDeleteButton} disabled={isDeleteLoading}>
           {props.muscle.name}を削除する
-        </Button>
-      </Stack>
-    </Stack>
+        </button>
+        <button onClick={onClickCancelDeleteButton} disabled={isDeleteLoading}>
+          削除しない
+        </button>
+      </div>
+    </div>
   ) : (
-    <Stack direction="column">
-      <Text>{props.muscle.name}</Text>
-      <Button onClick={onClickEditButton}>{props.muscle.name}を編集する</Button>
-      <Button onClick={onClickDeleteButton}>
+    <div className={stack({ direction: "column" })}>
+      <p>{props.muscle.name}</p>
+      <button onClick={onClickEditButton}>{props.muscle.name}を編集する</button>
+      <button onClick={onClickDeleteButton}>
         {props.muscle.name}を削除する
-      </Button>
-    </Stack>
+      </button>
+    </div>
   );
 };

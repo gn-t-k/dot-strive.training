@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently -n NEXT,TS -c magenta,cyan,green \"next dev\" \"npm run ts --watch\"",
+    "prepare": "panda codegen",
+    "dev": "rm -rf .next && concurrently -n NEXT,TS -c magenta,cyan,green \"next dev\" \"npm run ts --watch\"",
     "ts": "tsc --noEmit --incremental --preserveWatchOutput --pretty",
     "build": "prisma generate && next build",
     "start": "next start",
@@ -36,6 +37,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@pandacss/dev": "^0.4.0",
     "@typescript-eslint/eslint-plugin": "^5.60.0",
     "@typescript-eslint/parser": "^5.60.0",
     "concurrently": "^8.2.0",

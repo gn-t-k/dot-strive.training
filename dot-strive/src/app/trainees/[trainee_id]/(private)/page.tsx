@@ -2,11 +2,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { Heading, Container, Stack } from "@/libs/chakra-ui";
-
 import { Trainee } from "@/app/trainees/[trainee_id]/(private)/_components/trainee";
 import { LogoutButton } from "@/features/auth/components/logout-button";
 import { Loading } from "@/features/navigation/components/loading";
+import { container, stack } from "styled-system/patterns";
 
 import type { NextPage } from "@/app/_utils/types";
 import type { Route } from "next";
@@ -18,9 +17,9 @@ const Page: NextPage = (props) => {
   }
 
   return (
-    <Container>
-      <Stack direction="column">
-        <Heading>トレーニーページ</Heading>
+    <main className={container()}>
+      <div className={stack({ direction: "column" })}>
+        <h1>トレーニーページ</h1>
         <Suspense
           fallback={
             <Loading description={"トレーニーデータを取得しています"} />
@@ -31,8 +30,8 @@ const Page: NextPage = (props) => {
         <Link href={`/trainees/${traineeId}/muscles`}>部位</Link>
         <Link href={`/trainees/${traineeId}/exercises`}>種目</Link>
         <LogoutButton />
-      </Stack>
-    </Container>
+      </div>
+    </main>
   );
 };
 export default Page;

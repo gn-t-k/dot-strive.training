@@ -7,6 +7,7 @@ import { Container, Heading, Stack } from "@/libs/chakra-ui";
 import { Loading } from "@/features/navigation/components/loading";
 
 import { MuscleList } from "./_components/muscle-list";
+import { RegisterMuscleForm } from "./_components/register-muscle-form";
 
 import type { NextPage } from "@/app/_utils/types";
 import type { Route } from "next";
@@ -26,6 +27,7 @@ const Page: NextPage = (props) => {
         >
           <MuscleList traineeId={traineeId} />
         </Suspense>
+        <RegisterMuscleForm traineeId={traineeId} />
         <Link href={`/trainees/${traineeId}`}>トレーニーページ</Link>
       </Stack>
     </Container>

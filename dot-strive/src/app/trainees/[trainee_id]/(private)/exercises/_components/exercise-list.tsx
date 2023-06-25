@@ -1,7 +1,5 @@
 import Link from "next/link";
 
-import { Text } from "@/libs/chakra-ui";
-
 import { getAllExercisesBySession } from "@/features/exercise/get-all-by-session";
 import { getFetcher } from "@/features/http-client/fetcher";
 
@@ -18,7 +16,7 @@ export const ExerciseList: FC<Props> = async (props) => {
   });
 
   if (exercisesResult.isErr()) {
-    return <Text>種目の取得に失敗しました</Text>;
+    return <p>種目の取得に失敗しました</p>;
   }
   const exercises = exercisesResult.value;
 
