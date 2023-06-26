@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState, type FC } from "react";
 
+import { Button } from "@/app/_components/button";
+import { Input } from "@/app/_components/input";
 import { useToast } from "@/app/_components/use-toast";
 import { getFetcher } from "@/features/http-client/fetcher";
 import { getMutator } from "@/features/http-client/mutator";
@@ -90,10 +92,10 @@ export const RegisterMuscleForm: FC<Props> = (props) => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className={stack({ direction: "column" })}>
           <div className={stack({ direction: "row" })}>
-            <input {...register("name")} aria-label="部位名" />
-            <button type="submit" disabled={isLoading}>
+            <Input {...register("name")} aria-label="部位名" />
+            <Button type="submit" disabled={isLoading} visual="positive">
               部位を登録する
-            </button>
+            </Button>
           </div>
           {!!errors.name && <p>{errors.name.message}</p>}
         </div>
