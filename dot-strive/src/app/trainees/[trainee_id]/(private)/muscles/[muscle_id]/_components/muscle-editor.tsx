@@ -2,7 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { type SubmitHandler } from "react-hook-form";
 
+import { Button } from "@/app/_components/button";
+import { Input } from "@/app/_components/input";
 import { useToast } from "@/app/_components/use-toast";
 import { getFetcher } from "@/features/http-client/fetcher";
 import { getMutator } from "@/features/http-client/mutator";
@@ -15,7 +18,6 @@ import { stack } from "styled-system/patterns";
 import type { Muscle } from "@/features/muscle";
 import type { MuscleField } from "@/features/muscle/use-muscle-form";
 import type { FC, MouseEventHandler } from "react";
-import type { SubmitHandler } from "react-hook-form";
 
 type Props = {
   traineeId: string;
@@ -54,11 +56,7 @@ export const MuscleEditor: FC<Props> = (props) => {
     if (registeredMuscles.isErr()) {
       setIsEditLoading(false);
       renderToast({ title: "部位の更新に失敗しました", variant: "error" });
-      // toast({
-      //   title: "部位の更新に失敗しました",
-      //   status: "error",
-      //   isClosable: true,
-      // });
+
       return;
     }
 
@@ -70,11 +68,7 @@ export const MuscleEditor: FC<Props> = (props) => {
         title: `部位「${fieldValues.name}」はすでに登録されています`,
         variant: "error",
       });
-      // toast({
-      //   title: `部位「${fieldValues.name}」はすでに登録されています`,
-      //   status: "error",
-      //   isClosable: true,
-      // });
+
       return;
     }
 
@@ -96,19 +90,6 @@ export const MuscleEditor: FC<Props> = (props) => {
           }
         : { title: "部位の更新に失敗しました", variant: "error" }
     );
-    // toast(
-    //   result.isOk()
-    //     ? {
-    //         title: `部位「${props.muscle.name}」の名前を「${result.value.name}」に更新しました`,
-    //         status: "success",
-    //         isClosable: true,
-    //       }
-    //     : {
-    //         title: "部位の更新に失敗しました",
-    //         status: "error",
-    //         isClosable: true,
-    //       }
-    // );
 
     setIsEditing(false);
     router.refresh();
@@ -136,19 +117,6 @@ export const MuscleEditor: FC<Props> = (props) => {
     });
     setIsDeleteLoading(false);
 
-    // toast(
-    //   result.isOk()
-    //     ? {
-    //         title: `部位「${result.value.name}」を削除しました`,
-    //         status: "success",
-    //         isClosable: true,
-    //       }
-    //     : {
-    //         title: "部位の削除に失敗しました",
-    //         status: "error",
-    //         isClosable: true,
-    //       }
-    // );
     renderToast(
       result.isOk()
         ? {
@@ -169,50 +137,57 @@ export const MuscleEditor: FC<Props> = (props) => {
       {isEditing ? (
         <form onSubmit={handleSubmit(onClickSaveButton)}>
           <div className={stack({ direction: "column" })}>
-            <input {...register("name")} aria-label="部位名" />
+            <Input {...register("name")} aria-label="部位名" />
             {!!errors.name && <p>{errors.name.message}</p>}
             <div className={stack({ direction: "row", justify: "end" })}>
-              <button type="submit" disabled={isEditLoading}>
+              <Button type="submit" disabled={isEditLoading} visual="positive">
                 変更を保存する
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={onClickCancelEditButton}
                 disabled={isEditLoading}
+                visual="neutral"
               >
                 変更しない
-              </button>
+              </Button>
             </div>
-            <button disabled={true}>{props.muscle.name}を削除する</button>
+            <Button disabled={true} visual="neutral">
+              {props.muscle.name}を削除する
+            </Button>
           </div>
         </form>
       ) : isConfirmingDelete ? (
         <div className={stack({ direction: "column" })}>
           <p>{props.muscle.name}</p>
-          <button disabled={true}>{props.muscle.name}を編集する</button>
+          <Button disabled={true} visual="neutral">
+            {props.muscle.name}を編集する
+          </Button>
           <div className={stack({ direction: "row", justify: "end" })}>
-            <button
+            <Button
               onClick={onClickConfirmDeleteButton}
               disabled={isDeleteLoading}
+              visual="negative"
             >
               {props.muscle.name}を削除する
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={onClickCancelDeleteButton}
               disabled={isDeleteLoading}
+              visual="neutral"
             >
               削除しない
-            </button>
+            </Button>
           </div>
         </div>
       ) : (
         <div className={stack({ direction: "column" })}>
           <p>{props.muscle.name}</p>
-          <button onClick={onClickEditButton}>
+          <Button onClick={onClickEditButton} visual="neutral">
             {props.muscle.name}を編集する
-          </button>
-          <button onClick={onClickDeleteButton}>
+          </Button>
+          <Button onClick={onClickDeleteButton} visual="neutral">
             {props.muscle.name}を削除する
-          </button>
+          </Button>
         </div>
       )}
       <Toast />
