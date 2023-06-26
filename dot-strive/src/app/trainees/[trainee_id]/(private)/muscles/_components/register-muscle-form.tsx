@@ -3,27 +3,19 @@
 import { useRouter } from "next/navigation";
 import { useState, type FC } from "react";
 
-import {
-  FormControl,
-  Stack,
-  Input,
-  Button,
-  FormErrorMessage,
-  Spacer,
-  useToast,
-} from "@/libs/chakra-ui";
-
+import { useToast } from "@/app/_components/use-toast";
+import { getFetcher } from "@/features/http-client/fetcher";
 import { getMutator } from "@/features/http-client/mutator";
+import { getAllMusclesBySession } from "@/features/muscle/get-all-by-session";
 import { registerMuscle } from "@/features/muscle/register";
 import { useMuscleForm } from "@/features/muscle/use-muscle-form";
+import { stack } from "styled-system/patterns";
 
-import type { Muscle } from "@/features/muscle";
 import type { MuscleField } from "@/features/muscle/use-muscle-form";
 import type { SubmitHandler } from "react-hook-form";
 
 type Props = {
   traineeId: string;
-  registeredMuscles: Muscle[];
 };
 export const RegisterMuscleForm: FC<Props> = (props) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -35,14 +27,32 @@ export const RegisterMuscleForm: FC<Props> = (props) => {
     reset,
   } = useMuscleForm();
   const router = useRouter();
-  const toast = useToast();
+  const { Toast, renderToast } = useToast();
 
   const onSubmit: SubmitHandler<MuscleField> = async (fieldValues) => {
-    const isSameNameMuscleExist = props.registeredMuscles.some(
+    setIsLoading(true);
+
+    const registeredMuscles = await getAllMusclesBySession({
+      fetcher: getFetcher(),
+    })({
+      traineeId: props.traineeId,
+    });
+    if (registeredMuscles.isErr()) {
+      setIsLoading(false);
+      renderToast({
+        title: `部位「${fieldValues.name}」の登録に失敗しました`,
+        variant: "error",
+      });
+
+      return;
+    }
+
+    const isSameNameMuscleExist = registeredMuscles.value.some(
       (muscle) => muscle.name === fieldValues.name
     );
 
     if (isSameNameMuscleExist) {
+      setIsLoading(false);
       setError("name", {
         type: "custom",
         message: `部位「${fieldValues.name}」はすでに登録されています`,
@@ -51,7 +61,6 @@ export const RegisterMuscleForm: FC<Props> = (props) => {
       return;
     }
 
-    setIsLoading(true);
     const result = await registerMuscle({
       mutator: getMutator(),
     })({
@@ -60,17 +69,15 @@ export const RegisterMuscleForm: FC<Props> = (props) => {
     });
     setIsLoading(false);
 
-    toast(
+    renderToast(
       result.isOk()
         ? {
             title: `部位「${fieldValues.name}」を登録しました`,
-            status: "success",
-            isClosable: true,
+            variant: "success",
           }
         : {
             title: `部位「${fieldValues.name}」の登録に失敗しました`,
-            status: "error",
-            isClosable: true,
+            variant: "error",
           }
     );
 
@@ -79,21 +86,19 @@ export const RegisterMuscleForm: FC<Props> = (props) => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <FormControl isInvalid={!!errors.name}>
-        <Stack direction="column">
-          <Stack direction="row">
-            <Input {...register("name")} aria-label="部位名" />
-            <Spacer />
-            <Button type="submit" isLoading={isLoading} isDisabled={isLoading}>
+    <>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className={stack({ direction: "column" })}>
+          <div className={stack({ direction: "row" })}>
+            <input {...register("name")} aria-label="部位名" />
+            <button type="submit" disabled={isLoading}>
               部位を登録する
-            </Button>
-          </Stack>
-          {!!errors.name && (
-            <FormErrorMessage>{errors.name.message}</FormErrorMessage>
-          )}
-        </Stack>
-      </FormControl>
-    </form>
+            </button>
+          </div>
+          {!!errors.name && <p>{errors.name.message}</p>}
+        </div>
+      </form>
+      <Toast />
+    </>
   );
 };

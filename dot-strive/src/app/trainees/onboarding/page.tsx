@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
-import { Container, Heading } from "@/libs/chakra-ui";
 import { nextAuthOptions } from "@/libs/next-auth/options";
 import { prisma } from "@/libs/prisma/client";
 
-import { LogoutButton } from "@/features/auth/components/logout-button";
+import { LogoutButton } from "@/app/_components/logout-button";
+import { container } from "styled-system/patterns";
 
 import type { NextPage } from "@/app/_utils/types";
 import type { Route } from "next";
@@ -28,10 +28,10 @@ const Page: NextPage = async () => {
   }
 
   return (
-    <Container>
-      <Heading>オンボーディング</Heading>
+    <main className={container()}>
+      <h1>オンボーディング</h1>
       <LogoutButton />
-    </Container>
+    </main>
   );
 };
 export default Page;

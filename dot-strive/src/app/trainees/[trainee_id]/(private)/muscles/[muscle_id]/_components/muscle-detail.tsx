@@ -1,5 +1,3 @@
-import { Text } from "@/libs/chakra-ui";
-
 import { getFetcher } from "@/features/http-client/fetcher";
 import { getMuscleById } from "@/features/muscle/get-by-id";
 
@@ -18,7 +16,7 @@ export const MuscleDetail: FC<Props> = async (props) => {
   });
 
   if (result.isErr()) {
-    return <Text>部位データの取得に失敗しました</Text>;
+    return <p>部位データの取得に失敗しました</p>;
   }
   const muscle = result.value;
 
