@@ -2,8 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { Loading } from "@/features/navigation/components/loading";
-import { stack } from "styled-system/patterns";
+import { Loading } from "@/app/_components/loading";
+import { container, stack } from "styled-system/patterns";
 
 import { ExerciseList } from "./_components/exercise-list";
 
@@ -17,7 +17,7 @@ const Page: NextPage = (props) => {
   }
 
   return (
-    <main>
+    <main className={container()}>
       <section className={stack({ direction: "column" })}>
         <h1>種目一覧</h1>
         <Suspense

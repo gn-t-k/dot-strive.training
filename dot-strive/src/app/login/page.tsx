@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { nextAuthOptions } from "@/libs/next-auth/options";
 
-import { LoginButton } from "@/features/auth/components/login-button";
+import { LoginButton } from "@/app/_components/login-button";
 import { container } from "styled-system/patterns";
 
 import type { NextPage } from "../_utils/types";

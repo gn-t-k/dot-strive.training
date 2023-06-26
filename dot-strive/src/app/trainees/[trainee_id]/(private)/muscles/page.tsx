@@ -2,9 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { Container, Heading, Stack } from "@/libs/chakra-ui";
-
-import { Loading } from "@/features/navigation/components/loading";
+import { Loading } from "@/app/_components/loading";
+import { container, stack } from "styled-system/patterns";
 
 import { MuscleList } from "./_components/muscle-list";
 import { RegisterMuscleForm } from "./_components/register-muscle-form";
@@ -19,9 +18,9 @@ const Page: NextPage = (props) => {
   }
 
   return (
-    <Container>
-      <Stack direction="column">
-        <Heading>部位一覧</Heading>
+    <main className={container()}>
+      <section className={stack({ direction: "column" })}>
+        <h1>部位一覧</h1>
         <Suspense
           fallback={<Loading description="部位データを取得しています" />}
         >
@@ -29,8 +28,8 @@ const Page: NextPage = (props) => {
         </Suspense>
         <RegisterMuscleForm traineeId={traineeId} />
         <Link href={`/trainees/${traineeId}`}>トレーニーページ</Link>
-      </Stack>
-    </Container>
+      </section>
+    </main>
   );
 };
 export default Page;

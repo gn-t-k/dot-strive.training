@@ -2,8 +2,6 @@
 
 import { signOut } from "next-auth/react";
 
-import { Button } from "@/libs/chakra-ui";
-
 import { getBaseUrl } from "@/utils/get-base-url";
 
 import type { Route } from "next";
@@ -16,5 +14,5 @@ export const LogoutButton: FC = () => {
     });
   };
 
-  return <Button onClick={onClick}>ログアウト</Button>;
+  return <button onClick={onClick}>ログアウト</button>;
 };

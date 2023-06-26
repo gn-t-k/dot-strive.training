@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { Loading } from "@/features/navigation/components/loading";
+import { Loading } from "@/app/_components/loading";
 import { container, stack } from "styled-system/patterns";
 
 import { ExerciseDetail } from "./_components/exercise-detail";

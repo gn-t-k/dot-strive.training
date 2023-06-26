@@ -18,5 +18,15 @@ export const ExerciseDetail: FC<Props> = async (props) => {
   }
   const exercise = result.value;
 
-  return <p>{JSON.stringify(exercise)}</p>;
+  return (
+    <section>
+      <h2>{exercise.name}</h2>
+      <p>{exercise.id}</p>
+      <ul>
+        {exercise.targets.map((target) => {
+          return <li key={target.id}>{target.name}</li>;
+        })}
+      </ul>
+    </section>
+  );
 };

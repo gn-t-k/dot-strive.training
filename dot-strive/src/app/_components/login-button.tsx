@@ -2,8 +2,6 @@
 
 import { signIn } from "next-auth/react";
 
-import { Button } from "@/libs/chakra-ui";
-
 import { getBaseUrl } from "@/utils/get-base-url";
 
 import type { Route } from "next";
@@ -16,5 +14,5 @@ export const LoginButton: FC = () => {
     });
   };
 
-  return <Button onClick={onClick}>ログイン</Button>;
+  return <button onClick={onClick}>ログイン</button>;
 };

@@ -3,8 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type FC } from "react";
 
-import { useToast } from "@/libs/chakra-ui";
-
+import { useToast } from "@/app/_components/use-toast";
 import { getFetcher } from "@/features/http-client/fetcher";
 import { getMutator } from "@/features/http-client/mutator";
 import { getAllMusclesBySession } from "@/features/muscle/get-all-by-session";
@@ -28,7 +27,7 @@ export const RegisterMuscleForm: FC<Props> = (props) => {
     reset,
   } = useMuscleForm();
   const router = useRouter();
-  const toast = useToast();
+  const { Toast, renderToast } = useToast();
 
   const onSubmit: SubmitHandler<MuscleField> = async (fieldValues) => {
     setIsLoading(true);
@@ -40,10 +39,9 @@ export const RegisterMuscleForm: FC<Props> = (props) => {
     });
     if (registeredMuscles.isErr()) {
       setIsLoading(false);
-      toast({
+      renderToast({
         title: `部位「${fieldValues.name}」の登録に失敗しました`,
-        status: "error",
-        isClosable: true,
+        variant: "error",
       });
 
       return;
@@ -71,17 +69,15 @@ export const RegisterMuscleForm: FC<Props> = (props) => {
     });
     setIsLoading(false);
 
-    toast(
+    renderToast(
       result.isOk()
         ? {
             title: `部位「${fieldValues.name}」を登録しました`,
-            status: "success",
-            isClosable: true,
+            variant: "success",
           }
         : {
             title: `部位「${fieldValues.name}」の登録に失敗しました`,
-            status: "error",
-            isClosable: true,
+            variant: "error",
           }
     );
 
@@ -90,16 +86,19 @@ export const RegisterMuscleForm: FC<Props> = (props) => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className={stack({ direction: "column" })}>
-        <div className={stack({ direction: "row" })}>
-          <input {...register("name")} aria-label="部位名" />
-          <button type="submit" disabled={isLoading}>
-            部位を登録する
-          </button>
+    <>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className={stack({ direction: "column" })}>
+          <div className={stack({ direction: "row" })}>
+            <input {...register("name")} aria-label="部位名" />
+            <button type="submit" disabled={isLoading}>
+              部位を登録する
+            </button>
+          </div>
+          {!!errors.name && <p>{errors.name.message}</p>}
         </div>
-        {!!errors.name && <p>{errors.name.message}</p>}
-      </div>
-    </form>
+      </form>
+      <Toast />
+    </>
   );
 };
