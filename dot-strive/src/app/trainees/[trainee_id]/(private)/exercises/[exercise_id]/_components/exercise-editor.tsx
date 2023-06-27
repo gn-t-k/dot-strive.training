@@ -11,8 +11,6 @@ import { useToast } from "@/app/_components/use-toast";
 import { deleteExercise } from "@/features/exercise/delete";
 import { updateExercise } from "@/features/exercise/update";
 import { useExerciseForm } from "@/features/exercise/use-exercise-form";
-import { getFetcher } from "@/features/http-client/fetcher";
-import { getMutator } from "@/features/http-client/mutator";
 import { stack } from "styled-system/patterns";
 
 import type { Exercise } from "@/features/exercise";
@@ -54,17 +52,11 @@ export const ExerciseEditor: FC<Props> = (props) => {
   ) => {
     setIsEditLoading(true);
     const result = await updateExercise({
-      fetcher: getFetcher(),
-      mutator: getMutator({
-        method: "PATCH",
-      }),
-    })({
       traineeId: props.traineeId,
       exerciseId: props.exercise.id,
       exerciseName: fieldValues.name,
       targetIds: fieldValues.targets,
     });
-    console.log({ fieldValues });
     setIsEditLoading(false);
     setIsEditing(false);
     router.refresh();
@@ -94,10 +86,6 @@ export const ExerciseEditor: FC<Props> = (props) => {
   > = async (_) => {
     setIsDeleteLoading(true);
     const result = await deleteExercise({
-      mutator: getMutator({
-        method: "DELETE",
-      }),
-    })({
       traineeId: props.traineeId,
       exerciseId: props.exercise.id,
     });

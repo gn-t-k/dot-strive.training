@@ -1,21 +1,17 @@
 import { validateMuscle } from "@/features/muscle";
 
-import type { Fetcher } from "../http-client/fetcher";
+import { getFetcher } from "../http-client/fetcher";
+
 import type { Muscle } from "@/features/muscle";
 import type { Result } from "neverthrow";
 
-type GetMuscleById = (
-  deps: Deps
-) => (props: Props) => Promise<Result<Muscle, Error>>;
-type Deps = {
-  fetcher: Fetcher;
-};
+type GetMuscleById = (props: Props) => Promise<Result<Muscle, Error>>;
 type Props = {
   traineeId: string;
   muscleId: string;
 };
-export const getMuscleById: GetMuscleById = (deps) => async (props) => {
-  const response = await deps.fetcher(
+export const getMuscleById: GetMuscleById = async (props) => {
+  const response = await getFetcher()(
     `/api/trainees/${props.traineeId}/muscles/${props.muscleId}`
   );
   const data = await response.json();

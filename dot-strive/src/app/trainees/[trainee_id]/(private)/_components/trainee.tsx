@@ -1,15 +1,12 @@
 import Image from "next/image";
 
-import { getFetcher } from "@/features/http-client/fetcher";
 import { getTraineeBySession } from "@/features/trainee/get-by-session";
 import { stack } from "styled-system/patterns";
 
 import type { FC } from "react";
 
 export const Trainee: FC = async () => {
-  const traineeResult = await getTraineeBySession({
-    fetcher: getFetcher(),
-  })();
+  const traineeResult = await getTraineeBySession();
 
   if (traineeResult.isErr()) {
     return <p>データの検証に失敗しました</p>;
