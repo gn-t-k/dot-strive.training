@@ -11,7 +11,7 @@ export const muscleSchema = z.object({
 export type Muscle = z.infer<typeof muscleSchema>;
 export type MuscleId = z.infer<typeof muscleIdSchema>;
 
-type UnvalidatedMuscle = {
+export type UnvalidatedMuscle = {
   id: string;
   name: string;
 };

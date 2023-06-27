@@ -1,5 +1,8 @@
 import { getExerciseById } from "@/features/exercise/get-by-id";
 import { getFetcher } from "@/features/http-client/fetcher";
+import { getAllMusclesBySession } from "@/features/muscle/get-all-by-session";
+
+import { ExerciseEditor } from "./exercise-editor";
 
 import type { FC } from "react";
 
@@ -8,25 +11,26 @@ type Props = {
   exerciseId: string;
 };
 export const ExerciseDetail: FC<Props> = async (props) => {
-  const result = await getExerciseById({ fetcher: getFetcher() })({
-    traineeId: props.traineeId,
-    exerciseId: props.exerciseId,
-  });
+  const [getExerciseResult, getMusclesResult] = await Promise.all([
+    getExerciseById({ fetcher: getFetcher() })({
+      traineeId: props.traineeId,
+      exerciseId: props.exerciseId,
+    }),
+    getAllMusclesBySession({ fetcher: getFetcher() })({
+      traineeId: props.traineeId,
+    }),
+  ]);
 
-  if (result.isErr()) {
+  if (getExerciseResult.isErr() || getMusclesResult.isErr()) {
     return <p>種目データの取得に失敗しました</p>;
   }
-  const exercise = result.value;
+  const exercise = getExerciseResult.value;
 
   return (
-    <section>
-      <h2>{exercise.name}</h2>
-      <p>{exercise.id}</p>
-      <ul>
-        {exercise.targets.map((target) => {
-          return <li key={target.id}>{target.name}</li>;
-        })}
-      </ul>
-    </section>
+    <ExerciseEditor
+      traineeId={props.traineeId}
+      exercise={exercise}
+      registeredMuscles={getMusclesResult.value}
+    />
   );
 };

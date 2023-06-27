@@ -9,7 +9,7 @@ import { validateMuscle } from "@/features/muscle";
 import type { RouteHandler } from "@/app/api/_utils/types";
 import type { Muscle } from "@/features/muscle";
 
-export const GET: RouteHandler<Muscle | null> = async (req, context) => {
+export const GET: RouteHandler<Muscle> = async (req, context) => {
   const session = await getServerSession(nextAuthOptions);
   if (!session?.user.id) {
     return NextResponse.json(
@@ -160,7 +160,7 @@ export const PATCH: RouteHandler<Muscle> = async (req, context) => {
   }
 };
 
-export const DELETE: RouteHandler<Muscle | null> = async (req, context) => {
+export const DELETE: RouteHandler<Muscle> = async (req, context) => {
   const session = await getServerSession(nextAuthOptions);
   if (!session?.user.id) {
     return NextResponse.json(
