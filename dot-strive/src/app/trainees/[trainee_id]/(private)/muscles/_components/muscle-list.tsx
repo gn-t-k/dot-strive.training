@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { getFetcher } from "@/features/http-client/fetcher";
 import { getAllMusclesBySession } from "@/features/muscle/get-all-by-session";
 import { stack } from "styled-system/patterns";
 
@@ -11,8 +10,6 @@ type Props = {
 };
 export const MuscleList: FC<Props> = async (props) => {
   const result = await getAllMusclesBySession({
-    fetcher: getFetcher(),
-  })({
     traineeId: props.traineeId,
   });
 

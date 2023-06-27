@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { getAllExercisesBySession } from "@/features/exercise/get-all-by-session";
-import { getFetcher } from "@/features/http-client/fetcher";
 
 import type { FC } from "react";
 
@@ -10,8 +9,6 @@ type Props = {
 };
 export const ExerciseList: FC<Props> = async (props) => {
   const exercisesResult = await getAllExercisesBySession({
-    fetcher: getFetcher(),
-  })({
     traineeId: props.traineeId,
   });
 

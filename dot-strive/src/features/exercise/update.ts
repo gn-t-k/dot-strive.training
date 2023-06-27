@@ -1,30 +1,23 @@
 import { err, type Result } from "neverthrow";
 
+import { getMutator } from "../http-client/mutator";
 import { getAllMusclesBySession } from "../muscle/get-all-by-session";
 
 import type { Exercise } from ".";
-import type { Fetcher } from "../http-client/fetcher";
-import type { Mutator } from "../http-client/mutator";
 
 import { validateExercise } from ".";
 
-type UpdateExercise = (
-  deps: Deps
-) => (props: Props) => Promise<Result<Exercise, Error>>;
-type Deps = {
-  fetcher: Fetcher;
-  mutator: Mutator;
-};
+type UpdateExercise = (props: Props) => Promise<Result<Exercise, Error>>;
 type Props = {
   traineeId: string;
   exerciseId: string;
   exerciseName: string;
   targetIds: string[];
 };
-export const updateExercise: UpdateExercise = (deps) => async (props) => {
-  const targetsResult = await getAllMusclesBySession({ fetcher: deps.fetcher })(
-    { traineeId: props.traineeId }
-  );
+export const updateExercise: UpdateExercise = async (props) => {
+  const targetsResult = await getAllMusclesBySession({
+    traineeId: props.traineeId,
+  });
   if (targetsResult.isErr()) {
     return err(new Error("対象部位の取得に失敗しました"));
   }
@@ -42,7 +35,9 @@ export const updateExercise: UpdateExercise = (deps) => async (props) => {
     return validateExerciseResult;
   }
 
-  const response = await deps.mutator(
+  const response = await getMutator({
+    method: "PATCH",
+  })(
     `/api/trainees/${props.traineeId}/exercises/${props.exerciseId}`,
     JSON.stringify(validateExerciseResult.value)
   );

@@ -1,4 +1,3 @@
-import { getFetcher } from "@/features/http-client/fetcher";
 import { getMuscleById } from "@/features/muscle/get-by-id";
 
 import { MuscleEditor } from "./muscle-editor";
@@ -10,7 +9,7 @@ type Props = {
   muscleId: string;
 };
 export const MuscleDetail: FC<Props> = async (props) => {
-  const result = await getMuscleById({ fetcher: getFetcher() })({
+  const result = await getMuscleById({
     traineeId: props.traineeId,
     muscleId: props.muscleId,
   });

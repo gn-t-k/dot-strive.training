@@ -1,5 +1,4 @@
 import { getExerciseById } from "@/features/exercise/get-by-id";
-import { getFetcher } from "@/features/http-client/fetcher";
 import { getAllMusclesBySession } from "@/features/muscle/get-all-by-session";
 
 import { ExerciseEditor } from "./exercise-editor";
@@ -12,11 +11,11 @@ type Props = {
 };
 export const ExerciseDetail: FC<Props> = async (props) => {
   const [getExerciseResult, getMusclesResult] = await Promise.all([
-    getExerciseById({ fetcher: getFetcher() })({
+    getExerciseById({
       traineeId: props.traineeId,
       exerciseId: props.exerciseId,
     }),
-    getAllMusclesBySession({ fetcher: getFetcher() })({
+    getAllMusclesBySession({
       traineeId: props.traineeId,
     }),
   ]);

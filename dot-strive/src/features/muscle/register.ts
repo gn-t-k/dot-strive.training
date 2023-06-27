@@ -1,22 +1,18 @@
 import { ulid } from "ulid";
 
-import type { Mutator } from "../http-client/mutator";
+import { getMutator } from "../http-client/mutator";
+
 import type { Muscle } from "@/features/muscle";
 import type { Result } from "neverthrow";
 
 import { validateMuscle } from ".";
 
-type RegisterMuscle = (
-  deps: Deps
-) => (props: Props) => Promise<Result<Muscle, Error>>;
-type Deps = {
-  mutator: Mutator;
-};
+type RegisterMuscle = (props: Props) => Promise<Result<Muscle, Error>>;
 type Props = {
   traineeId: string;
   muscleName: string;
 };
-export const registerMuscle: RegisterMuscle = (deps) => async (props) => {
+export const registerMuscle: RegisterMuscle = async (props) => {
   const validateMuscleResult = validateMuscle({
     id: ulid(),
     name: props.muscleName,
@@ -25,7 +21,7 @@ export const registerMuscle: RegisterMuscle = (deps) => async (props) => {
     return validateMuscleResult;
   }
 
-  const response = await deps.mutator(
+  const response = await getMutator()(
     `/api/trainees/${props.traineeId}/muscles`,
     JSON.stringify(validateMuscleResult.value)
   );

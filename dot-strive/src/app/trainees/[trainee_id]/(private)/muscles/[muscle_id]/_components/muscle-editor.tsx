@@ -7,8 +7,6 @@ import { type SubmitHandler } from "react-hook-form";
 import { Button } from "@/app/_components/button";
 import { Input } from "@/app/_components/input";
 import { useToast } from "@/app/_components/use-toast";
-import { getFetcher } from "@/features/http-client/fetcher";
-import { getMutator } from "@/features/http-client/mutator";
 import { deleteMuscle } from "@/features/muscle/delete";
 import { getAllMusclesBySession } from "@/features/muscle/get-all-by-session";
 import { updateMuscle } from "@/features/muscle/update";
@@ -49,8 +47,6 @@ export const MuscleEditor: FC<Props> = (props) => {
   const onClickSaveButton: SubmitHandler<MuscleField> = async (fieldValues) => {
     setIsEditLoading(true);
     const registeredMuscles = await getAllMusclesBySession({
-      fetcher: getFetcher(),
-    })({
       traineeId: props.traineeId,
     });
     if (registeredMuscles.isErr()) {
@@ -73,10 +69,6 @@ export const MuscleEditor: FC<Props> = (props) => {
     }
 
     const result = await updateMuscle({
-      mutator: getMutator({
-        method: "PATCH",
-      }),
-    })({
       traineeId: props.traineeId,
       muscleId: props.muscle.id,
       muscleName: fieldValues.name,
@@ -108,10 +100,6 @@ export const MuscleEditor: FC<Props> = (props) => {
   > = async (_) => {
     setIsDeleteLoading(true);
     const result = await deleteMuscle({
-      mutator: getMutator({
-        method: "DELETE",
-      }),
-    })({
       traineeId: props.traineeId,
       muscleId: props.muscle.id,
     });
