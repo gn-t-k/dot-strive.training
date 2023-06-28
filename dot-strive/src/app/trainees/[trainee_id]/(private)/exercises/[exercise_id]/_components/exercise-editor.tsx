@@ -7,15 +7,15 @@ import { type SubmitHandler } from "react-hook-form";
 
 import { Button } from "@/app/_components/button";
 import { Input } from "@/app/_components/input";
-import { useToast } from "@/app/_components/use-toast";
-import { deleteExercise } from "@/features/exercise/delete";
-import { updateExercise } from "@/features/exercise/update";
-import { useExerciseForm } from "@/features/exercise/use-exercise-form";
+import { useToast } from "@/app/_hooks/use-toast";
+import { deleteExercise } from "@/app/trainees/[trainee_id]/(private)/exercises/[exercise_id]/_accessor/delete-exercise";
+import { updateExercise } from "@/app/trainees/[trainee_id]/(private)/exercises/[exercise_id]/_accessor/update-exercise";
+import { useExerciseForm } from "@/app/trainees/[trainee_id]/(private)/exercises/[exercise_id]/_hooks/use-exercise-form";
 import { stack } from "styled-system/patterns";
 
-import type { Exercise } from "@/features/exercise";
-import type { ExerciseField } from "@/features/exercise/use-exercise-form";
-import type { Muscle } from "@/features/muscle";
+import type { Exercise } from "@/app/_schemas/exercise";
+import type { Muscle } from "@/app/_schemas/muscle";
+import type { ExerciseField } from "@/app/trainees/[trainee_id]/(private)/exercises/[exercise_id]/_hooks/use-exercise-form";
 import type { FC, MouseEventHandler } from "react";
 
 type Props = {

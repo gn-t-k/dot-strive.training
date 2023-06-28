@@ -1,9 +1,8 @@
-import { getMutator } from "../http-client/mutator";
+import { validateMuscle } from "../../../../../../_schemas/muscle";
+import { getFetcher } from "../../../../../../_utils/get-fetcher";
 
-import type { Muscle } from ".";
+import type { Muscle } from "../../../../../../_schemas/muscle";
 import type { Result } from "neverthrow";
-
-import { validateMuscle } from ".";
 
 type DeleteMuscle = (props: Props) => Promise<Result<Muscle, Error>>;
 type Props = {
@@ -11,7 +10,7 @@ type Props = {
   muscleId: string;
 };
 export const deleteMuscle: DeleteMuscle = async (props) => {
-  const response = await getMutator({
+  const response = await getFetcher({
     method: "DELETE",
   })(`/api/trainees/${props.traineeId}/muscles/${props.muscleId}`);
   const data = await response.json();

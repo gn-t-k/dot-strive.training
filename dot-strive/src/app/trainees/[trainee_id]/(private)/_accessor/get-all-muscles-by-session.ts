@@ -1,11 +1,10 @@
 import { err, ok } from "neverthrow";
 
-import { getFetcher } from "../http-client/fetcher";
+import { validateMuscle } from "../../../../_schemas/muscle";
+import { getFetcher } from "../../../../_utils/get-fetcher";
 
-import type { Muscle } from ".";
+import type { Muscle } from "../../../../_schemas/muscle";
 import type { Result } from "neverthrow";
-
-import { validateMuscle } from ".";
 
 type GetAllMusclesBySession = (
   props: Props

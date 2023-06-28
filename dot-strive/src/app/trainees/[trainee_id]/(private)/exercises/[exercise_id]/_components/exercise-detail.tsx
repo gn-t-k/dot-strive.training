@@ -1,5 +1,5 @@
-import { getExerciseById } from "@/features/exercise/get-by-id";
-import { getAllMusclesBySession } from "@/features/muscle/get-all-by-session";
+import { getAllMusclesBySession } from "@/app/trainees/[trainee_id]/(private)/_accessor/get-all-muscles-by-session";
+import { getExerciseById } from "@/app/trainees/[trainee_id]/(private)/exercises/[exercise_id]/_accessor/get-exercise-by-id";
 
 import { ExerciseEditor } from "./exercise-editor";
 

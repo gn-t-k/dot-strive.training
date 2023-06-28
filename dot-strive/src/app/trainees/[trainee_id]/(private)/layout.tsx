@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
-import { nextAuthOptions } from "@/libs/next-auth/options";
-import { prisma } from "@/libs/prisma/client";
+import { nextAuthOptions } from "@/app/_libs/next-auth/options";
+import { prisma } from "@/app/_libs/prisma/client";
 
-import type { Layout } from "@/app/_utils/types";
+import type { Layout } from "@/app/_types/layout";
 import type { Route } from "next";
 
 const PrivateLayout: Layout = async ({ children, params }) => {

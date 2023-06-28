@@ -1,11 +1,10 @@
 import { err, type Result } from "neverthrow";
 
-import { getMutator } from "../http-client/mutator";
-import { getAllMusclesBySession } from "../muscle/get-all-by-session";
+import { validateExercise } from "../../../../../../_schemas/exercise";
+import { getFetcher } from "../../../../../../_utils/get-fetcher";
+import { getAllMusclesBySession } from "../../../_accessor/get-all-muscles-by-session";
 
-import type { Exercise } from ".";
-
-import { validateExercise } from ".";
+import type { Exercise } from "../../../../../../_schemas/exercise";
 
 type UpdateExercise = (props: Props) => Promise<Result<Exercise, Error>>;
 type Props = {
@@ -35,7 +34,7 @@ export const updateExercise: UpdateExercise = async (props) => {
     return validateExerciseResult;
   }
 
-  const response = await getMutator({
+  const response = await getFetcher({
     method: "PATCH",
   })(
     `/api/trainees/${props.traineeId}/exercises/${props.exerciseId}`,

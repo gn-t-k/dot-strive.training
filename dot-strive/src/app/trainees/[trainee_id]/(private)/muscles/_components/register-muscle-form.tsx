@@ -5,13 +5,13 @@ import { useState, type FC } from "react";
 
 import { Button } from "@/app/_components/button";
 import { Input } from "@/app/_components/input";
-import { useToast } from "@/app/_components/use-toast";
-import { getAllMusclesBySession } from "@/features/muscle/get-all-by-session";
-import { registerMuscle } from "@/features/muscle/register";
-import { useMuscleForm } from "@/features/muscle/use-muscle-form";
+import { useToast } from "@/app/_hooks/use-toast";
+import { getAllMusclesBySession } from "@/app/trainees/[trainee_id]/(private)/_accessor/get-all-muscles-by-session";
+import { registerMuscle } from "@/app/trainees/[trainee_id]/(private)/muscles/_accessor/register-muscle";
+import { useMuscleForm } from "@/app/trainees/[trainee_id]/(private)/muscles/_hooks/use-muscle-form";
 import { stack } from "styled-system/patterns";
 
-import type { MuscleField } from "@/features/muscle/use-muscle-form";
+import type { MuscleField } from "@/app/trainees/[trainee_id]/(private)/muscles/_hooks/use-muscle-form";
 import type { SubmitHandler } from "react-hook-form";
 
 type Props = {

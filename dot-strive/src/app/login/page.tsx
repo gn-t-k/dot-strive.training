@@ -1,12 +1,11 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
-import { nextAuthOptions } from "@/libs/next-auth/options";
-
 import { LoginButton } from "@/app/_components/login-button";
+import { nextAuthOptions } from "@/app/_libs/next-auth/options";
 import { container } from "styled-system/patterns";
 
-import type { NextPage } from "../_utils/types";
+import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
 
 const Page: NextPage = async () => {

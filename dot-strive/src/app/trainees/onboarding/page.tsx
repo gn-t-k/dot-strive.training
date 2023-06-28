@@ -1,13 +1,12 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
-import { nextAuthOptions } from "@/libs/next-auth/options";
-import { prisma } from "@/libs/prisma/client";
-
 import { LogoutButton } from "@/app/_components/logout-button";
+import { nextAuthOptions } from "@/app/_libs/next-auth/options";
+import { prisma } from "@/app/_libs/prisma/client";
 import { container } from "styled-system/patterns";
 
-import type { NextPage } from "@/app/_utils/types";
+import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
 
 const Page: NextPage = async () => {

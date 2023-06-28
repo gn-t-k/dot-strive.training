@@ -1,9 +1,9 @@
 import { ok, err } from "neverthrow";
 import { z } from "zod";
 
-import { muscleSchema } from "@/features/muscle";
+import { muscleSchema } from "@/app/_schemas/muscle";
 
-import type { Muscle } from "../muscle";
+import type { Muscle } from "./muscle";
 import type { Result } from "neverthrow";
 
 const exerciseIdSchema = z.string().brand("exercise-id");

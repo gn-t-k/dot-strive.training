@@ -1,8 +1,7 @@
-import { getFetcher } from "../http-client/fetcher";
+import { validateTrainee, type Trainee } from "../../../../_schemas/trainee";
+import { getFetcher } from "../../../../_utils/get-fetcher";
 
 import type { Result } from "neverthrow";
-
-import { validateTrainee, type Trainee } from ".";
 
 type GetTraineeBySession = () => Promise<Result<Trainee, Error>>;
 export const getTraineeBySession: GetTraineeBySession = async () => {
