@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { getAllMusclesBySession } from "@/app/trainees/[trainee_id]/(private)/_accessor/get-all-muscles-by-session";
+import { getAllMusclesBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-all-muscles-by-session";
 import { stack } from "styled-system/patterns";
 
 import type { FC } from "react";

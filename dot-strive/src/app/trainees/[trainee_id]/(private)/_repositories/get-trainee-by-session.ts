@@ -1,5 +1,5 @@
-import { validateTrainee, type Trainee } from "../../../../_schemas/trainee";
-import { getFetcher } from "../../../../_utils/get-fetcher";
+import { validateTrainee, type Trainee } from "@/app/_schemas/trainee";
+import { getFetcher } from "@/app/_utils/get-fetcher";
 
 import type { Result } from "neverthrow";
 

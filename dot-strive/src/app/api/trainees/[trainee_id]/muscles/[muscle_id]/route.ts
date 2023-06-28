@@ -6,7 +6,7 @@ import { prisma } from "@/app/_libs/prisma/client";
 import { validateMuscle } from "@/app/_schemas/muscle";
 
 import type { Muscle } from "@/app/_schemas/muscle";
-import type { RouteHandler } from "@/app/api/_utils/types";
+import type { RouteHandler } from "@/app/api/_types/route-handler";
 
 export const GET: RouteHandler<Muscle> = async (req, context) => {
   const session = await getServerSession(nextAuthOptions);

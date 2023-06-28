@@ -1,7 +1,7 @@
 import { ulid } from "ulid";
 
-import { validateMuscle } from "../../../../../_schemas/muscle";
-import { getFetcher } from "../../../../../_utils/get-fetcher";
+import { validateMuscle } from "@/app/_schemas/muscle";
+import { getFetcher } from "@/app/_utils/get-fetcher";
 
 import type { Muscle } from "@/app/_schemas/muscle";
 import type { Result } from "neverthrow";

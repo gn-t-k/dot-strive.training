@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { muscleSchema } from "@/app/_schemas/muscle";
 
-import type { Muscle } from "./muscle";
+import type { UnvalidatedMuscle } from "./muscle";
 import type { Result } from "neverthrow";
 
 const exerciseIdSchema = z.string().brand("exercise-id");
@@ -18,7 +18,7 @@ export type ExerciseId = z.infer<typeof exerciseIdSchema>;
 type UnvalidatedExercise = {
   id: string;
   name: string;
-  targets: Muscle[];
+  targets: UnvalidatedMuscle[];
 };
 export const validateExercise = (
   data: UnvalidatedExercise

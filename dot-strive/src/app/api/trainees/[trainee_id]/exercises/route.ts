@@ -7,7 +7,7 @@ import { validateExercise } from "@/app/_schemas/exercise";
 import { validateMuscle } from "@/app/_schemas/muscle";
 
 import type { Exercise } from "@/app/_schemas/exercise";
-import type { RouteHandler } from "@/app/api/_utils/types";
+import type { RouteHandler } from "@/app/api/_types/route-handler";
 
 export const GET: RouteHandler<Exercise[]> = async (req, context) => {
   const session = await getServerSession(nextAuthOptions);
