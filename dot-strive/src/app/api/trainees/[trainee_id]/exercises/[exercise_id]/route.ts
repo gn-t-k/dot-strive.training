@@ -4,10 +4,9 @@ import { getServerSession } from "next-auth";
 import { nextAuthOptions } from "@/app/_libs/next-auth/options";
 import { prisma } from "@/app/_libs/prisma/client";
 import { validateExercise } from "@/app/_schemas/exercise";
-import { validateMuscle } from "@/app/_schemas/muscle";
 
 import type { Exercise } from "@/app/_schemas/exercise";
-import type { RouteHandler } from "@/app/api/_utils/types";
+import type { RouteHandler } from "@/app/api/_types/route-handler";
 
 export const GET: RouteHandler<Exercise> = async (req, context) => {
   const session = await getServerSession(nextAuthOptions);
@@ -66,14 +65,7 @@ export const GET: RouteHandler<Exercise> = async (req, context) => {
     );
   }
 
-  const exercise = validateExercise({
-    ...data.exercises[0],
-    targets: data.exercises[0].targets.flatMap((target) => {
-      const validateMuscleResult = validateMuscle(target);
-
-      return validateMuscleResult.isErr() ? [] : [validateMuscleResult.value];
-    }),
-  });
+  const exercise = validateExercise(data.exercises[0]);
   if (exercise.isErr()) {
     return NextResponse.json(
       { error: "exerciseのデータが不正です" },
@@ -190,14 +182,7 @@ export const PATCH: RouteHandler<Exercise> = async (req, context) => {
       },
     });
 
-    const validateResult = validateExercise({
-      ...unvalidatedUpdated,
-      targets: unvalidatedUpdated.targets.flatMap((target) => {
-        const validateMuscleResult = validateMuscle(target);
-
-        return validateMuscleResult.isErr() ? [] : [validateMuscleResult.value];
-      }),
-    });
+    const validateResult = validateExercise(unvalidatedUpdated);
 
     if (validateResult.isErr()) {
       return NextResponse.json(
@@ -272,14 +257,7 @@ export const DELETE: RouteHandler<Exercise> = async (req, context) => {
     );
   }
 
-  const exercise = validateExercise({
-    ...data.exercises[0],
-    targets: data.exercises[0].targets.flatMap((target) => {
-      const validateMuscleResult = validateMuscle(target);
-
-      return validateMuscleResult.isErr() ? [] : [validateMuscleResult.value];
-    }),
-  });
+  const exercise = validateExercise(data.exercises[0]);
   if (exercise.isErr()) {
     return NextResponse.json(
       { error: "exerciseのデータが不正です" },
@@ -297,14 +275,7 @@ export const DELETE: RouteHandler<Exercise> = async (req, context) => {
       },
     });
 
-    const validateResult = validateExercise({
-      ...result,
-      targets: result.targets.flatMap((target) => {
-        const validateMuscleResult = validateMuscle(target);
-
-        return validateMuscleResult.isErr() ? [] : [validateMuscleResult.value];
-      }),
-    });
+    const validateResult = validateExercise(result);
     if (validateResult.isErr()) {
       return NextResponse.json(
         { error: "exerciseのデータが不正です" },

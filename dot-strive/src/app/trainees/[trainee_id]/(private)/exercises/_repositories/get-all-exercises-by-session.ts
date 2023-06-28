@@ -1,9 +1,9 @@
 import { err, ok } from "neverthrow";
 
-import { validateExercise } from "../../../../../_schemas/exercise";
-import { getFetcher } from "../../../../../_utils/get-fetcher";
+import { validateExercise } from "@/app/_schemas/exercise";
+import { getFetcher } from "@/app/_utils/get-fetcher";
 
-import type { Exercise } from "../../../../../_schemas/exercise";
+import type { Exercise } from "@/app/_schemas/exercise";
 import type { Result } from "neverthrow";
 
 type GetAllExercisesBySession = (

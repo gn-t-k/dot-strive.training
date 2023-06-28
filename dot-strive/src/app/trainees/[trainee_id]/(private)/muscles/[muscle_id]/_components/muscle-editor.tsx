@@ -7,13 +7,13 @@ import { type SubmitHandler } from "react-hook-form";
 import { Button } from "@/app/_components/button";
 import { Input } from "@/app/_components/input";
 import { useToast } from "@/app/_hooks/use-toast";
-import { getAllMusclesBySession } from "@/app/trainees/[trainee_id]/(private)/_accessor/get-all-muscles-by-session";
-import { deleteMuscle } from "@/app/trainees/[trainee_id]/(private)/muscles/[muscle_id]/_accessor/delete-muscle";
-import { updateMuscle } from "@/app/trainees/[trainee_id]/(private)/muscles/[muscle_id]/_accessor/update-muscle";
+import { type Muscle } from "@/app/_schemas/muscle";
+import { getAllMusclesBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-all-muscles-by-session";
+import { deleteMuscle } from "@/app/trainees/[trainee_id]/(private)/muscles/[muscle_id]/_repositories/delete-muscle";
+import { updateMuscle } from "@/app/trainees/[trainee_id]/(private)/muscles/[muscle_id]/_repositories/update-muscle";
 import { useMuscleForm } from "@/app/trainees/[trainee_id]/(private)/muscles/_hooks/use-muscle-form";
 import { stack } from "styled-system/patterns";
 
-import type { Muscle } from "@/app/_schemas/muscle";
 import type { MuscleField } from "@/app/trainees/[trainee_id]/(private)/muscles/_hooks/use-muscle-form";
 import type { FC, MouseEventHandler } from "react";
 

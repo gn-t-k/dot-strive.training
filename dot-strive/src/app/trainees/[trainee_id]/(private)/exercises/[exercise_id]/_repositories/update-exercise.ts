@@ -1,10 +1,10 @@
 import { err, type Result } from "neverthrow";
 
-import { validateExercise } from "../../../../../../_schemas/exercise";
-import { getFetcher } from "../../../../../../_utils/get-fetcher";
-import { getAllMusclesBySession } from "../../../_accessor/get-all-muscles-by-session";
+import { validateExercise } from "@/app/_schemas/exercise";
+import { getFetcher } from "@/app/_utils/get-fetcher";
+import { getAllMusclesBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-all-muscles-by-session";
 
-import type { Exercise } from "../../../../../../_schemas/exercise";
+import type { Exercise } from "@/app/_schemas/exercise";
 
 type UpdateExercise = (props: Props) => Promise<Result<Exercise, Error>>;
 type Props = {
