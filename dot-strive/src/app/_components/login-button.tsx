@@ -2,7 +2,7 @@
 
 import { signIn } from "next-auth/react";
 
-import { getBaseUrl } from "@/utils/get-base-url";
+import { getBaseUrl } from "@/app/_utils/get-base-url";
 
 import { Button } from "./button";
 

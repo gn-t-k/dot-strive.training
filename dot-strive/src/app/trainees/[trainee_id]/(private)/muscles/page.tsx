@@ -8,7 +8,7 @@ import { container, stack } from "styled-system/patterns";
 import { MuscleList } from "./_components/muscle-list";
 import { RegisterMuscleForm } from "./_components/register-muscle-form";
 
-import type { NextPage } from "@/app/_utils/types";
+import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
 
 const Page: NextPage = (props) => {

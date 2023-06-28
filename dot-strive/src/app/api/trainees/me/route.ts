@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
-import { nextAuthOptions } from "@/libs/next-auth/options";
-import { prisma } from "@/libs/prisma/client";
-
-import { validateTrainee } from "@/features/trainee";
+import { nextAuthOptions } from "@/app/_libs/next-auth/options";
+import { prisma } from "@/app/_libs/prisma/client";
+import { validateTrainee } from "@/app/_schemas/trainee";
 
 import type { RouteHandler } from "../../_utils/types";
-import type { Trainee } from "@/features/trainee";
+import type { Trainee } from "@/app/_schemas/trainee";
 
 export const GET: RouteHandler<Trainee | null> = async (_req, _context) => {
   const session = await getServerSession(nextAuthOptions);

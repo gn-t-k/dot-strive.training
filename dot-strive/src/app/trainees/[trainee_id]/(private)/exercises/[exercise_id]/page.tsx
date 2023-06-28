@@ -7,7 +7,7 @@ import { container, stack } from "styled-system/patterns";
 
 import { ExerciseDetail } from "./_components/exercise-detail";
 
-import type { NextPage } from "@/app/_utils/types";
+import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
 
 const Page: NextPage = (props) => {

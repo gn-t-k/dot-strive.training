@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
-import { nextAuthOptions } from "@/libs/next-auth/options";
-import { prisma } from "@/libs/prisma/client";
+import { nextAuthOptions } from "@/app/_libs/next-auth/options";
+import { prisma } from "@/app/_libs/prisma/client";
+import { validateExercise } from "@/app/_schemas/exercise";
+import { validateMuscle } from "@/app/_schemas/muscle";
 
-import { validateExercise } from "@/features/exercise";
-import { validateMuscle } from "@/features/muscle";
-
+import type { Exercise } from "@/app/_schemas/exercise";
 import type { RouteHandler } from "@/app/api/_utils/types";
-import type { Exercise } from "@/features/exercise";
 
 export const GET: RouteHandler<Exercise> = async (req, context) => {
   const session = await getServerSession(nextAuthOptions);

@@ -1,7 +1,7 @@
-import { NextAuthProvider } from "@/libs/next-auth/provider";
+import { NextAuthProvider } from "@/app/_libs/next-auth/provider";
 import "./global.css";
 
-import type { Layout } from "./_utils/types";
+import type { Layout } from "@/app/_types/layout";
 
 const RootLayout: Layout = ({ children }) => {
   return (

@@ -1,4 +1,4 @@
-import { getMuscleById } from "@/features/muscle/get-by-id";
+import { getMuscleById } from "@/app/trainees/[trainee_id]/(private)/muscles/[muscle_id]/_accessor/get-muscle-by-id";
 
 import { MuscleEditor } from "./muscle-editor";
 

@@ -1,11 +1,10 @@
 import { err, ok } from "neverthrow";
 
-import { getFetcher } from "../http-client/fetcher";
+import { validateExercise } from "../../../../../_schemas/exercise";
+import { getFetcher } from "../../../../../_utils/get-fetcher";
 
-import type { Exercise } from ".";
+import type { Exercise } from "../../../../../_schemas/exercise";
 import type { Result } from "neverthrow";
-
-import { validateExercise } from ".";
 
 type GetAllExercisesBySession = (
   props: Props

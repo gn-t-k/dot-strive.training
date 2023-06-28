@@ -1,11 +1,10 @@
 import { ulid } from "ulid";
 
-import { getMutator } from "../http-client/mutator";
+import { validateMuscle } from "../../../../../_schemas/muscle";
+import { getFetcher } from "../../../../../_utils/get-fetcher";
 
-import type { Muscle } from "@/features/muscle";
+import type { Muscle } from "@/app/_schemas/muscle";
 import type { Result } from "neverthrow";
-
-import { validateMuscle } from ".";
 
 type RegisterMuscle = (props: Props) => Promise<Result<Muscle, Error>>;
 type Props = {
@@ -21,7 +20,9 @@ export const registerMuscle: RegisterMuscle = async (props) => {
     return validateMuscleResult;
   }
 
-  const response = await getMutator()(
+  const response = await getFetcher({
+    method: "POST",
+  })(
     `/api/trainees/${props.traineeId}/muscles`,
     JSON.stringify(validateMuscleResult.value)
   );

@@ -1,8 +1,8 @@
-import { validateMuscle } from "@/features/muscle";
+import { validateMuscle } from "@/app/_schemas/muscle";
 
-import { getFetcher } from "../http-client/fetcher";
+import { getFetcher } from "../../../../../../_utils/get-fetcher";
 
-import type { Muscle } from "@/features/muscle";
+import type { Muscle } from "@/app/_schemas/muscle";
 import type { Result } from "neverthrow";
 
 type GetMuscleById = (props: Props) => Promise<Result<Muscle, Error>>;
