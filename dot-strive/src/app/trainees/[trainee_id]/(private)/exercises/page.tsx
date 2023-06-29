@@ -25,6 +25,9 @@ const Page: NextPage = (props) => {
         >
           <ExerciseList traineeId={traineeId} />
         </Suspense>
+        <Link href={`/trainees/${traineeId}/exercises/register`}>
+          種目を登録する
+        </Link>
         <Link href={`/trainees/${traineeId}`}>トレーニーページ</Link>
       </section>
     </main>

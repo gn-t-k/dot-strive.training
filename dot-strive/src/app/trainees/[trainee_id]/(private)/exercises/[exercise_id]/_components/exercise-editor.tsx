@@ -137,6 +137,7 @@ export const ExerciseEditor: FC<Props> = (props) => {
                 );
               })}
             </ul>
+            {!!errors.targets && <p>{errors.targets.message}</p>}
             <div className={stack({ direction: "row", justify: "end" })}>
               <Button type="submit" disabled={isEditLoading} visual="positive">
                 変更を保存する
