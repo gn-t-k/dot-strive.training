@@ -52,6 +52,18 @@ export const GET: RouteHandler<Muscle[]> = async (_req, context) => {
 };
 
 export const POST: RouteHandler<Muscle> = async (req, context) => {
+  const session = await getServerSession(nextAuthOptions);
+  if (!session?.user.id) {
+    return NextResponse.json(
+      {
+        error: "セッションが取得できませんでした",
+      },
+      {
+        status: 401,
+      }
+    );
+  }
+
   const data = await req.json();
   const validateBodyResult = validateMuscle(data);
 
@@ -68,6 +80,18 @@ export const POST: RouteHandler<Muscle> = async (req, context) => {
     return NextResponse.json(
       { error: "trainee-idが指定されていません" },
       { status: 400 }
+    );
+  }
+
+  const trainee = await prisma.trainee.findUnique({
+    where: {
+      id: traineeId,
+    },
+  });
+  if (trainee?.authUserId !== session.user.id) {
+    return NextResponse.json(
+      { error: "muscleを作成できませんでした" },
+      { status: 401 }
     );
   }
 

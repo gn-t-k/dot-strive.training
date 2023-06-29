@@ -65,3 +65,79 @@ export const GET: RouteHandler<Exercise[]> = async (req, context) => {
 
   return NextResponse.json(exercises);
 };
+
+export const POST: RouteHandler<Exercise> = async (req, context) => {
+  const session = await getServerSession(nextAuthOptions);
+  if (!session?.user.id) {
+    return NextResponse.json(
+      {
+        error: "セッションが取得できませんでした",
+      },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  const data = await req.json();
+  const validateBodyResult = validateExercise(data);
+
+  if (validateBodyResult.isErr()) {
+    return NextResponse.json(
+      { error: "bodyの検証に失敗しました" },
+      { status: 400 }
+    );
+  }
+  const body = validateBodyResult.value;
+
+  const traineeId = context?.params?.["trainee_id"];
+  if (!traineeId) {
+    return NextResponse.json(
+      { error: "trainee-idが指定されていません" },
+      { status: 400 }
+    );
+  }
+
+  const trainee = await prisma.trainee.findUnique({
+    where: {
+      id: traineeId,
+    },
+  });
+  if (trainee?.authUserId !== session.user.id) {
+    return NextResponse.json(
+      { error: "exerciseを作成できませんでした" },
+      { status: 401 }
+    );
+  }
+
+  try {
+    const created = await prisma.exercise.create({
+      data: {
+        id: body.id,
+        name: body.name,
+        targets: {
+          connect: body.targets.map((target) => ({ id: target.id })),
+        },
+        traineeId: traineeId,
+      },
+      include: {
+        targets: true,
+      },
+    });
+
+    const validateCreatedResult = validateExercise(created);
+    if (validateCreatedResult.isErr()) {
+      return NextResponse.json(
+        { error: "exerciseの検証に失敗しました" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(validateCreatedResult.value);
+  } catch (error) {
+    return NextResponse.json(
+      { error: `exerciseの作成に失敗しました: ${error}` },
+      { status: 500 }
+    );
+  }
+};
