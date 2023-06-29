@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { container } from "styled-system/patterns";
@@ -36,6 +37,7 @@ const Page: NextPage = async (props) => {
         registeredExercises={getExercisesResult.value}
         registeredMuscles={registeredMuscles}
       />
+      <Link href={`/trainees/${traineeId}/exercises`}>種目一覧</Link>
     </main>
   );
 };
