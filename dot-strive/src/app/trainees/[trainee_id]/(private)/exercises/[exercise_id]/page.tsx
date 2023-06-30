@@ -21,9 +21,7 @@ const Page: NextPage = (props) => {
     <main className={container()}>
       <section className={stack({ direction: "column" })}>
         <h1>種目詳細</h1>
-        <Suspense
-          fallback={<Loading description="種目データを取得しています" />}
-        >
+        <Suspense fallback={<Loading description="データを取得しています" />}>
           <ExerciseDetail traineeId={traineeId} exerciseId={exerciseId} />
         </Suspense>
         <Link href={`/trainees/${traineeId}/exercises`}>種目一覧</Link>
