@@ -1,7 +1,7 @@
 import { getAllMusclesBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-all-muscles-by-session";
-import { getExerciseById } from "@/app/trainees/[trainee_id]/(private)/exercises/[exercise_id]/_repositories/get-exercise-by-id";
+import { getAllExercisesBySession } from "@/app/trainees/[trainee_id]/(private)/exercises/_repositories/get-all-exercises-by-session";
 
-import { ExerciseEditor } from "./exercise-editor";
+import { UpdateExercise } from "./update-exercise";
 
 import type { FC } from "react";
 
@@ -10,26 +10,34 @@ type Props = {
   exerciseId: string;
 };
 export const ExerciseDetail: FC<Props> = async (props) => {
-  const [getExerciseResult, getMusclesResult] = await Promise.all([
-    getExerciseById({
+  const [getExercisesResult, getMusclesResult] = await Promise.all([
+    getAllExercisesBySession({
       traineeId: props.traineeId,
-      exerciseId: props.exerciseId,
     }),
     getAllMusclesBySession({
       traineeId: props.traineeId,
     }),
   ]);
 
-  if (getExerciseResult.isErr() || getMusclesResult.isErr()) {
-    return <p>種目データの取得に失敗しました</p>;
+  if (getExercisesResult.isErr() || getMusclesResult.isErr()) {
+    return <p>データの取得に失敗しました</p>;
   }
-  const exercise = getExerciseResult.value;
+  const registeredExercises = getExercisesResult.value;
+  const registeredMuscles = getMusclesResult.value;
+
+  const exercise = registeredExercises.find(
+    (exercise) => exercise.id === props.exerciseId
+  );
+  if (!exercise) {
+    return <p>種目の取得に失敗しました</p>;
+  }
 
   return (
-    <ExerciseEditor
+    <UpdateExercise
       traineeId={props.traineeId}
       exercise={exercise}
-      registeredMuscles={getMusclesResult.value}
+      registeredMuscles={registeredMuscles}
+      registeredExercises={registeredExercises}
     />
   );
 };

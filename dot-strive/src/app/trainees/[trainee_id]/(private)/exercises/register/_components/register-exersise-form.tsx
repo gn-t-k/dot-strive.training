@@ -1,26 +1,29 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, type FC } from "react";
 
 import { Button } from "@/app/_components/button";
 import { Input } from "@/app/_components/input";
-import { useToast } from "@/app/_hooks/use-toast";
+import { useExerciseForm } from "@/app/trainees/[trainee_id]/(private)/exercises/[exercise_id]/_hooks/use-exercise-form";
+import { registerExercise } from "@/app/trainees/[trainee_id]/(private)/exercises/_repositories/register-exercise";
 import { stack } from "styled-system/patterns";
 
-import { useExerciseForm } from "../[exercise_id]/_hooks/use-exercise-form";
-import { registerExercise } from "../_repositories/register-exercise";
-
-import type { ExerciseField } from "../[exercise_id]/_hooks/use-exercise-form";
 import type { Exercise } from "@/app/_schemas/exercise";
 import type { Muscle } from "@/app/_schemas/muscle";
+import type { ExerciseField } from "@/app/trainees/[trainee_id]/(private)/exercises/[exercise_id]/_hooks/use-exercise-form";
+import type { Result } from "neverthrow";
 import type { SubmitHandler } from "react-hook-form";
 
 type Props = {
   traineeId: string;
-  registeredExercises: Exercise[];
   registeredMuscles: Muscle[];
+  registeredExercises: Exercise[];
+  afterRegister?: AfterRegister;
 };
+export type AfterRegister = (
+  fieldValues: ExerciseField,
+  result: Result<unknown, Error>
+) => void;
 export const RegisterExerciseForm: FC<Props> = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const {
@@ -29,8 +32,6 @@ export const RegisterExerciseForm: FC<Props> = (props) => {
     formState: { errors },
     setError,
   } = useExerciseForm();
-  const router = useRouter();
-  const { Toast, renderToast } = useToast();
 
   const onSubmit: SubmitHandler<ExerciseField> = async (fieldValues) => {
     setIsLoading(true);
@@ -56,21 +57,8 @@ export const RegisterExerciseForm: FC<Props> = (props) => {
     });
     setIsLoading(false);
 
-    renderToast(
-      result.isOk()
-        ? {
-            title: `種目「${fieldValues.name}」を登録しました`,
-            variant: "success",
-          }
-        : {
-            title: `種目「${fieldValues.name}」の登録に失敗しました`,
-            variant: "error",
-          }
-    );
-
-    if (result.isOk()) {
-      router.refresh();
-      router.push(`/trainees/${props.traineeId}/exercises`);
+    if (props.afterRegister) {
+      props.afterRegister(fieldValues, result);
     }
   };
 
@@ -100,7 +88,6 @@ export const RegisterExerciseForm: FC<Props> = (props) => {
           </Button>
         </div>
       </form>
-      <Toast />
     </>
   );
 };

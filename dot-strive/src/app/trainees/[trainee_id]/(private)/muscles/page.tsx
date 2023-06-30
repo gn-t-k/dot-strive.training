@@ -6,7 +6,6 @@ import { Loading } from "@/app/_components/loading";
 import { container, stack } from "styled-system/patterns";
 
 import { MuscleList } from "./_components/muscle-list";
-import { RegisterMuscleForm } from "./_components/register-muscle-form";
 
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
@@ -26,7 +25,9 @@ const Page: NextPage = (props) => {
         >
           <MuscleList traineeId={traineeId} />
         </Suspense>
-        <RegisterMuscleForm traineeId={traineeId} />
+        <Link href={`/trainees/${traineeId}/muscles/register`}>
+          部位を登録する
+        </Link>
         <Link href={`/trainees/${traineeId}`}>トレーニーページ</Link>
       </section>
     </main>
