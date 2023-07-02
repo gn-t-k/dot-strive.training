@@ -62,7 +62,9 @@ export const POST: RouteHandler = async (_req, _context) => {
   } catch (error) {
     return NextResponse.json(
       {
-        error: `初期登録に失敗しました: ${JSON.stringify(error)}`,
+        error: `初期登録に失敗しました${
+          error instanceof Error ? `: ${error.message}` : ""
+        }`,
       },
       {
         status: 500,
@@ -164,7 +166,9 @@ const registerTrainee: RegisterTrainee = async (props) => {
     return ok(trainee);
   } catch (error) {
     return err({
-      message: `トレーニーの登録に失敗しました: ${JSON.stringify(error)}`,
+      message: `トレーニーの登録に失敗しました${
+        error instanceof Error ? `: ${error.message}` : ""
+      }`,
       status: 500,
     });
   }
@@ -201,7 +205,9 @@ const registerMuscles: RegisterMuscles = async (props) => {
     return ok(muscles);
   } catch (error) {
     return err({
-      message: `部位の登録に失敗しました: ${JSON.stringify(error)}`,
+      message: `部位の登録に失敗しました${
+        error instanceof Error ? `: ${error.message}` : ""
+      }`,
       status: 500,
     });
   }
@@ -253,9 +259,10 @@ const registerExercises: RegisterExercises = async (props) => {
 
     return ok(exercises);
   } catch (error) {
-    console.log({ error });
     return err({
-      message: `種目の登録に失敗しました: ${JSON.stringify(error)}`,
+      message: `種目の登録に失敗しました${
+        error instanceof Error ? `: ${error.message}` : ""
+      }`,
       status: 500,
     });
   }
