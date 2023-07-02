@@ -6,7 +6,7 @@ import type { Result } from "neverthrow";
 export const traineeIdSchema = z.string().brand("trainee-id");
 const traineeSchema = z.object({
   id: traineeIdSchema,
-  name: z.string(),
+  name: z.string().min(1),
   image: z.string().url(),
 });
 export type Trainee = z.infer<typeof traineeSchema>;
