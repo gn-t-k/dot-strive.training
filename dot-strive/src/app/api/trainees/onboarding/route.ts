@@ -62,7 +62,7 @@ export const POST: RouteHandler = async (_req, _context) => {
   } catch (error) {
     return NextResponse.json(
       {
-        error: `初期登録に失敗しました: ${error}`,
+        error: `初期登録に失敗しました: ${JSON.stringify(error)}`,
       },
       {
         status: 500,
@@ -164,7 +164,7 @@ const registerTrainee: RegisterTrainee = async (props) => {
     return ok(trainee);
   } catch (error) {
     return err({
-      message: "トレーニーの登録に失敗しました",
+      message: `トレーニーの登録に失敗しました: ${JSON.stringify(error)}`,
       status: 500,
     });
   }
@@ -201,7 +201,7 @@ const registerMuscles: RegisterMuscles = async (props) => {
     return ok(muscles);
   } catch (error) {
     return err({
-      message: "部位の登録に失敗しました",
+      message: `部位の登録に失敗しました: ${JSON.stringify(error)}`,
       status: 500,
     });
   }
@@ -233,17 +233,29 @@ const registerExercises: RegisterExercises = async (props) => {
   });
 
   try {
-    await props.prisma.exercise.createMany({
-      data: exercises.map((exercise) => ({
-        ...exercise,
-        traineeId: props.trainee.id,
-      })),
-    });
+    await Promise.all(
+      exercises.map(
+        async (exercise) =>
+          await props.prisma.exercise.create({
+            data: {
+              id: exercise.id,
+              name: exercise.name,
+              traineeId: props.trainee.id,
+              targets: {
+                connect: exercise.targets.map((target) => ({
+                  id: target.id,
+                })),
+              },
+            },
+          })
+      )
+    );
 
     return ok(exercises);
   } catch (error) {
+    console.log({ error });
     return err({
-      message: "種目の登録に失敗しました",
+      message: `種目の登録に失敗しました: ${JSON.stringify(error)}`,
       status: 500,
     });
   }
