@@ -16,64 +16,59 @@ import type { Result } from "neverthrow";
 import type { Session } from "next-auth";
 
 export const POST: RouteHandler = async (_req, _context) => {
-  await prisma.$transaction(async (tx) => {
-    const session = await getServerSession(nextAuthOptions);
-    if (!session?.user.id) {
-      return NextResponse.json(
-        {
-          error: "セッションが取得できませんでした",
-        },
-        {
-          status: 401,
-        }
-      );
-    }
+  try {
+    await prisma.$transaction(async (tx) => {
+      const session = await getServerSession(nextAuthOptions);
+      if (!session?.user.id) {
+        throw new Error("セッションが取得できませんでした");
+      }
 
-    const registerTraineeResult = await registerTrainee({
-      session,
-      authUserId: session.user.id,
-      prisma: tx,
+      const registerTraineeResult = await registerTrainee({
+        session,
+        authUserId: session.user.id,
+        prisma: tx,
+      });
+      if (registerTraineeResult.isErr()) {
+        throw new Error(
+          `トレーニーの登録に失敗しました: ${registerTraineeResult.error}`
+        );
+      }
+      const trainee = registerTraineeResult.value;
+
+      const registerMusclesResult = await registerMuscles({
+        trainee,
+        prisma: tx,
+      });
+      if (registerMusclesResult.isErr()) {
+        throw new Error(
+          `部位の登録に失敗しました: ${registerMusclesResult.error}`
+        );
+      }
+      const muscles = registerMusclesResult.value;
+
+      const registerExercisesResult = await registerExercises({
+        trainee,
+        muscles,
+        prisma: tx,
+      });
+      if (registerExercisesResult.isErr()) {
+        throw new Error(
+          `種目の登録に失敗しました: ${registerExercisesResult.error}`
+        );
+      }
     });
-    if (registerTraineeResult.isErr()) {
-      return NextResponse.json(
-        {
-          error: registerTraineeResult.error.message,
-        },
-        {
-          status: registerTraineeResult.error.status,
-        }
-      );
-    }
-    const trainee = registerTraineeResult.value;
 
-    const registerMusclesResult = await registerMuscles({
-      trainee,
-      prisma: tx,
-    });
-    if (registerMusclesResult.isErr()) {
-      return NextResponse.json(
-        {
-          error: registerMusclesResult.error.message,
-        },
-        {
-          status: registerMusclesResult.error.status,
-        }
-      );
-    }
-    const muscles = registerMusclesResult.value;
-  });
-
-  /**
-   * トレーニーの登録
-   */
-
-  /**
-   * 部位の登録
-   */
-
-  /**
-   * 種目の登録
-   */
+    return NextResponse.json({});
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: `初期登録に失敗しました: ${error}`,
+      },
+      {
+        status: 500,
+      }
+    );
+  }
 };
 
 type DefaultExercise = {
@@ -225,7 +220,13 @@ const registerExercises: RegisterExercises = async (props) => {
     const result = validateExercise({
       id: ulid(),
       name: exercise.exerciseName,
-      targets: [], // TODO
+      targets: exercise.targetNames.flatMap((targetName) => {
+        const target = props.muscles.find(
+          (muscle) => muscle.name === targetName
+        );
+
+        return target ? [target] : [];
+      }),
     });
 
     return result.isErr() ? [] : [result.value];
