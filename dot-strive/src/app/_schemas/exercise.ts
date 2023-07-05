@@ -7,7 +7,7 @@ import type { UnvalidatedMuscle } from "./muscle";
 import type { Result } from "neverthrow";
 
 const exerciseIdSchema = z.string().brand("exercise-id");
-const exerciseSchema = z.object({
+export const exerciseSchema = z.object({
   id: exerciseIdSchema,
   name: z.string().min(1),
   targets: z.array(muscleSchema),
@@ -15,7 +15,7 @@ const exerciseSchema = z.object({
 export type Exercise = z.infer<typeof exerciseSchema>;
 export type ExerciseId = z.infer<typeof exerciseIdSchema>;
 
-type UnvalidatedExercise = {
+export type UnvalidatedExercise = {
   id: string;
   name: string;
   targets: UnvalidatedMuscle[];

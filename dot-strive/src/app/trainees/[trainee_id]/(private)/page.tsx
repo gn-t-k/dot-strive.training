@@ -29,6 +29,7 @@ const Page: NextPage = (props) => {
         </Suspense>
         <Link href={`/trainees/${traineeId}/muscles`}>部位</Link>
         <Link href={`/trainees/${traineeId}/exercises`}>種目</Link>
+        <Link href={`/trainees/${traineeId}/trainings`}>トレーニング</Link>
         <LogoutButton />
       </div>
     </main>
