@@ -23,9 +23,26 @@ const trainingIdSchema = z.string().brand("training-id");
 const trainingSchema = z.object({
   id: trainingIdSchema,
   records: z.array(recordSchema),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z
+    .string()
+    .datetime()
+    .refine((dateString) => isUTC(dateString), {
+      message: "createdAt must be a UTC date string",
+      path: ["createdAt"],
+    }),
+  updatedAt: z
+    .string()
+    .datetime()
+    .refine((dateString) => isUTC(dateString), {
+      message: "updatedAt must be a UTC date string",
+      path: ["updatedAt"],
+    }),
 });
+const isUTC = (date: string): boolean => {
+  return (
+    date.endsWith("Z") || date.includes("+00:00") || date.includes("-00:00")
+  );
+};
 export type Training = z.infer<typeof trainingSchema>;
 
 type UnvalidatedTraining = {

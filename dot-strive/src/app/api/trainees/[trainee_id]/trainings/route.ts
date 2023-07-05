@@ -8,7 +8,7 @@ import { validateTraining } from "@/app/_schemas/training";
 import type { Training } from "@/app/_schemas/training";
 import type { RouteHandler } from "@/app/api/_types/route-handler";
 
-export const GET: RouteHandler<Training[]> = async (_req, context) => {
+export const POST: RouteHandler<Training> = async (req, context) => {
   const session = await getServerSession(nextAuthOptions);
   if (!session?.user.id) {
     return NextResponse.json(
@@ -21,6 +21,17 @@ export const GET: RouteHandler<Training[]> = async (_req, context) => {
     );
   }
 
+  const data = await req.json();
+  const validateBodyResult = validateTraining(data);
+
+  if (validateBodyResult.isErr()) {
+    return NextResponse.json(
+      { error: "bodyの検証に失敗しました" },
+      { status: 400 }
+    );
+  }
+  const training = validateBodyResult.value;
+
   const traineeId = context?.params?.["trainee_id"];
   if (!traineeId) {
     return NextResponse.json(
@@ -29,46 +40,59 @@ export const GET: RouteHandler<Training[]> = async (_req, context) => {
     );
   }
 
-  const data = await prisma.trainee.findUnique({
+  const trainee = await prisma.trainee.findUnique({
     where: {
       id: traineeId,
     },
-    include: {
-      trainings: {
-        include: {
-          records: {
-            include: {
-              exercise: {
-                include: {
-                  targets: true,
-                },
-              },
-              sets: true,
-            },
-          },
-        },
-      },
-    },
   });
-
-  if (!data || data.authUserId !== session.user.id) {
+  if (trainee?.authUserId !== session.user.id) {
     return NextResponse.json(
-      { error: "trainingsを取得できませんでした" },
-      { status: 404 }
+      { error: "trainingを作成できませんでした" },
+      { status: 401 }
     );
   }
 
-  const trainings = data.trainings
-    .map((training) =>
-      validateTraining({
-        ...training,
-        createdAt: training.createdAt.toISOString(),
-        updatedAt: training.updatedAt.toISOString(),
-      })
-    )
-    .flatMap((validationResult) =>
-      validationResult.isErr() ? [] : [validationResult.value]
-    );
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.training.create({
+        data: {
+          id: training.id,
+          createdAt: training.createdAt,
+          updatedAt: training.createdAt,
+          trainee: {
+            connect: {
+              id: trainee.id,
+            },
+          },
+        },
+      });
 
-  return NextResponse.json(trainings);
+      await tx.record.createMany({
+        data: training.records.map((record) => ({
+          id: record.id,
+          trainingId: training.id,
+          exerciseId: record.exercise.id,
+          memo: record.memo,
+        })),
+      });
+
+      await tx.set.createMany({
+        data: training.records.flatMap((record) =>
+          record.sets.map((set) => ({
+            id: set.id,
+            recordId: record.id,
+            weight: set.weight,
+            repetition: set.repetition,
+          }))
+        ),
+      });
+    });
+
+    return NextResponse.json(training);
+  } catch (error) {
+    return NextResponse.json(
+      { error: "trainingを作成できませんでした" },
+      { status: 500 }
+    );
+  }
 };
