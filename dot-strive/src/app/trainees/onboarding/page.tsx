@@ -11,7 +11,6 @@ import type { NextPage } from "@/app/_types/page";
 const Page: NextPage = async () => {
   const registerResult = await registerInitialData();
   if (registerResult.isErr()) {
-    console.log({ error: registerResult.error.message });
     return <p>登録に失敗しました</p>;
   }
 
