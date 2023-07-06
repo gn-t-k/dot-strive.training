@@ -96,7 +96,9 @@ export const TrainingForm: FC<Props> = (props) => {
       <div className={stack({ direction: "column" })}>
         <label htmlFor="date">日付</label>
         <Input type="date" id="date" {...register("date")} />
-        {errors.date && <p>{errors.date.message}</p>}
+        {errors.date && (
+          <p className={css({ color: "red" })}>{errors.date.message}</p>
+        )}
       </div>
       <div className={stack({ direction: "column" })}>
         <p>記録</p>
@@ -131,7 +133,9 @@ export const TrainingForm: FC<Props> = (props) => {
           );
         })}
         <Button onClick={onClickAddExercise}>種目を追加</Button>
-        {errors.records && <p>{errors.records.message}</p>}
+        {errors.records && (
+          <p className={css({ color: "red" })}>{errors.records.message}</p>
+        )}
       </div>
       <Button type="submit" visual="positive">
         {props.submitButtonLabel}
@@ -186,7 +190,9 @@ const RecordForm: FC<RecordFormProps> = (props) => {
           })}
         </Select>
         {props.errors?.records?.[props.recordIndex]?.exerciseId && (
-          <p>{props.errors.records[props.recordIndex]?.exerciseId?.message}</p>
+          <p className={css({ color: "red" })}>
+            {props.errors.records[props.recordIndex]?.exerciseId?.message}
+          </p>
         )}
       </div>
       <div className={stack({ direction: "column", gap: 4 })}>
@@ -209,7 +215,9 @@ const RecordForm: FC<RecordFormProps> = (props) => {
         })}
         <Button onClick={onClickAddSet}>セットを追加</Button>
         {props.errors?.records?.[props.recordIndex]?.sets && (
-          <p>{props.errors.records[props.recordIndex]?.sets?.message}</p>
+          <p className={css({ color: "red" })}>
+            {props.errors.records[props.recordIndex]?.sets?.message}
+          </p>
         )}
       </div>
       <div className={stack({ direction: "column" })}>
@@ -219,7 +227,9 @@ const RecordForm: FC<RecordFormProps> = (props) => {
           {...props.register(`records.${props.recordIndex}.memo`)}
         />
         {props.errors?.records?.[props.recordIndex]?.memo && (
-          <p>{props.errors.records[props.recordIndex]?.memo?.message}</p>
+          <p className={css({ color: "red" })}>
+            {props.errors.records[props.recordIndex]?.memo?.message}
+          </p>
         )}
       </div>
     </div>
@@ -252,7 +262,7 @@ const SetForm: FC<SetFormProps> = (props) => {
           </div>
           {props.errors?.records?.[props.recordIndex]?.sets?.[props.setIndex]
             ?.weight && (
-            <p>
+            <p className={css({ color: "red" })}>
               {
                 props.errors.records[props.recordIndex]?.sets?.[props.setIndex]
                   ?.weight?.message
@@ -274,7 +284,7 @@ const SetForm: FC<SetFormProps> = (props) => {
           </div>
           {props.errors?.records?.[props.recordIndex]?.sets?.[props.setIndex]
             ?.repetition && (
-            <p>
+            <p className={css({ color: "red" })}>
               {
                 props.errors.records[props.recordIndex]?.sets?.[props.setIndex]
                   ?.repetition?.message
