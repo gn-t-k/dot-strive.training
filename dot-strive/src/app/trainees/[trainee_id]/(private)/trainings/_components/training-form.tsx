@@ -132,7 +132,7 @@ export const TrainingForm: FC<Props> = (props) => {
             </div>
           );
         })}
-        <Button onClick={onClickAddExercise}>種目を追加</Button>
+        <Button onClick={onClickAddExercise}>記録を追加</Button>
         {errors.records && (
           <p className={css({ color: "red" })}>{errors.records.message}</p>
         )}
