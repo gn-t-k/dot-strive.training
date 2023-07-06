@@ -2,6 +2,7 @@ import { err, ok } from "neverthrow";
 import { z } from "zod";
 
 import { exerciseSchema } from "./exercise";
+import { utcDateStringSchema } from "./utc-date-string";
 
 import type { UnvalidatedExercise } from "./exercise";
 import type { Result } from "neverthrow";
@@ -23,33 +24,14 @@ const trainingIdSchema = z.string().brand("training-id");
 const trainingSchema = z.object({
   id: trainingIdSchema,
   records: z.array(recordSchema),
-  createdAt: z
-    .string()
-    .datetime()
-    .refine((dateString) => isUTC(dateString), {
-      message: "createdAt must be a UTC date string",
-      path: ["createdAt"],
-    }),
-  updatedAt: z
-    .string()
-    .datetime()
-    .refine((dateString) => isUTC(dateString), {
-      message: "updatedAt must be a UTC date string",
-      path: ["updatedAt"],
-    }),
+  date: utcDateStringSchema,
 });
-const isUTC = (date: string): boolean => {
-  return (
-    date.endsWith("Z") || date.includes("+00:00") || date.includes("-00:00")
-  );
-};
 export type Training = z.infer<typeof trainingSchema>;
 
 type UnvalidatedTraining = {
   id: string;
   records: UnvalidatedRecord[];
-  createdAt: string;
-  updatedAt: string;
+  date: string;
 };
 type UnvalidatedRecord = {
   id: string;

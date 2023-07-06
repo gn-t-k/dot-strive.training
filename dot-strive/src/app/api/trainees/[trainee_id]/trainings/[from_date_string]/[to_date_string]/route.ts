@@ -50,7 +50,7 @@ export const GET: RouteHandler<Training[]> = async (_req, context) => {
     include: {
       trainings: {
         where: {
-          createdAt: {
+          date: {
             gte: new Date(fromDateString),
             lte: new Date(toDateString),
           },
@@ -82,8 +82,7 @@ export const GET: RouteHandler<Training[]> = async (_req, context) => {
     .map((training) =>
       validateTraining({
         ...training,
-        createdAt: training.createdAt.toISOString(),
-        updatedAt: training.updatedAt.toISOString(),
+        date: training.date.toISOString(),
       })
     )
     .flatMap((validationResult) =>

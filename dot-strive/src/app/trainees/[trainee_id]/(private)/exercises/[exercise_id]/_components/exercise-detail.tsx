@@ -1,5 +1,5 @@
+import { getAllExercisesBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-all-exercises-by-session";
 import { getAllMusclesBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-all-muscles-by-session";
-import { getAllExercisesBySession } from "@/app/trainees/[trainee_id]/(private)/exercises/_repositories/get-all-exercises-by-session";
 
 import { UpdateExercise } from "./update-exercise";
 

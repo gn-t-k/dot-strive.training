@@ -103,6 +103,7 @@ model Exercise {
 
 model Training {
   id        String   @id
+  date DateTime
   createdAt DateTime
   updatedAt DateTime
   traineeId String

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { getAllExercisesBySession } from "@/app/trainees/[trainee_id]/(private)/exercises/_repositories/get-all-exercises-by-session";
+import { getAllExercisesBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-all-exercises-by-session";
 
 import type { FC } from "react";
 

@@ -60,6 +60,9 @@ const Page: NextPage = (props) => {
             month={month}
           />
         </Suspense>
+        <Link href={`/trainees/${traineeId}/trainings/register`}>
+          トレーニングを登録する
+        </Link>
         <Link href={`/trainees/${traineeId}`}>トレーニーページ</Link>
       </section>
     </main>

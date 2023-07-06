@@ -1,3 +1,4 @@
+import { LocalDate } from "@/app/_components/local-date";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
@@ -26,11 +27,6 @@ export const DailyTrainingList: FC<Props> = async (props) => {
   return (
     <ul className={stack({ direction: "column", gap: 12, p: 4 })}>
       {trainings.map((training) => {
-        const date = new Date(training.createdAt).toLocaleString("ja", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        });
         const styles = css({
           border: "1px solid",
         });
@@ -38,7 +34,7 @@ export const DailyTrainingList: FC<Props> = async (props) => {
         return (
           <li key={training.id} className={styles}>
             <div className={stack({ direction: "column" })}>
-              <time>{date}</time>
+              <LocalDate utcDateString={training.date} />
               <ul className={stack({ direction: "column", gap: 8, p: 4 })}>
                 {training.records.map((record) => {
                   return (
