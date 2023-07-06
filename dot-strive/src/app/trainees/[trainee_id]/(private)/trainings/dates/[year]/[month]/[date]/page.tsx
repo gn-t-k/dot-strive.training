@@ -46,7 +46,7 @@ const Page: NextPage = (props) => {
             date={date}
           />
         </Suspense>
-        <Link href={`/trainees/${traineeId}/trainings/${year}/${month}`}>
+        <Link href={`/trainees/${traineeId}/trainings/dates/${year}/${month}`}>
           {year}年{month}月のトレーニング一覧
         </Link>
       </section>
