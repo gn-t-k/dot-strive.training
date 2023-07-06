@@ -27,7 +27,7 @@ export const MonthlyTrainingList: FC<Props> = async (props) => {
   return (
     <ul className={stack({ direction: "column", gap: 12, p: 4 })}>
       {trainings.map((training) => {
-        const date = new Date(training.createdAt);
+        const date = new Date(training.date);
         const styles = css({
           border: "1px solid",
         });

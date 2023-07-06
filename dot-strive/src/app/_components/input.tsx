@@ -9,6 +9,7 @@ export const Input = forwardRef<HTMLInputElement, Props>(function Input(
 ) {
   const styles = css({
     border: "1px solid black",
+    w: "full",
   });
 
   return <input ref={forwardedRef} className={styles} {...props} />;

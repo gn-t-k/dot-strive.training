@@ -26,7 +26,7 @@ export const DailyTrainingList: FC<Props> = async (props) => {
   return (
     <ul className={stack({ direction: "column", gap: 12, p: 4 })}>
       {trainings.map((training) => {
-        const date = new Date(training.createdAt).toLocaleString("ja", {
+        const date = new Date(training.date).toLocaleString("ja", {
           year: "numeric",
           month: "2-digit",
           day: "2-digit",

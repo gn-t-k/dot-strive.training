@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import { container } from "styled-system/patterns";
 
 import { RegisterExercise } from "./_components/register-exercise";
+import { getAllExercisesBySession } from "../../_repositories/get-all-exercises-by-session";
 import { getAllMusclesBySession } from "../../_repositories/get-all-muscles-by-session";
-import { getAllExercisesBySession } from "../_repositories/get-all-exercises-by-session";
 
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
