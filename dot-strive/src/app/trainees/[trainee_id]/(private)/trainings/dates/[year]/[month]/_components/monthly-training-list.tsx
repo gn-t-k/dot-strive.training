@@ -1,4 +1,6 @@
-import { LocalDate } from "@/app/_components/local-date";
+import Link from "next/link";
+
+import { TrainingDetail } from "@/app/trainees/[trainee_id]/(private)/trainings/_components/training-detail";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
@@ -32,40 +34,11 @@ export const MonthlyTrainingList: FC<Props> = async (props) => {
 
         return (
           <li key={training.id} className={styles}>
-            <div className={stack({ direction: "column" })}>
-              <LocalDate utcDateString={training.date} />
-              <ul className={stack({ direction: "column", gap: 8, p: 4 })}>
-                {training.records.map((record) => {
-                  return (
-                    <li
-                      key={record.id}
-                      className={stack({ direction: "column" })}
-                    >
-                      <p>{record.exercise.name}</p>
-                      <ul
-                        className={stack({
-                          direction: "column",
-                          gap: 4,
-                          p: 4,
-                        })}
-                      >
-                        {record.sets.map((set) => {
-                          return (
-                            <li
-                              key={set.id}
-                              className={stack({ direction: "row" })}
-                            >
-                              <p>{set.weight}kg</p>
-                              <p>{set.repetition}回</p>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+            <Link
+              href={`/trainees/${props.traineeId}/trainings/${training.id}`}
+            >
+              <TrainingDetail training={training} />
+            </Link>
           </li>
         );
       })}
