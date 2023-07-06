@@ -5,7 +5,8 @@ export const utcDateStringSchema = z
   .datetime()
   .refine((dateString) => isUTC(dateString), {
     message: "date must be a UTC date string",
-  });
+  })
+  .brand("utc-date-string");
 const isUTC = (date: string): boolean => {
   return (
     date.endsWith("Z") || date.includes("+00:00") || date.includes("-00:00")
