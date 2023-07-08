@@ -36,6 +36,9 @@ const Page: NextPage = async (props) => {
       <section className={stack({ direction: "column" })}>
         <h1>トレーニング詳細</h1>
         <TrainingDetail training={training} />
+        <Link href={`/trainees/${traineeId}/trainings/${trainingId}/edit`}>
+          トレーニングを編集する
+        </Link>
         <Link href={`/trainees/${traineeId}/trainings`}>
           トレーニングページ
         </Link>
