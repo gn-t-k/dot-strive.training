@@ -4,7 +4,7 @@ import { ulid } from "ulid";
 import { validateTraining } from "@/app/_schemas/training";
 import { getFetcher } from "@/app/_utils/get-fetcher";
 
-import { getAllExercisesBySession } from "../../../_repositories/get-all-exercises-by-session";
+import { getAllExercisesBySession } from "../../_repositories/get-all-exercises-by-session";
 
 import type { Training } from "@/app/_schemas/training";
 import type { Result } from "neverthrow";

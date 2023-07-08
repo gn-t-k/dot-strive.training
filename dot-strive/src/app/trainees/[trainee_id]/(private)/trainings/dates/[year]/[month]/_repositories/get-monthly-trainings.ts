@@ -1,4 +1,4 @@
-import { endOfDay } from "date-fns";
+import { endOfMonth } from "date-fns";
 import { err, ok } from "neverthrow";
 
 import { validateTraining } from "@/app/_schemas/training";
@@ -7,21 +7,20 @@ import { getFetcher } from "@/app/_utils/get-fetcher";
 import type { Training } from "@/app/_schemas/training";
 import type { Result } from "neverthrow";
 
-type GetDailyTrainings = (props: Props) => Promise<Result<Training[], Error>>;
+type GetMonthlyTrainings = (props: Props) => Promise<Result<Training[], Error>>;
 type Props = {
   traineeId: string;
   year: string;
   month: string;
-  date: string;
 };
-export const getDailyTrainings: GetDailyTrainings = async (props) => {
-  const startOfDate = new Date(`${props.year}-${props.month}-${props.date}`);
-  const endOfDate = endOfDay(startOfDate);
+export const getMonthlyTrainings: GetMonthlyTrainings = async (props) => {
+  const startDate = new Date(`${props.year}-${props.month}`);
+  const endDate = endOfMonth(startDate);
 
   const response = await getFetcher()(
-    `/api/trainees/${props.traineeId}/trainings/${encodeURIComponent(
-      startOfDate.toISOString()
-    )}/${encodeURIComponent(endOfDate.toISOString())}`
+    `/api/trainees/${props.traineeId}/trainings/dates/${encodeURIComponent(
+      startDate.toISOString()
+    )}/${encodeURIComponent(endDate.toISOString())}`
   );
   const data = await response.json();
 

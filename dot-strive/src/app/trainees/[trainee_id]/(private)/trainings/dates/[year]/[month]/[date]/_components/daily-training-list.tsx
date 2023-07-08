@@ -1,0 +1,42 @@
+import { TrainingDetail } from "@/app/trainees/[trainee_id]/(private)/trainings/_components/training-detail";
+import { css } from "styled-system/css";
+import { stack } from "styled-system/patterns";
+
+import { getDailyTrainings } from "../_repository/get-daily-trainings";
+
+import type { FC } from "react";
+
+type Props = {
+  traineeId: string;
+  year: string;
+  month: string;
+  date: string;
+};
+export const DailyTrainingList: FC<Props> = async (props) => {
+  const result = await getDailyTrainings({
+    traineeId: props.traineeId,
+    year: props.year,
+    month: props.month,
+    date: props.date,
+  });
+  if (result.isErr()) {
+    return <p>トレーニングデータの取得に失敗しました</p>;
+  }
+  const trainings = result.value;
+
+  return (
+    <ul className={stack({ direction: "column", gap: 12, p: 4 })}>
+      {trainings.map((training) => {
+        const styles = css({
+          border: "1px solid",
+        });
+
+        return (
+          <li key={training.id} className={styles}>
+            <TrainingDetail training={training} />
+          </li>
+        );
+      })}
+    </ul>
+  );
+};

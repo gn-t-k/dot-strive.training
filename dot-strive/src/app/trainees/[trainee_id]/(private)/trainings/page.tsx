@@ -12,7 +12,7 @@ const Page: NextPage = (props) => {
   const year = today.getFullYear();
   const month = today.getMonth() + 1;
 
-  const to = `/trainees/${traineeId}/trainings/${year}/${month}` as const;
+  const to = `/trainees/${traineeId}/trainings/dates/${year}/${month}` as const;
   redirect(to satisfies Route<typeof to>);
 };
 export default Page;
