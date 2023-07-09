@@ -39,12 +39,12 @@ const Page: NextPage = (props) => {
         </h1>
         <div className={stack({ direction: "row" })}>
           <Link
-            href={`/trainees/${traineeId}/trainings/${prevMonthYear}/${prevMonthMonth}`}
+            href={`/trainees/${traineeId}/trainings/dates/${prevMonthYear}/${prevMonthMonth}`}
           >
             {prevMonthYear}年{prevMonthMonth}月
           </Link>
           <Link
-            href={`/trainees/${traineeId}/trainings/${nextMonthYear}/${nextMonthMonth}`}
+            href={`/trainees/${traineeId}/trainings/dates/${nextMonthYear}/${nextMonthMonth}`}
           >
             {nextMonthYear}年{nextMonthMonth}月
           </Link>

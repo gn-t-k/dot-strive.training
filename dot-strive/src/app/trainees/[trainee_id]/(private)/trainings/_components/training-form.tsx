@@ -13,11 +13,7 @@ import { useForm } from "@/app/_libs/react-hook-form/use-form";
 import { css, cx } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
-import { registerTraining } from "../register/_repositories/register-training";
-
 import type { Exercise } from "@/app/_schemas/exercise";
-import type { Training } from "@/app/_schemas/training";
-import type { Result } from "neverthrow";
 import type { FC, MouseEventHandler } from "react";
 import type { SubmitHandler, UseFormReturn } from "react-hook-form";
 
@@ -26,12 +22,9 @@ type Props = {
   defaultValues?: TrainingField;
   registeredExercises: Exercise[];
   traineeId: string;
-  afterSubmit?: AfterSubmit;
+  submitTraining: SubmitTraining;
 };
-type AfterSubmit = (
-  fieldValues: TrainingField,
-  result: Result<Training, Error>
-) => void;
+type SubmitTraining = (fieldValues: TrainingField) => Promise<void>;
 export const TrainingForm: FC<Props> = (props) => {
   const {
     handleSubmit,
@@ -45,26 +38,7 @@ export const TrainingForm: FC<Props> = (props) => {
   });
 
   const onSubmit: SubmitHandler<TrainingField> = async (fieldValues) => {
-    const registerTrainingResult = await registerTraining({
-      traineeId: props.traineeId,
-      date: fieldValues.date,
-      records: fieldValues.records.map((record) => {
-        return {
-          exerciseId: record.exerciseId,
-          sets: record.sets.map((set) => {
-            return {
-              weight: Number(set.weight),
-              repetition: Number(set.repetition),
-            };
-          }),
-          memo: record.memo,
-        };
-      }),
-    });
-
-    if (props.afterSubmit) {
-      props.afterSubmit(fieldValues, registerTrainingResult);
-    }
+    await props.submitTraining(fieldValues);
   };
   const onClickAddExercise: MouseEventHandler<HTMLButtonElement> = (event) => {
     event.preventDefault();

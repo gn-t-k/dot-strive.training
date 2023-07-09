@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/app/_hooks/use-toast";
 import { TrainingForm } from "@/app/trainees/[trainee_id]/(private)/trainings/_components/training-form";
 
+import { registerTraining } from "../../_repositories/register-training";
+
 import type { Exercise } from "@/app/_schemas/exercise";
 import type { ComponentProps, FC } from "react";
 
@@ -15,9 +17,27 @@ type Props = {
 export const RegisterTraining: FC<Props> = async (props) => {
   const router = useRouter();
   const { renderToast } = useToast();
-  const afterSubmit: NonNullable<
-    ComponentProps<typeof TrainingForm>["afterSubmit"]
-  > = (fieldValues, result) => {
+
+  const submitTraining: ComponentProps<
+    typeof TrainingForm
+  >["submitTraining"] = async (fieldValues) => {
+    const result = await registerTraining({
+      traineeId: props.traineeId,
+      date: fieldValues.date,
+      records: fieldValues.records.map((record) => {
+        return {
+          exerciseId: record.exerciseId,
+          sets: record.sets.map((set) => {
+            return {
+              weight: Number(set.weight),
+              repetition: Number(set.repetition),
+            };
+          }),
+          memo: record.memo,
+        };
+      }),
+    });
+
     router.refresh();
     renderToast(
       result.isOk()
@@ -38,7 +58,7 @@ export const RegisterTraining: FC<Props> = async (props) => {
       submitButtonLabel="トレーニングを登録する"
       registeredExercises={props.registeredExercises}
       traineeId={props.traineeId}
-      afterSubmit={afterSubmit}
+      submitTraining={submitTraining}
     />
   );
 };
