@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { container, stack } from "styled-system/patterns";
 
+import { DeleteTraining } from "./_components/delete-training";
 import { getTrainingById } from "./_repositories/get-training-by-id";
 import { TrainingDetail } from "../_components/training-detail";
 
@@ -39,6 +40,7 @@ const Page: NextPage = async (props) => {
         <Link href={`/trainees/${traineeId}/trainings/${trainingId}/edit`}>
           トレーニングを編集する
         </Link>
+        <DeleteTraining traineeId={traineeId} training={training} />
         <Link href={`/trainees/${traineeId}/trainings`}>
           トレーニングページ
         </Link>
