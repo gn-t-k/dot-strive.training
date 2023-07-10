@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { Loading } from "@/app/_components/loading";
-import { container, stack } from "styled-system/patterns";
+import { stack } from "styled-system/patterns";
 
 import { DailyTrainingList } from "./_components/daily-training-list";
 
@@ -29,28 +29,24 @@ const Page: NextPage = (props) => {
   }
 
   return (
-    <main className={container()}>
-      <section className={stack({ direction: "column" })}>
-        <h1>
-          {year}年{month}月{date}日のトレーニング
-        </h1>
-        <Suspense
-          fallback={
-            <Loading description="トレーニングデータを取得しています" />
-          }
-        >
-          <DailyTrainingList
-            traineeId={traineeId}
-            year={year}
-            month={month}
-            date={date}
-          />
-        </Suspense>
-        <Link href={`/trainees/${traineeId}/trainings/dates/${year}/${month}`}>
-          {year}年{month}月のトレーニング一覧
-        </Link>
-      </section>
-    </main>
+    <section className={stack({ direction: "column" })}>
+      <h1>
+        {year}年{month}月{date}日のトレーニング
+      </h1>
+      <Suspense
+        fallback={<Loading description="トレーニングデータを取得しています" />}
+      >
+        <DailyTrainingList
+          traineeId={traineeId}
+          year={year}
+          month={month}
+          date={date}
+        />
+      </Suspense>
+      <Link href={`/trainees/${traineeId}/trainings/dates/${year}/${month}`}>
+        {year}年{month}月のトレーニング一覧
+      </Link>
+    </section>
   );
 };
 export default Page;

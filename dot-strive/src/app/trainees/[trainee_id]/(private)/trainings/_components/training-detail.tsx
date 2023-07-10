@@ -9,7 +9,7 @@ type Props = {
 };
 export const TrainingDetail: FC<Props> = (props) => {
   return (
-    <div className={stack({ direction: "column" })}>
+    <div className={stack({ direction: "column", p: 4 })}>
       <LocalDate utcDateString={props.training.date} />
       <ul className={stack({ direction: "column", gap: 8, p: 4 })}>
         {props.training.records.map((record) => {
@@ -19,8 +19,7 @@ export const TrainingDetail: FC<Props> = (props) => {
               <ul
                 className={stack({
                   direction: "column",
-                  gap: 4,
-                  p: 4,
+                  px: 4,
                 })}
               >
                 {record.sets.map((set) => {

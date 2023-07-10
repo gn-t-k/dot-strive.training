@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { Loading } from "@/app/_components/loading";
-import { container, stack } from "styled-system/patterns";
+import { stack } from "styled-system/patterns";
 
 import { MuscleList } from "./_components/muscle-list";
 
@@ -17,20 +17,15 @@ const Page: NextPage = (props) => {
   }
 
   return (
-    <main className={container()}>
-      <section className={stack({ direction: "column" })}>
-        <h1>部位一覧</h1>
-        <Suspense
-          fallback={<Loading description="部位データを取得しています" />}
-        >
-          <MuscleList traineeId={traineeId} />
-        </Suspense>
-        <Link href={`/trainees/${traineeId}/muscles/register`}>
-          部位を登録する
-        </Link>
-        <Link href={`/trainees/${traineeId}`}>トレーニーページ</Link>
-      </section>
-    </main>
+    <section className={stack({ direction: "column" })}>
+      <h1>部位一覧</h1>
+      <Suspense fallback={<Loading description="部位データを取得しています" />}>
+        <MuscleList traineeId={traineeId} />
+      </Suspense>
+      <Link href={`/trainees/${traineeId}/muscles/register`}>
+        部位を登録する
+      </Link>
+    </section>
   );
 };
 export default Page;

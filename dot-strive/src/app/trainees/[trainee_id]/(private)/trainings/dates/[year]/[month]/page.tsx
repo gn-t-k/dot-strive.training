@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { Loading } from "@/app/_components/loading";
-import { container, stack } from "styled-system/patterns";
+import { stack } from "styled-system/patterns";
 
 import { MonthlyTrainingList } from "./_components/monthly-training-list";
 
@@ -32,40 +32,31 @@ const Page: NextPage = (props) => {
   const prevMonthMonth = prevMonthDate.getMonth() + 1;
 
   return (
-    <main className={container()}>
-      <section className={stack({ direction: "column" })}>
-        <h1>
-          {year}年{month}月のトレーニング一覧
-        </h1>
-        <div className={stack({ direction: "row" })}>
-          <Link
-            href={`/trainees/${traineeId}/trainings/dates/${prevMonthYear}/${prevMonthMonth}`}
-          >
-            {prevMonthYear}年{prevMonthMonth}月
-          </Link>
-          <Link
-            href={`/trainees/${traineeId}/trainings/dates/${nextMonthYear}/${nextMonthMonth}`}
-          >
-            {nextMonthYear}年{nextMonthMonth}月
-          </Link>
-        </div>
-        <Suspense
-          fallback={
-            <Loading description="トレーニングデータを取得しています" />
-          }
+    <section className={stack({ direction: "column" })}>
+      <h1>
+        {year}年{month}月のトレーニング一覧
+      </h1>
+      <Link href={`/trainees/${traineeId}/trainings/register`}>
+        トレーニングを登録する
+      </Link>
+      <div className={stack({ direction: "row" })}>
+        <Link
+          href={`/trainees/${traineeId}/trainings/dates/${prevMonthYear}/${prevMonthMonth}`}
         >
-          <MonthlyTrainingList
-            traineeId={traineeId}
-            year={year}
-            month={month}
-          />
-        </Suspense>
-        <Link href={`/trainees/${traineeId}/trainings/register`}>
-          トレーニングを登録する
+          {prevMonthYear}年{prevMonthMonth}月
         </Link>
-        <Link href={`/trainees/${traineeId}`}>トレーニーページ</Link>
-      </section>
-    </main>
+        <Link
+          href={`/trainees/${traineeId}/trainings/dates/${nextMonthYear}/${nextMonthMonth}`}
+        >
+          {nextMonthYear}年{nextMonthMonth}月
+        </Link>
+      </div>
+      <Suspense
+        fallback={<Loading description="トレーニングデータを取得しています" />}
+      >
+        <MonthlyTrainingList traineeId={traineeId} year={year} month={month} />
+      </Suspense>
+    </section>
   );
 };
 export default Page;
