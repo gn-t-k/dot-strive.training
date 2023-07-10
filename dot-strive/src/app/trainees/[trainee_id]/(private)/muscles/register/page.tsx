@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { getAllMusclesBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-all-muscles-by-session";
-import { container } from "styled-system/patterns";
 
 import { RegisterMuscle } from "./_components/register-muscle";
 
@@ -24,14 +23,14 @@ const Page: NextPage = async (props) => {
   const registeredMuscles = getMusclesResult.value;
 
   return (
-    <main className={container()}>
+    <section>
       <h1>部位を登録する</h1>
       <RegisterMuscle
         traineeId={traineeId}
         registeredMuscles={registeredMuscles}
       />
       <Link href={`/trainees/${traineeId}/muscles`}>部位一覧</Link>
-    </main>
+    </section>
   );
 };
 export default Page;

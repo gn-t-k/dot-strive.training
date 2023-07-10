@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { container } from "styled-system/patterns";
-
 import { RegisterExercise } from "./_components/register-exercise";
 import { getAllExercisesBySession } from "../../_repositories/get-all-exercises-by-session";
 import { getAllMusclesBySession } from "../../_repositories/get-all-muscles-by-session";
@@ -32,7 +30,7 @@ const Page: NextPage = async (props) => {
   const registeredExercises = getExercisesResult.value;
 
   return (
-    <main className={container()}>
+    <section>
       <h1>種目を登録する</h1>
       <RegisterExercise
         traineeId={traineeId}
@@ -40,7 +38,7 @@ const Page: NextPage = async (props) => {
         registeredExercises={registeredExercises}
       />
       <Link href={`/trainees/${traineeId}/exercises`}>種目一覧</Link>
-    </main>
+    </section>
   );
 };
 export default Page;

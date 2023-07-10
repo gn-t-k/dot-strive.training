@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { container, stack } from "styled-system/patterns";
+import { stack } from "styled-system/patterns";
 
 import { DeleteTraining } from "./_components/delete-training";
 import { getTrainingById } from "./_repositories/get-training-by-id";
@@ -33,19 +33,15 @@ const Page: NextPage = async (props) => {
   const training = getTrainingResult.value;
 
   return (
-    <main className={container()}>
-      <section className={stack({ direction: "column" })}>
-        <h1>トレーニング詳細</h1>
-        <TrainingDetail training={training} />
-        <Link href={`/trainees/${traineeId}/trainings/${trainingId}/edit`}>
-          トレーニングを編集する
-        </Link>
-        <DeleteTraining traineeId={traineeId} training={training} />
-        <Link href={`/trainees/${traineeId}/trainings`}>
-          トレーニングページ
-        </Link>
-      </section>
-    </main>
+    <section className={stack({ direction: "column" })}>
+      <h1>トレーニング詳細</h1>
+      <TrainingDetail training={training} />
+      <Link href={`/trainees/${traineeId}/trainings/${trainingId}/edit`}>
+        トレーニングを編集する
+      </Link>
+      <DeleteTraining traineeId={traineeId} training={training} />
+      <Link href={`/trainees/${traineeId}/trainings`}>トレーニング一覧</Link>
+    </section>
   );
 };
 export default Page;
