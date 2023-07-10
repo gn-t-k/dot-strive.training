@@ -10,8 +10,9 @@ import type { Result } from "neverthrow";
 const setIdSchema = z.string().brand("set-id");
 const setSchema = z.object({
   id: setIdSchema,
-  weight: z.number().positive(),
-  repetition: z.number().positive().int(),
+  weight: z.number().nonnegative(),
+  repetition: z.number().int().nonnegative(),
+  order: z.number().int().nonnegative(),
 });
 const recordIdSchema = z.string().brand("record-id");
 const recordSchema = z.object({
@@ -19,6 +20,7 @@ const recordSchema = z.object({
   exercise: exerciseSchema,
   sets: z.array(setSchema),
   memo: z.string(),
+  order: z.number().int().nonnegative(),
 });
 const trainingIdSchema = z.string().brand("training-id");
 const trainingSchema = z.object({

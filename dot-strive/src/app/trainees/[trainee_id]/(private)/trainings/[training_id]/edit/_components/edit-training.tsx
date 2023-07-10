@@ -27,7 +27,7 @@ export const EditTraining: FC<Props> = async (props) => {
     const validateTrainingResult = validateTraining({
       id: props.training.id,
       date: new Date(fieldValues.date).toISOString(),
-      records: fieldValues.records.flatMap((record) => {
+      records: fieldValues.records.flatMap((record, index) => {
         const exercise = props.registeredExercises.find(
           (exercise) => exercise.id === record.exerciseId
         );
@@ -40,14 +40,16 @@ export const EditTraining: FC<Props> = async (props) => {
           {
             id: ulid(),
             exercise,
-            sets: record.sets.map((set) => {
+            sets: record.sets.map((set, index) => {
               return {
                 id: ulid(),
                 weight: Number(set.weight),
                 repetition: Number(set.repetition),
+                order: index + 1,
               };
             }),
             memo: record.memo,
+            order: index + 1,
           },
         ];
       }),
