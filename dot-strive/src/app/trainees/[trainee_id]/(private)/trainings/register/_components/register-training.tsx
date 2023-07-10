@@ -24,16 +24,18 @@ export const RegisterTraining: FC<Props> = async (props) => {
     const result = await registerTraining({
       traineeId: props.traineeId,
       date: fieldValues.date,
-      records: fieldValues.records.map((record) => {
+      records: fieldValues.records.map((record, index) => {
         return {
           exerciseId: record.exerciseId,
-          sets: record.sets.map((set) => {
+          sets: record.sets.map((set, index) => {
             return {
               weight: Number(set.weight),
               repetition: Number(set.repetition),
+              order: index + 1,
             };
           }),
           memo: record.memo,
+          order: index + 1,
         };
       }),
     });

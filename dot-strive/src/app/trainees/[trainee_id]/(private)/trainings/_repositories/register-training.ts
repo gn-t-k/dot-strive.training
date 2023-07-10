@@ -18,8 +18,10 @@ type Props = {
     sets: {
       weight: number;
       repetition: number;
+      order: number;
     }[];
     memo: string;
+    order: number;
   }[];
 };
 export const registerTraining: RegisterTraining = async (props) => {
@@ -56,9 +58,11 @@ export const registerTraining: RegisterTraining = async (props) => {
               id: ulid(),
               weight: set.weight,
               repetition: set.repetition,
+              order: set.order,
             };
           }),
           memo: record.memo,
+          order: record.order,
         },
       ];
     }),

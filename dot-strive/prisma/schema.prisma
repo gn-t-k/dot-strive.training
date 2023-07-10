@@ -119,6 +119,7 @@ model Record {
   trainingId String
   exerciseId String
   memo       String
+  order      Int
 
   sets Set[]
 
@@ -135,6 +136,7 @@ model Set {
   recordId   String
   weight     Float
   repetition Int
+  order      Int
 
   record Record @relation(fields: [recordId], references: [id])
 
