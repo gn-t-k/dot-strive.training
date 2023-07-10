@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { Loading } from "@/app/_components/loading";
-import { container, stack } from "styled-system/patterns";
+import { stack } from "styled-system/patterns";
 
 import { ExerciseDetail } from "./_components/exercise-detail";
 
@@ -18,15 +18,13 @@ const Page: NextPage = (props) => {
   }
 
   return (
-    <main className={container()}>
-      <section className={stack({ direction: "column" })}>
-        <h1>種目詳細</h1>
-        <Suspense fallback={<Loading description="データを取得しています" />}>
-          <ExerciseDetail traineeId={traineeId} exerciseId={exerciseId} />
-        </Suspense>
-        <Link href={`/trainees/${traineeId}/exercises`}>種目一覧</Link>
-      </section>
-    </main>
+    <section className={stack({ direction: "column" })}>
+      <h1>種目詳細</h1>
+      <Suspense fallback={<Loading description="データを取得しています" />}>
+        <ExerciseDetail traineeId={traineeId} exerciseId={exerciseId} />
+      </Suspense>
+      <Link href={`/trainees/${traineeId}/exercises`}>種目一覧</Link>
+    </section>
   );
 };
 export default Page;

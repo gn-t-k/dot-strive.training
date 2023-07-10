@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { container } from "styled-system/patterns";
-
 import { EditTraining } from "./_components/edit-training";
 import { getAllExercisesBySession } from "../../../_repositories/get-all-exercises-by-session";
 import { getTrainingById } from "../_repositories/get-training-by-id";
@@ -39,15 +37,17 @@ const Page: NextPage = async (props) => {
   const registeredExercises = getExercisesResult.value;
 
   return (
-    <main className={container()}>
+    <section>
       <h1>トレーニングを編集する</h1>
       <EditTraining
         traineeId={traineeId}
         training={training}
         registeredExercises={registeredExercises}
       />
-      <Link href={`/trainees/${traineeId}/trainings/${trainingId}`}>戻る</Link>
-    </main>
+      <Link href={`/trainees/${traineeId}/trainings/${trainingId}`}>
+        編集をやめる
+      </Link>
+    </section>
   );
 };
 export default Page;
