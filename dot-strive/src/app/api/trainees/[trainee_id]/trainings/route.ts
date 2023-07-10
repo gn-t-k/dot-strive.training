@@ -104,6 +104,7 @@ export const POST: RouteHandler<Training> = async (req, context) => {
             trainingId: newTraining.id,
             exerciseId: record.exercise.id,
             memo: record.memo,
+            order: record.order,
           })),
         });
 
@@ -114,6 +115,7 @@ export const POST: RouteHandler<Training> = async (req, context) => {
               recordId: record.id,
               weight: set.weight,
               repetition: set.repetition,
+              order: set.order,
             }))
           ),
         });
@@ -165,6 +167,7 @@ export const POST: RouteHandler<Training> = async (req, context) => {
             trainingId: newTraining.id,
             exerciseId: record.exercise.id,
             memo: record.memo,
+            order: record.order,
           })),
         });
 
@@ -175,6 +178,7 @@ export const POST: RouteHandler<Training> = async (req, context) => {
               recordId: record.id,
               weight: set.weight,
               repetition: set.repetition,
+              order: set.order,
             }))
           ),
         });
