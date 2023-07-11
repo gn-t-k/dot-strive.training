@@ -19,7 +19,7 @@ type Props = {
   selected: UTCDateString;
 };
 export const TrainingCalendar: FC<Props> = (props) => {
-  const [{ calendar }, { select }] = useCalendar({
+  const [{ calendar }] = useCalendar({
     today: utcDateStringSchema.parse(new Date().toISOString()),
     selected: props.selected,
   });
