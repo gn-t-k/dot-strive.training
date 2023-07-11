@@ -1,6 +1,7 @@
 "use client";
 
 import * as Popover from "@radix-ui/react-popover";
+import Link from "next/link";
 
 import { EmojiIcon } from "@/app/_components/emoji-icon";
 import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
@@ -101,7 +102,11 @@ export const TrainingCalendar: FC<Props> = (props) => {
                                 {trainings.map((training) => {
                                   return (
                                     <li key={training.id}>
-                                      <TrainingDetail training={training} />
+                                      <Link
+                                        href={`/trainees/${props.traineeId}/trainings/${training.id}`}
+                                      >
+                                        <TrainingDetail training={training} />
+                                      </Link>
                                     </li>
                                   );
                                 })}
