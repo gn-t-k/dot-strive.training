@@ -1,12 +1,13 @@
 "use client";
 
-import Link from "next/link";
+import * as Popover from "@radix-ui/react-popover";
 
 import { EmojiIcon } from "@/app/_components/emoji-icon";
 import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
 import { css } from "styled-system/css";
 import { grid, stack } from "styled-system/patterns";
 
+import { TrainingDetail } from "../../../../_components/training-detail";
 import { useCalendar } from "../_hooks/use-calendar";
 
 import type { Training } from "@/app/_schemas/training";
@@ -35,7 +36,7 @@ export const TrainingCalendar: FC<Props> = (props) => {
               key={`week-${index}`}
             >
               {week.map((day) => {
-                const isTrainingDay = props.trainings.some((training) => {
+                const trainings = props.trainings.filter((training) => {
                   const date = new Date(training.date);
 
                   return (
@@ -44,34 +45,73 @@ export const TrainingCalendar: FC<Props> = (props) => {
                     date.getDate() === day.date
                   );
                 });
+                const isTrainingDay = trainings.length > 0;
+
                 return (
-                  <Link
-                    href={`/trainees/${props.traineeId}/trainings/dates/${day.year}/${day.month}/${day.date}`}
-                    key={day.date}
-                  >
-                    <div
-                      role="cell"
-                      className={css({
-                        display: "flex",
-                        justifyContent: "center",
-                      })}
-                    >
-                      <div className={stack({ direction: "column", gap: 0 })}>
-                        <span className={css({ textAlign: "center" })}>
-                          {day.date}
-                        </span>
-                        <EmojiIcon
-                          label={
-                            isTrainingDay
-                              ? "トレーニングあり"
-                              : "トレーニングなし"
-                          }
-                          emoji={isTrainingDay ? "🟩" : "⬜"}
-                          size="small"
-                        />
-                      </div>
-                    </div>
-                  </Link>
+                  <div role="cell" key={day.date}>
+                    <Popover.Root>
+                      <Popover.Trigger asChild>
+                        <div
+                          className={stack({
+                            direction: "column",
+                            justify: "center",
+                            gap: 0,
+                            textAlign: "center",
+                          })}
+                        >
+                          <span
+                            className={css({
+                              color: day.isSelectedMonth ? "black" : "gray.300",
+                              fontWeight: day.isToday ? "bold" : "normal",
+                            })}
+                          >
+                            {day.date}
+                          </span>
+                          <div
+                            className={css({
+                              display: "flex",
+                              justifyContent: "center",
+                            })}
+                          >
+                            <EmojiIcon
+                              label={
+                                isTrainingDay
+                                  ? "トレーニングあり"
+                                  : "トレーニングなし"
+                              }
+                              emoji={isTrainingDay ? "🟩" : "⬜"}
+                              size="small"
+                            />
+                          </div>
+                        </div>
+                      </Popover.Trigger>
+                      <Popover.Portal>
+                        <Popover.Content>
+                          {isTrainingDay && (
+                            <div
+                              className={css({
+                                bg: "white",
+                                w: "300px",
+                                h: "300px",
+                                overflow: "auto",
+                                border: "1px solid",
+                              })}
+                            >
+                              <ul className={stack({ direction: "column" })}>
+                                {trainings.map((training) => {
+                                  return (
+                                    <li key={training.id}>
+                                      <TrainingDetail training={training} />
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            </div>
+                          )}
+                        </Popover.Content>
+                      </Popover.Portal>
+                    </Popover.Root>
+                  </div>
                 );
               })}
             </div>

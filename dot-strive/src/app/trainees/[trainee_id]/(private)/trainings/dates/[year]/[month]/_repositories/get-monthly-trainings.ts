@@ -1,4 +1,4 @@
-import { endOfMonth } from "date-fns";
+import { addDays, endOfMonth, subDays } from "date-fns";
 import { err, ok } from "neverthrow";
 
 import { validateTraining } from "@/app/_schemas/training";
@@ -16,11 +16,13 @@ type Props = {
 export const getMonthlyTrainings: GetMonthlyTrainings = async (props) => {
   const startDate = new Date(`${props.year}-${props.month}`);
   const endDate = endOfMonth(startDate);
+  const bufferedStartDate = subDays(startDate, 7);
+  const bufferedEndDate = addDays(endDate, 7);
 
   const response = await getFetcher()(
     `/api/trainees/${props.traineeId}/trainings/dates/${encodeURIComponent(
-      startDate.toISOString()
-    )}/${encodeURIComponent(endDate.toISOString())}`
+      bufferedStartDate.toISOString()
+    )}/${encodeURIComponent(bufferedEndDate.toISOString())}`
   );
   const data = await response.json();
 

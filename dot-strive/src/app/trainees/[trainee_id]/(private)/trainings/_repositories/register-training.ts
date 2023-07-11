@@ -1,3 +1,4 @@
+import { setDate, setMonth, setYear } from "date-fns";
 import { err } from "neverthrow";
 import { ulid } from "ulid";
 
@@ -37,9 +38,18 @@ export const registerTraining: RegisterTraining = async (props) => {
   }
   const registeredExercises = getExercisesResult.value;
 
+  const inputDate = new Date(props.date);
+  const [year, month, date] = [
+    inputDate.getFullYear(),
+    inputDate.getMonth(),
+    inputDate.getDate(),
+  ];
+  const localDate = new Date();
+  const combinedDate = setDate(setMonth(setYear(localDate, year), month), date);
+
   const validateTrainingResult = validateTraining({
     id: ulid(),
-    date: new Date(props.date).toISOString(),
+    date: new Date(combinedDate).toISOString(),
     records: props.records.flatMap((record) => {
       const exercise = registeredExercises.find(
         (exercise) => exercise.id === record.exerciseId
