@@ -23,7 +23,7 @@ const Page: NextPage = async () => {
     redirect("/trainees/onboarding" satisfies Route);
   }
 
-  const to = `/trainees/${trainee.id}` as const;
+  const to = `/trainees/${trainee.id}/trainings` as const;
   redirect(to satisfies Route<typeof to>);
 };
 export default Page;
