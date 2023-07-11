@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { TrainingDetail } from "@/app/trainees/[trainee_id]/(private)/trainings/_components/training-detail";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
@@ -33,7 +35,11 @@ export const DailyTrainingList: FC<Props> = async (props) => {
 
         return (
           <li key={training.id} className={styles}>
-            <TrainingDetail training={training} />
+            <Link
+              href={`/trainees/${props.traineeId}/trainings/${training.id}`}
+            >
+              <TrainingDetail training={training} />
+            </Link>
           </li>
         );
       })}
