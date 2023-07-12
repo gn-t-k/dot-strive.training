@@ -40,11 +40,13 @@ type UnvalidatedRecord = {
   exercise: UnvalidatedExercise;
   sets: UnvalidatedSet[];
   memo: string;
+  order: number;
 };
 type UnvalidatedSet = {
   id: string;
   weight: number;
   repetition: number;
+  order: number;
 };
 export const validateTraining = (
   data: UnvalidatedTraining
