@@ -165,11 +165,13 @@ export const DELETE: RouteHandler<Training> = async (_req, context) => {
         id: record.id,
         memo: record.memo,
         exercise: record.exercise,
+        order: record.order,
         sets: record.sets.map((set) => {
           return {
             id: set.id,
             weight: set.weight,
             repetition: set.repetition,
+            order: set.order,
           };
         }),
       };
