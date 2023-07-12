@@ -4,7 +4,6 @@ import { getServerSession } from "next-auth";
 import { GlobalNavigation } from "@/app/_components/global-navigation";
 import { nextAuthOptions } from "@/app/_libs/next-auth/options";
 import { prisma } from "@/app/_libs/prisma/client";
-import { css, cx } from "styled-system/css";
 import { container } from "styled-system/patterns";
 
 import type { Layout } from "@/app/_types/layout";
@@ -37,9 +36,7 @@ const PrivateLayout: Layout = async ({ children, params }) => {
 
   return (
     <>
-      <main className={cx(container(), css({ minH: "100dvh" }))}>
-        {children}
-      </main>
+      <main className={container({ minH: "100dvh" })}>{children}</main>
       <GlobalNavigation />
     </>
   );
