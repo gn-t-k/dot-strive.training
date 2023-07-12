@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { Loading } from "@/app/_components/loading";
+import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
 import { MonthlyTrainingList } from "./_components/monthly-training-list";
@@ -33,13 +34,10 @@ const Page: NextPage = (props) => {
 
   return (
     <section className={stack({ direction: "column" })}>
-      <h1>
+      <h1 className={css({ textAlign: "center" })}>
         {year}年{month}月のトレーニング一覧
       </h1>
-      <Link href={`/trainees/${traineeId}/trainings/register`}>
-        トレーニングを登録する
-      </Link>
-      <div className={stack({ direction: "row" })}>
+      <div className={stack({ direction: "row", justify: "space-between" })}>
         <Link
           href={`/trainees/${traineeId}/trainings/dates/${prevMonthYear}/${prevMonthMonth}`}
         >

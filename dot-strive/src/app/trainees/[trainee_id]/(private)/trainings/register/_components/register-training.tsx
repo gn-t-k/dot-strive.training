@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { format } from "date-fns";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { useToast } from "@/app/_hooks/use-toast";
 import { TrainingForm } from "@/app/trainees/[trainee_id]/(private)/trainings/_components/training-form";
@@ -8,6 +9,7 @@ import { TrainingForm } from "@/app/trainees/[trainee_id]/(private)/trainings/_c
 import { registerTraining } from "../../_repositories/register-training";
 
 import type { Exercise } from "@/app/_schemas/exercise";
+import type { TrainingField } from "@/app/trainees/[trainee_id]/(private)/trainings/_components/training-form";
 import type { ComponentProps, FC } from "react";
 
 type Props = {
@@ -17,6 +19,8 @@ type Props = {
 export const RegisterTraining: FC<Props> = async (props) => {
   const router = useRouter();
   const { renderToast } = useToast();
+  const searchParams = useSearchParams();
+  const date = searchParams.get("date");
 
   const submitTraining: ComponentProps<
     typeof TrainingForm
@@ -54,6 +58,24 @@ export const RegisterTraining: FC<Props> = async (props) => {
     );
     router.push(`/trainees/${props.traineeId}/trainings`);
   };
+  const defaultValues =
+    date && !isNaN(Date.parse(date))
+      ? ({
+          date: format(new Date(date), "yyyy-MM-dd"),
+          records: [
+            {
+              exerciseId: "",
+              sets: [
+                {
+                  weight: "",
+                  repetition: "",
+                },
+              ],
+              memo: "",
+            },
+          ],
+        } satisfies TrainingField)
+      : undefined;
 
   return (
     <TrainingForm
@@ -61,6 +83,7 @@ export const RegisterTraining: FC<Props> = async (props) => {
       registeredExercises={props.registeredExercises}
       traineeId={props.traineeId}
       submitTraining={submitTraining}
+      defaultValues={defaultValues}
     />
   );
 };

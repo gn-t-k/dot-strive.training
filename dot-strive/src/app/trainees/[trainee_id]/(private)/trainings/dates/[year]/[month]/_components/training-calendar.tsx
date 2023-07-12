@@ -88,31 +88,40 @@ export const TrainingCalendar: FC<Props> = (props) => {
                       </Popover.Trigger>
                       <Popover.Portal>
                         <Popover.Content>
-                          {isTrainingDay && (
-                            <div
-                              className={css({
-                                bg: "white",
-                                w: "300px",
-                                h: "300px",
-                                overflow: "auto",
-                                border: "1px solid",
+                          <div
+                            className={stack({
+                              direction: "column",
+                              gap: 0,
+                              bg: "white",
+                              w: "300px",
+                              maxH: "300px",
+                              overflow: "auto",
+                              border: "1px solid",
+                            })}
+                          >
+                            <ul className={stack({ direction: "column" })}>
+                              {trainings.map((training) => {
+                                return (
+                                  <li key={training.id}>
+                                    <Link
+                                      href={`/trainees/${props.traineeId}/trainings/${training.id}`}
+                                    >
+                                      <TrainingDetail training={training} />
+                                    </Link>
+                                  </li>
+                                );
                               })}
+                            </ul>
+                            <Link
+                              href={`/trainees/${props.traineeId}/trainings/register?date=${day.year}-${day.month}-${day.date}`}
+                              className={css({ textAlign: "center" })}
                             >
-                              <ul className={stack({ direction: "column" })}>
-                                {trainings.map((training) => {
-                                  return (
-                                    <li key={training.id}>
-                                      <Link
-                                        href={`/trainees/${props.traineeId}/trainings/${training.id}`}
-                                      >
-                                        <TrainingDetail training={training} />
-                                      </Link>
-                                    </li>
-                                  );
-                                })}
-                              </ul>
-                            </div>
-                          )}
+                              {trainings.length > 0
+                                ? "さらに"
+                                : `${day.year}/${day.month}/${day.date}の`}
+                              トレーニングを登録する
+                            </Link>
+                          </div>
                         </Popover.Content>
                       </Popover.Portal>
                     </Popover.Root>

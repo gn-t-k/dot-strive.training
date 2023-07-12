@@ -10,7 +10,7 @@ import { Input } from "@/app/_components/input";
 import { Select } from "@/app/_components/select";
 import { TextArea } from "@/app/_components/text-area";
 import { useForm } from "@/app/_libs/react-hook-form/use-form";
-import { css, cx } from "styled-system/css";
+import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
 import type { Exercise } from "@/app/_schemas/exercise";
@@ -78,16 +78,15 @@ export const TrainingForm: FC<Props> = (props) => {
         <p>記録</p>
         {fields.map((record, index) => {
           const onClickRemoveRecord = onClickRemoveRecordHOF(index);
-          const styles = css({
-            border: "1px solid",
-          });
 
           return (
             <div
-              className={cx(
-                stack({ direction: "column", p: 4, gap: 12 }),
-                styles
-              )}
+              className={stack({
+                direction: "column",
+                p: 4,
+                gap: 12,
+                border: "1px solid",
+              })}
               key={record.id}
             >
               <RecordForm
@@ -182,7 +181,7 @@ const RecordForm: FC<RecordFormProps> = (props) => {
                 register={props.register}
               />
               <Button onClick={onClickRemoveSet} disabled={fields.length < 2}>
-                セットを削除
+                🗑
               </Button>
             </div>
           );
