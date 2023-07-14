@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
+import { useState, type FC, type MouseEventHandler } from "react";
 import { useFieldArray } from "react-hook-form";
 import { z } from "zod";
 
@@ -14,7 +15,6 @@ import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
 import type { Exercise } from "@/app/_schemas/exercise";
-import type { FC, MouseEventHandler } from "react";
 import type { SubmitHandler, UseFormReturn } from "react-hook-form";
 
 type Props = {
@@ -26,6 +26,7 @@ type Props = {
 };
 type SubmitTraining = (fieldValues: TrainingField) => Promise<void>;
 export const TrainingForm: FC<Props> = (props) => {
+  const [isLoading, setIsLoading] = useState(false);
   const {
     handleSubmit,
     formState: { errors },
@@ -38,7 +39,9 @@ export const TrainingForm: FC<Props> = (props) => {
   });
 
   const onSubmit: SubmitHandler<TrainingField> = async (fieldValues) => {
+    setIsLoading(true);
     await props.submitTraining(fieldValues);
+    setIsLoading(false);
   };
   const onClickAddExercise: MouseEventHandler<HTMLButtonElement> = (event) => {
     event.preventDefault();
@@ -110,7 +113,7 @@ export const TrainingForm: FC<Props> = (props) => {
           <p className={css({ color: "red" })}>{errors.records.message}</p>
         )}
       </div>
-      <Button type="submit" visual="positive">
+      <Button type="submit" disabled={isLoading} visual="positive">
         {props.submitButtonLabel}
       </Button>
     </form>

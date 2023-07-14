@@ -17,7 +17,7 @@ type Props = {
   training: Training;
   registeredExercises: Exercise[];
 };
-export const EditTraining: FC<Props> = async (props) => {
+export const EditTraining: FC<Props> = (props) => {
   const router = useRouter();
   const { renderToast } = useToast();
 

@@ -1,49 +1,25 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { DeleteTrainingClient } from "./delete-training-client";
+import { getTrainingById } from "../_repositories/get-training-by-id";
 
-import { useToast } from "@/app/_hooks/use-toast";
-
-import { DeleteTrainingButton } from "./delete-training-button";
-
-import type { Training } from "@/app/_schemas/training";
-import type { ComponentProps, FC } from "react";
+import type { FC } from "react";
 
 type Props = {
   traineeId: string;
-  training: Training;
+  trainingId: string;
 };
-export const DeleteTraining: FC<Props> = (props) => {
-  const router = useRouter();
-  const { renderToast } = useToast();
-  const afterDelete = useCallback<
-    ComponentProps<typeof DeleteTrainingButton>["afterDelete"]
-  >(
-    (result) => {
-      renderToast(
-        result.isOk()
-          ? {
-              title: "トレーニングを削除しました",
-              variant: "success",
-            }
-          : {
-              title: "トレーニングの削除に失敗しました",
-              variant: "error",
-            }
-      );
-      if (result.isOk()) {
-        router.push(`/trainees/${props.traineeId}/trainings`);
-      }
-    },
-    [props.traineeId, renderToast, router]
-  );
+export const DeleteTraining: FC<Props> = async (props) => {
+  const getTrainingResult = await getTrainingById({
+    traineeId: props.traineeId,
+    trainingId: props.trainingId,
+  });
+  if (getTrainingResult.isErr()) {
+    return <p>データの取得に失敗しました</p>;
+  }
+  const training = getTrainingResult.value;
 
   return (
-    <DeleteTrainingButton
-      traineeId={props.traineeId}
-      training={props.training}
-      afterDelete={afterDelete}
-    />
+    <DeleteTrainingClient traineeId={props.traineeId} training={training} />
   );
 };

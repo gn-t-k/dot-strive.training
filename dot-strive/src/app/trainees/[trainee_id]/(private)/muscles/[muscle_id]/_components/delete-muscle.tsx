@@ -1,5 +1,4 @@
-import { stack } from "styled-system/patterns";
-
+import { DeleteMuscleClient } from "./delete-muscle-client";
 import { getMuscleById } from "../_repositories/get-muscle-by-id";
 
 import type { FC } from "react";
@@ -8,7 +7,7 @@ type Props = {
   traineeId: string;
   muscleId: string;
 };
-export const MuscleDetail: FC<Props> = async (props) => {
+export const DeleteMuscle: FC<Props> = async (props) => {
   const getMuscleResult = await getMuscleById({
     traineeId: props.traineeId,
     muscleId: props.muscleId,
@@ -18,9 +17,5 @@ export const MuscleDetail: FC<Props> = async (props) => {
   }
   const muscle = getMuscleResult.value;
 
-  return (
-    <div className={stack({ direction: "column" })}>
-      <p>{muscle.name}</p>
-    </div>
-  );
+  return <DeleteMuscleClient traineeId={props.traineeId} muscle={muscle} />;
 };

@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
-import { TrainingDetail } from "@/app/trainees/[trainee_id]/(private)/trainings/_components/training-detail";
+import { TrainingDetailView } from "@/app/trainees/[trainee_id]/(private)/trainings/_components/training-detail";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
@@ -51,7 +51,7 @@ export const MonthlyTrainingList: FC<Props> = async (props) => {
                 <Link
                   href={`/trainees/${props.traineeId}/trainings/${training.id}`}
                 >
-                  <TrainingDetail training={training} />
+                  <TrainingDetailView training={training} />
                 </Link>
               </li>
             );
