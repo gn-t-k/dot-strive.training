@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, type FC } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -8,7 +9,6 @@ import { stack } from "styled-system/patterns";
 
 import type { Exercise } from "@/app/_schemas/exercise";
 import type { Muscle } from "@/app/_schemas/muscle";
-import type { FC } from "react";
 import type { SubmitHandler, UseFormReturn } from "react-hook-form";
 
 type Props = {
@@ -20,6 +20,7 @@ type Props = {
 };
 export type SubmitExercise = (fieldValues: ExerciseField) => Promise<void>;
 export const ExerciseForm: FC<Props> = (props) => {
+  const [isLoading, setIsLoading] = useState(false);
   const {
     handleSubmit,
     register,
@@ -27,12 +28,15 @@ export const ExerciseForm: FC<Props> = (props) => {
     setError,
   } = useExerciseForm(props.defaultValues);
   const onSubmit: SubmitHandler<ExerciseField> = async (fieldValues) => {
+    setIsLoading(true);
+
     if (
       (!props.defaultValues || props.defaultValues.name !== fieldValues.name) &&
       props.registeredExercises.some(
         (exercise) => exercise.name === fieldValues.name
       )
     ) {
+      setIsLoading(false);
       setError("name", {
         type: "exerciseNameConflictError",
         message: `種目「${fieldValues.name}」はすでに登録されています`,
@@ -42,6 +46,7 @@ export const ExerciseForm: FC<Props> = (props) => {
     }
 
     await props.submitExercise(fieldValues);
+    setIsLoading(false);
   };
 
   return (
@@ -72,7 +77,7 @@ export const ExerciseForm: FC<Props> = (props) => {
           })}
         </ul>
         {!!errors.targets && <p>{errors.targets.message}</p>}
-        <Button type="submit" visual="positive">
+        <Button type="submit" disabled={isLoading} visual="positive">
           {props.submitButtonLabel}
         </Button>
       </div>
@@ -89,7 +94,7 @@ export type ExerciseField = z.infer<typeof exerciseFieldSchema>;
 type UseExerciseForm = (
   defaultValue?: ExerciseField
 ) => UseFormReturn<ExerciseField>;
-export const useExerciseForm: UseExerciseForm = (defaultValue) => {
+const useExerciseForm: UseExerciseForm = (defaultValue) => {
   return useForm<ExerciseField>({
     resolver: zodResolver(exerciseFieldSchema),
     defaultValues: defaultValue ?? {
