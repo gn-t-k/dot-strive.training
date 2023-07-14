@@ -16,7 +16,7 @@ type Props = {
   traineeId: string;
   registeredExercises: Exercise[];
 };
-export const RegisterTraining: FC<Props> = async (props) => {
+export const RegisterTraining: FC<Props> = (props) => {
   const router = useRouter();
   const { renderToast } = useToast();
   const searchParams = useSearchParams();

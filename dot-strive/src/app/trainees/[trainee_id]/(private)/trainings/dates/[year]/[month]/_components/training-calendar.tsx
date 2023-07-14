@@ -8,7 +8,7 @@ import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
 import { css } from "styled-system/css";
 import { grid, stack } from "styled-system/patterns";
 
-import { TrainingDetail } from "../../../../_components/training-detail";
+import { TrainingDetailView } from "../../../../_components/training-detail";
 import { useCalendar } from "../_hooks/use-calendar";
 
 import type { Training } from "@/app/_schemas/training";
@@ -106,7 +106,7 @@ export const TrainingCalendar: FC<Props> = (props) => {
                                     <Link
                                       href={`/trainees/${props.traineeId}/trainings/${training.id}`}
                                     >
-                                      <TrainingDetail training={training} />
+                                      <TrainingDetailView training={training} />
                                     </Link>
                                   </li>
                                 );
