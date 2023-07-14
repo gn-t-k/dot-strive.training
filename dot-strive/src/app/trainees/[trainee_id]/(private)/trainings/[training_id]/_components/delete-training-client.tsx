@@ -1,24 +1,26 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/app/_components/button";
+import { useToast } from "@/app/_hooks/use-toast";
 import { stack } from "styled-system/patterns";
 
 import { deleteTraining } from "../_repositories/delete-training";
 
 import type { Training } from "@/app/_schemas/training";
-import type { Result } from "neverthrow";
 import type { FC, MouseEventHandler } from "react";
 
 type Props = {
   traineeId: string;
   training: Training;
-  afterDelete: AfterDelete;
 };
-type AfterDelete = (result: Result<Training, Error>) => void;
-export const DeleteTrainingButton: FC<Props> = (props) => {
+export const DeleteTrainingClient: FC<Props> = (props) => {
+  const router = useRouter();
+  const { renderToast } = useToast();
   const [isConfirming, setIsConfirming] = useState(false);
+
   const onClickDelete: MouseEventHandler<HTMLButtonElement> = (event) => {
     event.preventDefault();
 
@@ -34,7 +36,21 @@ export const DeleteTrainingButton: FC<Props> = (props) => {
       trainingId: props.training.id,
     });
     setIsConfirming(false);
-    props.afterDelete(result);
+
+    renderToast(
+      result.isOk()
+        ? {
+            title: "トレーニングを削除しました",
+            variant: "success",
+          }
+        : {
+            title: "トレーニングの削除に失敗しました",
+            variant: "error",
+          }
+    );
+    if (result.isOk()) {
+      router.push(`/trainees/${props.traineeId}/trainings`);
+    }
   };
   const onClickCancel: MouseEventHandler<HTMLButtonElement> = (event) => {
     event.preventDefault();

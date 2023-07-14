@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
 
-import { Loading } from "@/app/_components/loading";
 import { getAllExercisesBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-all-exercises-by-session";
 import { stack } from "styled-system/patterns";
 
@@ -29,12 +27,10 @@ const Page: NextPage = async (props) => {
   return (
     <section className={stack({ direction: "column" })}>
       <h1>トレーニングを登録</h1>
-      <Suspense fallback={<Loading description="種目データを取得しています" />}>
-        <RegisterTraining
-          traineeId={traineeId}
-          registeredExercises={registeredExercises}
-        />
-      </Suspense>
+      <RegisterTraining
+        traineeId={traineeId}
+        registeredExercises={registeredExercises}
+      />
       <Link href={`/trainees/${traineeId}/trainings`}>トレーニング一覧</Link>
     </section>
   );

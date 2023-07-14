@@ -1,7 +1,8 @@
-import { getAllExercisesBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-all-exercises-by-session";
-import { getAllMusclesBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-all-muscles-by-session";
+import Link from "next/link";
 
-import { UpdateExercise } from "./update-exercise";
+import { stack } from "styled-system/patterns";
+
+import { getExerciseById } from "../_repositories/get-exercise-by-id";
 
 import type { FC } from "react";
 
@@ -10,34 +11,29 @@ type Props = {
   exerciseId: string;
 };
 export const ExerciseDetail: FC<Props> = async (props) => {
-  const [getExercisesResult, getMusclesResult] = await Promise.all([
-    getAllExercisesBySession({
-      traineeId: props.traineeId,
-    }),
-    getAllMusclesBySession({
-      traineeId: props.traineeId,
-    }),
-  ]);
-
-  if (getExercisesResult.isErr() || getMusclesResult.isErr()) {
-    return <p>データの取得に失敗しました</p>;
+  const getExerciseResult = await getExerciseById({
+    traineeId: props.traineeId,
+    exerciseId: props.exerciseId,
+  });
+  if (getExerciseResult.isErr()) {
+    return <p>種目データの取得に失敗しました</p>;
   }
-  const registeredExercises = getExercisesResult.value;
-  const registeredMuscles = getMusclesResult.value;
-
-  const exercise = registeredExercises.find(
-    (exercise) => exercise.id === props.exerciseId
-  );
-  if (!exercise) {
-    return <p>種目の取得に失敗しました</p>;
-  }
+  const exercise = getExerciseResult.value;
 
   return (
-    <UpdateExercise
-      traineeId={props.traineeId}
-      exercise={exercise}
-      registeredMuscles={registeredMuscles}
-      registeredExercises={registeredExercises}
-    />
+    <div className={stack({ direction: "column" })}>
+      <p>{exercise.name}</p>
+      <ul className={stack({ direction: "column" })}>
+        {exercise.targets.map((target) => {
+          return (
+            <li key={target.id}>
+              <Link href={`/trainees/${props.traineeId}/muscles/${target.id}`}>
+                {target.name}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 };

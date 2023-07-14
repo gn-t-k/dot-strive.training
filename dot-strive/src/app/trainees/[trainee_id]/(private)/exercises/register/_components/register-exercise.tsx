@@ -5,9 +5,10 @@ import { useCallback } from "react";
 
 import { useToast } from "@/app/_hooks/use-toast";
 
-import { RegisterExerciseForm } from "./register-exersise-form";
+import { ExerciseForm } from "../../_components/exercise-form";
+import { registerExercise } from "../../_repositories/register-exercise";
 
-import type { AfterRegister } from "./register-exersise-form";
+import type { SubmitExercise } from "../../_components/exercise-form";
 import type { Exercise } from "@/app/_schemas/exercise";
 import type { Muscle } from "@/app/_schemas/muscle";
 import type { FC } from "react";
@@ -20,8 +21,14 @@ type Props = {
 export const RegisterExercise: FC<Props> = (props) => {
   const router = useRouter();
   const { renderToast } = useToast();
-  const afterRegister = useCallback<AfterRegister>(
-    (fieldValues, result) => {
+  const submitExercise = useCallback<SubmitExercise>(
+    async (fieldValues) => {
+      const result = await registerExercise({
+        traineeId: props.traineeId,
+        exerciseName: fieldValues.name,
+        targetIds: fieldValues.targets,
+      });
+
       renderToast(
         result.isOk()
           ? {
@@ -41,11 +48,11 @@ export const RegisterExercise: FC<Props> = (props) => {
   );
 
   return (
-    <RegisterExerciseForm
-      traineeId={props.traineeId}
+    <ExerciseForm
+      submitButtonLabel="種目を登録する"
       registeredMuscles={props.registeredMuscles}
       registeredExercises={props.registeredExercises}
-      afterRegister={afterRegister}
+      submitExercise={submitExercise}
     />
   );
 };

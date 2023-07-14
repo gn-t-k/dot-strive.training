@@ -1,13 +1,32 @@
 import { LocalDate } from "@/app/_components/local-date";
 import { stack } from "styled-system/patterns";
 
+import { getTrainingById } from "../[training_id]/_repositories/get-training-by-id";
+
 import type { Training } from "@/app/_schemas/training";
 import type { FC } from "react";
 
 type Props = {
+  traineeId: string;
+  trainingId: string;
+};
+export const TrainingDetail: FC<Props> = async (props) => {
+  const getTrainingResult = await getTrainingById({
+    traineeId: props.traineeId,
+    trainingId: props.trainingId,
+  });
+  if (getTrainingResult.isErr()) {
+    return <p>データの取得に失敗しました</p>;
+  }
+  const training = getTrainingResult.value;
+
+  return <TrainingDetailView training={training} />;
+};
+
+type TrainingDetailViewProps = {
   training: Training;
 };
-export const TrainingDetail: FC<Props> = (props) => {
+export const TrainingDetailView: FC<TrainingDetailViewProps> = (props) => {
   return (
     <div className={stack({ direction: "column", p: 4 })}>
       <LocalDate utcDateString={props.training.date} />
