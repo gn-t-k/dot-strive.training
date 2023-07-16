@@ -66,6 +66,6 @@ export const DeleteExerciseClient: FC<Props> = (props) => {
       <Button onClick={onClickCancel}>キャンセル</Button>
     </div>
   ) : (
-    <Button onClick={onClickDelete}>削除する</Button>
+    <Button onClick={onClickDelete}>{props.exercise.name}を削除する</Button>
   );
 };
