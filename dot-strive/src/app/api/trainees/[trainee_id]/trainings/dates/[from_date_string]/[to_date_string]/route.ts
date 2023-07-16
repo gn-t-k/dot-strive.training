@@ -63,9 +63,19 @@ export const GET: RouteHandler<Training[]> = async (_req, context) => {
                   targets: true,
                 },
               },
-              sets: true,
+              sets: {
+                orderBy: {
+                  order: "asc",
+                },
+              },
+            },
+            orderBy: {
+              order: "asc",
             },
           },
+        },
+        orderBy: {
+          date: "asc",
         },
       },
     },

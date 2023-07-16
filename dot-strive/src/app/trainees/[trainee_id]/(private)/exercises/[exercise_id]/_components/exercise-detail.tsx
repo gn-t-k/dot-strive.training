@@ -23,7 +23,7 @@ export const ExerciseDetail: FC<Props> = async (props) => {
   return (
     <div className={stack({ direction: "column" })}>
       <p>{exercise.name}</p>
-      <ul className={stack({ direction: "column" })}>
+      <ul className={stack({ direction: "column", pl: 4 })}>
         {exercise.targets.map((target) => {
           return (
             <li key={target.id}>

@@ -60,6 +60,8 @@ export const GET: RouteHandler<Training[]> = async (req, context) => {
             },
           },
         },
+        orderBy: { date: "desc" },
+        take: 10,
       },
     },
   });

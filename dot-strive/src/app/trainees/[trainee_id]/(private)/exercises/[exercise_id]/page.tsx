@@ -7,6 +7,7 @@ import { stack } from "styled-system/patterns";
 
 import { DeleteExercise } from "./_components/delete-exercise";
 import { ExerciseDetail } from "./_components/exercise-detail";
+import { ExerciseRecords } from "../../_components/exercise-records";
 
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
@@ -31,6 +32,7 @@ const Page: NextPage = (props) => {
         <Link href={`/trainees/${traineeId}/exercises/${exerciseId}/edit`}>
           種目を編集する
         </Link>
+        <ExerciseRecords traineeId={traineeId} exerciseId={exerciseId} />
         <DeleteExercise traineeId={traineeId} exerciseId={exerciseId} />
       </Suspense>
       <Link href={`/trainees/${traineeId}/exercises`}>種目一覧</Link>
