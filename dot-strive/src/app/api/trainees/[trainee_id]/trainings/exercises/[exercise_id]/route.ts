@@ -8,7 +8,7 @@ import { validateTraining } from "@/app/_schemas/training";
 import type { Training } from "@/app/_schemas/training";
 import type { RouteHandler } from "@/app/api/_types/route-handler";
 
-export const GET: RouteHandler<Training[]> = async (_req, context) => {
+export const GET: RouteHandler<Training[]> = async (req, context) => {
   const session = await getServerSession(nextAuthOptions);
   if (!session?.user.id) {
     return NextResponse.json(
@@ -20,7 +20,6 @@ export const GET: RouteHandler<Training[]> = async (_req, context) => {
       }
     );
   }
-
   const traineeId = context?.params?.["trainee_id"];
   if (!traineeId) {
     return NextResponse.json(
@@ -28,17 +27,10 @@ export const GET: RouteHandler<Training[]> = async (_req, context) => {
       { status: 400 }
     );
   }
-  const fromDateString = context?.params?.["from_date_string"];
-  if (!fromDateString || isNaN(Date.parse(fromDateString))) {
+  const exerciseId = context?.params?.["exercise_id"];
+  if (!exerciseId) {
     return NextResponse.json(
-      { error: "from-date-stringが適切に指定されていません" },
-      { status: 400 }
-    );
-  }
-  const toDateString = context?.params?.["to_date_string"];
-  if (!toDateString || isNaN(Date.parse(toDateString))) {
-    return NextResponse.json(
-      { error: "to-date-stringが適切に指定されていません" },
+      { error: "exercise-idが指定されていません" },
       { status: 400 }
     );
   }
@@ -50,9 +42,10 @@ export const GET: RouteHandler<Training[]> = async (_req, context) => {
     include: {
       trainings: {
         where: {
-          date: {
-            gte: new Date(fromDateString),
-            lte: new Date(toDateString),
+          records: {
+            some: {
+              exerciseId,
+            },
           },
         },
         include: {
@@ -63,24 +56,15 @@ export const GET: RouteHandler<Training[]> = async (_req, context) => {
                   targets: true,
                 },
               },
-              sets: {
-                orderBy: {
-                  order: "asc",
-                },
-              },
-            },
-            orderBy: {
-              order: "asc",
+              sets: true,
             },
           },
         },
-        orderBy: {
-          date: "asc",
-        },
+        orderBy: { date: "desc" },
+        take: 10,
       },
     },
   });
-
   if (!data || data.authUserId !== session.user.id) {
     return NextResponse.json(
       { error: "trainingsを取得できませんでした" },

@@ -29,6 +29,7 @@ const trainingSchema = z.object({
   date: utcDateStringSchema,
 });
 export type Training = z.infer<typeof trainingSchema>;
+export type Record = z.infer<typeof recordSchema>;
 
 type UnvalidatedTraining = {
   id: string;
