@@ -50,6 +50,9 @@ export const GET: RouteHandler<Training[]> = async (req, context) => {
         },
         include: {
           records: {
+            where: {
+              exerciseId,
+            },
             include: {
               exercise: {
                 include: {
