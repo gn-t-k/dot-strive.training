@@ -1,8 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import * as Popover from "@radix-ui/react-popover";
 import { format } from "date-fns";
-import { useState, type FC, type MouseEventHandler } from "react";
+import { useState, type FC, type MouseEventHandler, Suspense } from "react";
 import { useFieldArray } from "react-hook-form";
 import { z } from "zod";
 
@@ -13,6 +14,8 @@ import { TextArea } from "@/app/_components/text-area";
 import { useForm } from "@/app/_libs/react-hook-form/use-form";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
+
+import { ExerciseInformation } from "./exercise-information";
 
 import type { Exercise } from "@/app/_schemas/exercise";
 import type { SubmitHandler, UseFormReturn } from "react-hook-form";
@@ -32,6 +35,7 @@ export const TrainingForm: FC<Props> = (props) => {
     formState: { errors },
     register,
     control,
+    watch,
   } = useTrainingForm(props.defaultValues);
   const { fields, append, remove } = useFieldArray({
     control: control,
@@ -93,10 +97,12 @@ export const TrainingForm: FC<Props> = (props) => {
               key={record.id}
             >
               <RecordForm
+                traineeId={props.traineeId}
                 control={control}
                 recordIndex={index}
                 register={register}
                 errors={errors}
+                watch={watch}
                 registeredExercises={props.registeredExercises}
               />
               <Button
@@ -121,17 +127,26 @@ export const TrainingForm: FC<Props> = (props) => {
 };
 
 type RecordFormProps = {
+  traineeId: string;
   recordIndex: number;
   registeredExercises: Exercise[];
   control: UseFormReturn<TrainingField>["control"];
   register: UseFormReturn<TrainingField>["register"];
   errors: UseFormReturn<TrainingField>["formState"]["errors"];
+  watch: UseFormReturn<TrainingField>["watch"];
 };
 const RecordForm: FC<RecordFormProps> = (props) => {
   const { fields, append, remove } = useFieldArray({
     control: props.control,
     name: `records.${props.recordIndex}.sets`,
   });
+
+  const selectedExerciseId = props.watch(
+    `records.${props.recordIndex}.exerciseId`
+  );
+  const selectedExercise = props.registeredExercises.find(
+    (exercise) => exercise.id === selectedExerciseId
+  );
 
   const onClickAddSet: MouseEventHandler<HTMLButtonElement> = (event) => {
     event.preventDefault();
@@ -153,18 +168,50 @@ const RecordForm: FC<RecordFormProps> = (props) => {
     <div className={stack({ direction: "column", gap: 8 })}>
       <div className={stack({ direction: "column" })}>
         <label htmlFor={`records.${props.recordIndex}.exerciseId`}>種目</label>
-        <Select
-          id={`records.${props.recordIndex}.exerciseId`}
-          {...props.register(`records.${props.recordIndex}.exerciseId`)}
-        >
-          {props.registeredExercises.map((exercise) => {
-            return (
-              <option value={exercise.id} key={exercise.id}>
-                {exercise.name}
-              </option>
-            );
-          })}
-        </Select>
+        <div className={stack({ direction: "row", justify: "space-between" })}>
+          <Select
+            id={`records.${props.recordIndex}.exerciseId`}
+            {...props.register(`records.${props.recordIndex}.exerciseId`)}
+          >
+            {props.registeredExercises.map((exercise) => {
+              return (
+                <option value={exercise.id} key={exercise.id}>
+                  {exercise.name}
+                </option>
+              );
+            })}
+          </Select>
+          <Popover.Root>
+            <Popover.Trigger asChild>
+              <Button
+                aria-label={`${selectedExercise?.name}の情報を見る`}
+                disabled={!selectedExercise}
+              >
+                ℹ
+              </Button>
+            </Popover.Trigger>
+            <Popover.Portal>
+              <Popover.Content>
+                <div
+                  className={css({
+                    w: "300px",
+                    maxH: "300px",
+                    bg: "white",
+                    border: "1px solid",
+                    overflow: "auto",
+                  })}
+                >
+                  <Suspense fallback={<p>データを取得しています</p>}>
+                    <ExerciseInformation
+                      traineeId={props.traineeId}
+                      exerciseId={selectedExerciseId}
+                    />
+                  </Suspense>
+                </div>
+              </Popover.Content>
+            </Popover.Portal>
+          </Popover.Root>
+        </div>
         {props.errors?.records?.[props.recordIndex]?.exerciseId && (
           <p className={css({ color: "red" })}>
             {props.errors.records[props.recordIndex]?.exerciseId?.message}
@@ -183,7 +230,11 @@ const RecordForm: FC<RecordFormProps> = (props) => {
                 errors={props.errors}
                 register={props.register}
               />
-              <Button onClick={onClickRemoveSet} disabled={fields.length < 2}>
+              <Button
+                aria-label={`${index + 1}番目のセットを削除する`}
+                onClick={onClickRemoveSet}
+                disabled={fields.length < 2}
+              >
                 🗑
               </Button>
             </div>
