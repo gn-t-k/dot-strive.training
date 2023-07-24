@@ -1,8 +1,8 @@
+import { type FC } from "react";
+
 import { stack } from "styled-system/patterns";
 
 import { getMuscleById } from "../_repositories/get-muscle-by-id";
-
-import type { FC } from "react";
 
 type Props = {
   traineeId: string;
