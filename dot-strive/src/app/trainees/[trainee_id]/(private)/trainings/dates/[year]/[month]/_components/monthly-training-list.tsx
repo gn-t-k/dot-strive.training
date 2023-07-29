@@ -5,7 +5,7 @@ import { TrainingDetailView } from "@/app/trainees/[trainee_id]/(private)/traini
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
-import { TrainingCalendar } from "./training-calendar";
+import { MonthlyTrainingCalendar } from "./monthly-training-calendar";
 import { getMonthlyTrainings } from "../_repositories/get-monthly-trainings";
 
 import type { FC } from "react";
@@ -29,7 +29,7 @@ export const MonthlyTrainingList: FC<Props> = async (props) => {
 
   return (
     <div className={stack({ direction: "column" })}>
-      <TrainingCalendar
+      <MonthlyTrainingCalendar
         traineeId={props.traineeId}
         trainings={trainings}
         selected={utcDateStringSchema.parse(

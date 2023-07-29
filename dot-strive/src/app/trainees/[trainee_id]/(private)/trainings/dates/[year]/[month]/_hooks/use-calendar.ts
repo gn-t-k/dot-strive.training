@@ -1,7 +1,5 @@
-"use client";
-
 import { addDays, getDay, startOfMonth, subDays } from "date-fns";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import type { UTCDateString } from "@/app/_schemas/utc-date-string";
 
@@ -9,12 +7,15 @@ type UseCalendar = (props: {
   today: UTCDateString;
   selected: UTCDateString;
 }) => [
-  { calendar: Calendar },
+  {
+    month: Month;
+    week: Week;
+  },
   {
     select: Select;
   }
 ];
-type Calendar = Week[];
+type Month = Week[];
 type Week = CalendarDate[];
 type CalendarDate = {
   year: number;
@@ -27,12 +28,43 @@ type CalendarDate = {
 type Select = (utcDateString: UTCDateString) => void;
 
 export const useCalendar: UseCalendar = (props) => {
-  type GetCalendar = (
-    today: UTCDateString,
-    selected: UTCDateString
-  ) => Calendar;
-  const getCalendar: GetCalendar = (today, selected) => {
-    const todaysDate = new Date(today);
+  type GetWeek = (startSunday: Date, today: Date, selected: Date) => Week;
+  const getWeek: GetWeek = (startSunday, today, selected) => {
+    return [0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
+      const d = addDays(startSunday, dayIndex);
+      const year = d.getFullYear();
+      const month = d.getMonth() + 1;
+      const date = d.getDate();
+      const isToday =
+        year === today.getFullYear() &&
+        month === today.getMonth() + 1 &&
+        date === today.getDate();
+      const isSelectedMonth =
+        year === selected.getFullYear() && month === selected.getMonth() + 1;
+      const isSelectedDate = isSelectedMonth && date === selected.getDate();
+
+      return {
+        year,
+        month,
+        date,
+        isToday,
+        isSelectedDate,
+        isSelectedMonth,
+      };
+    });
+  };
+
+  const [selected, setSelected] = useState<UTCDateString>(props.selected);
+
+  const week = useMemo<Week>(() => {
+    const todaysDate = new Date(props.today);
+    const selectedDate = new Date(selected);
+    const selectedWeekFirstDate = subDays(selectedDate, getDay(selectedDate));
+
+    return getWeek(selectedWeekFirstDate, todaysDate, selectedDate);
+  }, [props.today, selected]);
+  const month = useMemo<Month>(() => {
+    const todaysDate = new Date(props.today);
     const selectedDate = new Date(selected);
     const selectedMonthFirstDate = startOfMonth(selectedDate);
     const selectedMonthCalendarFirstDate = subDays(
@@ -43,46 +75,16 @@ export const useCalendar: UseCalendar = (props) => {
     return [0, 1, 2, 3, 4, 5].map((weekIndex) => {
       const start = addDays(selectedMonthCalendarFirstDate, weekIndex * 7);
 
-      return [0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
-        const d = addDays(start, dayIndex);
-        const year = d.getFullYear();
-        const month = d.getMonth() + 1;
-        const date = d.getDate();
-        const isToday =
-          year === todaysDate.getFullYear() &&
-          month === todaysDate.getMonth() + 1 &&
-          date === todaysDate.getDate();
-        const isSelectedMonth =
-          year === selectedDate.getFullYear() &&
-          month === selectedDate.getMonth() + 1;
-        const isSelectedDate =
-          isSelectedMonth && date === selectedDate.getDate();
-
-        return {
-          year,
-          month,
-          date,
-          isToday,
-          isSelectedDate,
-          isSelectedMonth,
-        };
-      });
+      return getWeek(start, todaysDate, selectedDate);
     });
-  };
-  const initialCalendar = getCalendar(props.today, props.selected);
-  const [calendar, setCalendar] = useState<Calendar>(initialCalendar);
+  }, [props.today, selected]);
 
-  const select = useCallback<Select>(
-    (utcDateString) => {
-      const calendar = getCalendar(props.today, utcDateString);
-
-      setCalendar(calendar);
-    },
-    [props.today]
-  );
+  const select = useCallback<Select>((utcDateString) => {
+    setSelected(utcDateString);
+  }, []);
 
   return [
-    { calendar },
+    { month, week },
     {
       select,
     },
