@@ -11,7 +11,7 @@ import { MuscleDetail } from "./_components/muscle-detail";
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
 
-const Page: NextPage = (props) => {
+const Page: NextPage = async (props) => {
   const traineeId = props.params?.["trainee_id"];
   if (!traineeId) {
     redirect("/" satisfies Route);
