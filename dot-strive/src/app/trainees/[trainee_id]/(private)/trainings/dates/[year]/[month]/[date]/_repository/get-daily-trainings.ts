@@ -1,4 +1,4 @@
-import { endOfDay, startOfDay } from "date-fns";
+import { endOfDay } from "date-fns";
 import { err, ok } from "neverthrow";
 
 import { validateTraining } from "@/app/_schemas/training";
@@ -15,9 +15,7 @@ type Props = {
   date: string;
 };
 export const getDailyTrainings: GetDailyTrainings = async (props) => {
-  const startOfDate = startOfDay(
-    new Date(`${props.year}-${props.month}-${props.date}`)
-  );
+  const startOfDate = new Date(`${props.year}-${props.month}-${props.date}`);
   const endOfDate = endOfDay(startOfDate);
 
   const response = await getFetcher()(
