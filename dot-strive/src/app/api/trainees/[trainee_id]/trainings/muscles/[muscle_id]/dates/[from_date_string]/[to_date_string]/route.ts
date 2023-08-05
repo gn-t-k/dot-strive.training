@@ -7,6 +7,9 @@ import { validateTraining } from "@/app/_schemas/training";
 import type { Training } from "@/app/_schemas/training";
 import type { RouteHandler } from "@/app/api/_types/route-handler";
 
+/**
+ * トレーニングを部位と期間で絞り込んで取得する
+ */
 export const GET: RouteHandler<Training[]> = async (_req, context) => {
   const session = await getServerSession(nextAuthOptions);
   if (!session?.user.id) {

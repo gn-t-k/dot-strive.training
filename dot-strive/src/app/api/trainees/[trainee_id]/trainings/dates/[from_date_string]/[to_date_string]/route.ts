@@ -51,8 +51,8 @@ export const GET: RouteHandler<Training[]> = async (_req, context) => {
       trainings: {
         where: {
           date: {
-            gte: new Date(fromDateString),
-            lte: new Date(toDateString),
+            gte: fromDateString,
+            lte: toDateString,
           },
         },
         include: {
