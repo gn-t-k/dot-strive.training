@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { Loading } from "@/app/_components/loading";
+import { ErrorBoundary } from "@/app/_components/error-boundary";
 import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
@@ -59,16 +59,14 @@ const Page: NextPage = (props) => {
           <WeeklyTrainingCalendar traineeId={traineeId} selected={selected} />
         </Suspense>
       </div>
-      <Suspense
-        fallback={<Loading description="トレーニングデータを取得しています" />}
-      >
+      <ErrorBoundary>
         <DailyTrainingList
           traineeId={traineeId}
           year={year}
           month={month}
           date={date}
         />
-      </Suspense>
+      </ErrorBoundary>
       <Link
         href={`/trainees/${traineeId}/trainings/register?date=${year}-${month}-${date}`}
         className={css({ textAlign: "center" })}
