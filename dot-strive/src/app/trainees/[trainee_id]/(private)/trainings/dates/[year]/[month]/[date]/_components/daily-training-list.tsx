@@ -18,13 +18,44 @@ type Props = {
   date: string;
 };
 export const DailyTrainingList: FC<Props> = (props) => {
-  const startOfDate = new Date(`${props.year}-${props.month}-${props.date}`);
-  const endOfDate = endOfDay(startOfDate);
+  try {
+    const startOfDate = new Date(`${props.year}-${props.month}-${props.date}`);
+    const endOfDate = endOfDay(startOfDate);
 
+    return (
+      <DailyTrainingListView
+        traineeId={props.traineeId}
+        startOfDate={startOfDate}
+        endOfDate={endOfDate}
+      />
+    );
+  } catch (error) {
+    return (
+      <section>
+        <h1>エラーが発生しました</h1>
+        <ul>
+          <li>
+            message: {error instanceof Error ? error.message : "unknown error"}
+          </li>
+          <li>year: {props.year}</li>
+          <li>month: {props.month}</li>
+          <li>date: {props.date}</li>
+        </ul>
+      </section>
+    );
+  }
+};
+
+type ViewProps = {
+  traineeId: string;
+  startOfDate: Date;
+  endOfDate: Date;
+};
+const DailyTrainingListView: FC<ViewProps> = (props) => {
   const { data: trainings } = useSWR(
     `/api/trainees/${props.traineeId}/trainings/dates/${encodeURIComponent(
-      startOfDate.toISOString()
-    )}/${encodeURIComponent(endOfDate.toISOString())}`,
+      props.startOfDate.toISOString()
+    )}/${encodeURIComponent(props.endOfDate.toISOString())}`,
     async (key) => {
       const response = await getFetcher()(key);
       const data = await response.json();
@@ -44,18 +75,6 @@ export const DailyTrainingList: FC<Props> = (props) => {
       fallbackData: [],
     }
   );
-
-  // const result = await getDailyTrainings({
-  //   traineeId: props.traineeId,
-  //   year: props.year,
-  //   month: props.month,
-  //   date: props.date,
-  // });
-
-  // if (result.isErr()) {
-  //   return <p>トレーニングデータの取得に失敗しました</p>;
-  // }
-  // const trainings = result.value;
 
   return (
     <ul className={stack({ direction: "column", gap: 12, p: 4 })}>
