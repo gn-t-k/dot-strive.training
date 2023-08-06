@@ -34,7 +34,15 @@ export class ErrorBoundary extends Component<Props, State> {
   public render(): ReactNode {
     if (this.state.hasError) {
       return (
-        <h1>Sorry.. there was an error: {JSON.stringify(this.state.error)}</h1>
+        <section>
+          <h1>エラーが発生しました</h1>
+          <ul>
+            <li>name: {this.state.error.name}</li>
+            <li>message: {this.state.error.message}</li>
+            <li>cause: {String(this.state.error.cause)}</li>
+            <li>stack: {this.state.error.stack}</li>
+          </ul>
+        </section>
       );
     }
 
