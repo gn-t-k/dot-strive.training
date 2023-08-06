@@ -39,9 +39,7 @@ export const DailyTrainingList: FC<Props> = (props) => {
           <li>
             message: {error instanceof Error ? error.message : "unknown error"}
           </li>
-          <li>year: {props.year}</li>
-          <li>month: {props.month}</li>
-          <li>date: {props.date}</li>
+          <li>string: {`${props.year}-${props.month}-${props.date}`}</li>
         </ul>
       </section>
     );
