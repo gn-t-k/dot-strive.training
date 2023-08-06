@@ -59,6 +59,9 @@ const Page: NextPage = (props) => {
           <WeeklyTrainingCalendar traineeId={traineeId} selected={selected} />
         </Suspense>
       </div>
+      <p>
+        debug: {year}年{month}月{date}日
+      </p>
       <ErrorBoundary>
         <DailyTrainingList
           traineeId={traineeId}
