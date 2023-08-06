@@ -4,9 +4,9 @@ import { endOfDay } from "date-fns";
 import Link from "next/link";
 import useSWR from "swr";
 
+import { LocalDate } from "@/app/_components/local-date";
 import { validateTraining } from "@/app/_schemas/training";
 import { getFetcher } from "@/app/_utils/get-fetcher";
-import { TrainingDetailView } from "@/app/trainees/[trainee_id]/(private)/trainings/_components/training-detail";
 import { stack } from "styled-system/patterns";
 
 import type { FC } from "react";
@@ -61,7 +61,39 @@ export const DailyTrainingList: FC<Props> = (props) => {
             <Link
               href={`/trainees/${props.traineeId}/trainings/${training.id}`}
             >
-              <TrainingDetailView training={training} />
+              <div className={stack({ direction: "column", p: 4 })}>
+                <LocalDate utcDateString={training.date} />
+                <ul className={stack({ direction: "column", gap: 8, p: 4 })}>
+                  {training.records.map((record) => {
+                    return (
+                      <li
+                        key={record.id}
+                        className={stack({ direction: "column" })}
+                      >
+                        <p>{record.exercise.name}</p>
+                        <ul
+                          className={stack({
+                            direction: "column",
+                            px: 4,
+                          })}
+                        >
+                          {record.sets.map((set) => {
+                            return (
+                              <li
+                                key={set.id}
+                                className={stack({ direction: "row" })}
+                              >
+                                <p>{set.weight}kg</p>
+                                <p>{set.repetition}回</p>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             </Link>
           </li>
         );
