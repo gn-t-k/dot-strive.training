@@ -33,7 +33,9 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public render(): ReactNode {
     if (this.state.hasError) {
-      return <h1>Sorry.. there was an error: {this.state.error.message}</h1>;
+      return (
+        <h1>Sorry.. there was an error: {JSON.stringify(this.state.error)}</h1>
+      );
     }
 
     return this.props.children;
