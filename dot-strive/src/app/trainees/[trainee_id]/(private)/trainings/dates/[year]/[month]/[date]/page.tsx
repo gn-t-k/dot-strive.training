@@ -59,16 +59,15 @@ const Page: NextPage = (props) => {
           <WeeklyTrainingCalendar traineeId={traineeId} selected={selected} />
         </Suspense>
       </div>
-      <p>
-        debug: {year}年{month}月{date}日
-      </p>
       <ErrorBoundary>
-        <DailyTrainingList
-          traineeId={traineeId}
-          year={year}
-          month={month}
-          date={date}
-        />
+        <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
+          <DailyTrainingList
+            traineeId={traineeId}
+            year={year}
+            month={month}
+            date={date}
+          />
+        </Suspense>
       </ErrorBoundary>
       <Link
         href={`/trainees/${traineeId}/trainings/register?date=${year}-${month}-${date}`}

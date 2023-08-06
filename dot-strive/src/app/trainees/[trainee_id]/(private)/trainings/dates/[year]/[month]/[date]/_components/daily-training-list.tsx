@@ -21,11 +21,7 @@ export const DailyTrainingList: FC<Props> = (props) => {
   const startOfDate = new Date(`${props.year}-${props.month}-${props.date}`);
   const endOfDate = endOfDay(startOfDate);
 
-  const {
-    data: trainings,
-    isLoading,
-    error,
-  } = useSWR(
+  const { data: trainings } = useSWR(
     `/api/trainees/${props.traineeId}/trainings/dates/${encodeURIComponent(
       startOfDate.toISOString()
     )}/${encodeURIComponent(endOfDate.toISOString())}`,
@@ -42,16 +38,12 @@ export const DailyTrainingList: FC<Props> = (props) => {
       });
 
       return trainings;
+    },
+    {
+      suspense: true,
+      fallbackData: [],
     }
   );
-
-  if (isLoading) {
-    return <p>トレーニングデータを取得しています</p>;
-  }
-
-  if (!trainings || !!error) {
-    return <p>トレーニングデータの取得に失敗しました</p>;
-  }
 
   // const result = await getDailyTrainings({
   //   traineeId: props.traineeId,
