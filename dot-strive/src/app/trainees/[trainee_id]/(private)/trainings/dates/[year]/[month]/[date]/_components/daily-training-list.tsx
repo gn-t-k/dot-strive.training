@@ -20,13 +20,15 @@ type Props = {
 export const DailyTrainingList: FC<Props> = (props) => {
   try {
     const startOfDate = new Date(`${props.year}-${props.month}-${props.date}`);
+    const startOfDateString = startOfDate.toISOString();
     const endOfDate = endOfDay(startOfDate);
+    const endOfDateString = endOfDate.toISOString();
 
     return (
       <DailyTrainingListView
         traineeId={props.traineeId}
-        startOfDate={startOfDate}
-        endOfDate={endOfDate}
+        startOfDate={startOfDateString}
+        endOfDate={endOfDateString}
       />
     );
   } catch (error) {
@@ -48,14 +50,14 @@ export const DailyTrainingList: FC<Props> = (props) => {
 
 type ViewProps = {
   traineeId: string;
-  startOfDate: Date;
-  endOfDate: Date;
+  startOfDate: string;
+  endOfDate: string;
 };
 const DailyTrainingListView: FC<ViewProps> = (props) => {
   const { data: trainings } = useSWR(
     `/api/trainees/${props.traineeId}/trainings/dates/${encodeURIComponent(
-      props.startOfDate.toISOString()
-    )}/${encodeURIComponent(props.endOfDate.toISOString())}`,
+      props.startOfDate
+    )}/${encodeURIComponent(props.endOfDate)}`,
     async (key) => {
       const response = await getFetcher()(key);
       const data = await response.json();
