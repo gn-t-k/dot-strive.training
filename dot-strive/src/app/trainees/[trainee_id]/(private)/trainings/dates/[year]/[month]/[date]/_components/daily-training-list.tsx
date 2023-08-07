@@ -1,6 +1,6 @@
 "use client";
 
-import { endOfDay } from "date-fns";
+import { endOfDay, startOfDay } from "date-fns";
 import Link from "next/link";
 import useSWR from "swr";
 
@@ -9,23 +9,21 @@ import { getFetcher } from "@/app/_utils/get-fetcher";
 import { TrainingDetailView } from "@/app/trainees/[trainee_id]/(private)/trainings/_components/training-detail";
 import { stack } from "styled-system/patterns";
 
+import type { UTCDateString } from "@/app/_schemas/utc-date-string";
 import type { FC } from "react";
 
 type Props = {
   traineeId: string;
-  year: string;
-  month: string;
-  date: string;
+  date: UTCDateString;
 };
 export const DailyTrainingList: FC<Props> = (props) => {
-  const startOfDate = new Date(`${props.year}-${props.month}-${props.date}`);
+  const startOfDate = startOfDay(
+    // クライアントのタイムゾーンで日付を指定するため、new Dateして時間をずらしている
+    new Date(props.date)
+  );
   const endOfDate = endOfDay(startOfDate);
 
-  const {
-    data: trainings,
-    isLoading,
-    error,
-  } = useSWR(
+  const { data: trainings, isLoading } = useSWR(
     `/api/trainees/${props.traineeId}/trainings/dates/${encodeURIComponent(
       startOfDate.toISOString()
     )}/${encodeURIComponent(endOfDate.toISOString())}`,
@@ -42,15 +40,15 @@ export const DailyTrainingList: FC<Props> = (props) => {
       });
 
       return trainings;
+    },
+    {
+      suspense: true,
+      fallbackData: [],
     }
   );
 
   if (isLoading) {
     return <p>トレーニングデータを取得しています</p>;
-  }
-
-  if (!trainings || !!error) {
-    return <p>トレーニングデータの取得に失敗しました</p>;
   }
 
   return (
