@@ -20,7 +20,7 @@ export const DailyTrainingList: FC<Props> = (props) => {
   const startOfDate = startOfDay(new Date(props.date));
   const endOfDate = endOfDay(startOfDate);
 
-  const { data: trainings } = useSWR(
+  const { data: trainings, isLoading } = useSWR(
     `/api/trainees/${props.traineeId}/trainings/dates/${encodeURIComponent(
       startOfDate.toISOString()
     )}/${encodeURIComponent(endOfDate.toISOString())}`,
@@ -43,6 +43,10 @@ export const DailyTrainingList: FC<Props> = (props) => {
       fallbackData: [],
     }
   );
+
+  if (isLoading) {
+    return <p>トレーニングデータを取得しています</p>;
+  }
 
   return (
     <ul className={stack({ direction: "column", gap: 12, p: 4 })}>
