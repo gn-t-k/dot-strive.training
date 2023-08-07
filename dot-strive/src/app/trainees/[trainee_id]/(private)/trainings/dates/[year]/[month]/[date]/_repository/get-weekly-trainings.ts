@@ -1,4 +1,4 @@
-import { endOfWeek, startOfWeek } from "date-fns";
+import { endOfWeek, startOfWeek, subDays } from "date-fns";
 import { err, ok } from "neverthrow";
 
 import { validateTraining } from "@/app/_schemas/training";
@@ -17,11 +17,13 @@ export const getWeeklyTrainings: GetWeeklyTrainings = async (props) => {
   const date = new Date(props.date);
   const startDate = startOfWeek(date);
   const endDate = endOfWeek(date);
+  const bufferedStartDate = subDays(startDate, 1);
+  const bufferedEndDate = subDays(endDate, 1);
 
   const response = await getFetcher()(
     `/api/trainees/${props.traineeId}/trainings/dates/${encodeURIComponent(
-      startDate.toISOString()
-    )}/${encodeURIComponent(endDate.toISOString())}`
+      bufferedStartDate.toISOString()
+    )}/${encodeURIComponent(bufferedEndDate.toISOString())}`
   );
   const data = await response.json();
 
