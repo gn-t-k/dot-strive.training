@@ -1,6 +1,6 @@
 "use client";
 
-import { endOfDay } from "date-fns";
+import { endOfDay, startOfDay } from "date-fns";
 import Link from "next/link";
 import useSWR from "swr";
 
@@ -9,53 +9,21 @@ import { getFetcher } from "@/app/_utils/get-fetcher";
 import { TrainingDetailView } from "@/app/trainees/[trainee_id]/(private)/trainings/_components/training-detail";
 import { stack } from "styled-system/patterns";
 
+import type { UTCDateString } from "@/app/_schemas/utc-date-string";
 import type { FC } from "react";
 
 type Props = {
   traineeId: string;
-  year: string;
-  month: string;
-  date: string;
+  date: UTCDateString;
 };
 export const DailyTrainingList: FC<Props> = (props) => {
-  try {
-    const startOfDate = new Date(`${props.year}-${props.month}-${props.date}`);
-    const startOfDateString = startOfDate.toISOString();
-    const endOfDate = endOfDay(startOfDate);
-    const endOfDateString = endOfDate.toISOString();
+  const startOfDate = startOfDay(new Date(props.date));
+  const endOfDate = endOfDay(startOfDate);
 
-    return (
-      <DailyTrainingListView
-        traineeId={props.traineeId}
-        startOfDate={startOfDateString}
-        endOfDate={endOfDateString}
-      />
-    );
-  } catch (error) {
-    return (
-      <section>
-        <h1>エラーが発生しました</h1>
-        <ul>
-          <li>
-            message: {error instanceof Error ? error.message : "unknown error"}
-          </li>
-          <li>string: {`${props.year}-${props.month}-${props.date}`}</li>
-        </ul>
-      </section>
-    );
-  }
-};
-
-type ViewProps = {
-  traineeId: string;
-  startOfDate: string;
-  endOfDate: string;
-};
-const DailyTrainingListView: FC<ViewProps> = (props) => {
   const { data: trainings } = useSWR(
     `/api/trainees/${props.traineeId}/trainings/dates/${encodeURIComponent(
-      props.startOfDate
-    )}/${encodeURIComponent(props.endOfDate)}`,
+      startOfDate.toISOString()
+    )}/${encodeURIComponent(endOfDate.toISOString())}`,
     async (key) => {
       const response = await getFetcher()(key);
       const data = await response.json();

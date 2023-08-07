@@ -61,12 +61,7 @@ const Page: NextPage = (props) => {
       </div>
       <ErrorBoundary>
         <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
-          <DailyTrainingList
-            traineeId={traineeId}
-            year={year}
-            month={month}
-            date={date}
-          />
+          <DailyTrainingList traineeId={traineeId} date={selected} />
         </Suspense>
       </ErrorBoundary>
       <Link
