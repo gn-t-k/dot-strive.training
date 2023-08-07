@@ -17,7 +17,10 @@ type Props = {
   date: UTCDateString;
 };
 export const DailyTrainingList: FC<Props> = (props) => {
-  const startOfDate = startOfDay(new Date(props.date));
+  const startOfDate = startOfDay(
+    // クライアントのタイムゾーンで日付を指定するため、new Dateして時間をずらしている
+    new Date(props.date)
+  );
   const endOfDate = endOfDay(startOfDate);
 
   const { data: trainings, isLoading } = useSWR(
