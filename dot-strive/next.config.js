@@ -4,6 +4,7 @@ const nextConfig = {
   swcMinify: true,
   experimental: {
     typedRoutes: true,
+    serverActions: true,
   },
   images: {
     remotePatterns: [
