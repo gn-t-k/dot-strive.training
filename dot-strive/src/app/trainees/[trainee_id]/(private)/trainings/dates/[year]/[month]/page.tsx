@@ -80,7 +80,7 @@ type Props = {
   year: string;
   month: string;
 };
-export const FetchMonthlyTrainings: FC<Props> = async (props) => {
+const FetchMonthlyTrainings: FC<Props> = async (props) => {
   const result = await getMonthlyTrainings({
     traineeId: props.traineeId,
     year: props.year,
