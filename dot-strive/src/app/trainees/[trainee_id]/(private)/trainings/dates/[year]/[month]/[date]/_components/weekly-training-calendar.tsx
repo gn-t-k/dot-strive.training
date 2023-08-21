@@ -1,11 +1,13 @@
-import { WeeklyTrainingCalendarClient } from "./weekly-training-calendar-client";
+import { TrainingCalendarWeek } from "@/app/_components/training-calendar-week";
+
 import { getWeeklyTrainings } from "../_repository/get-weekly-trainings";
 
+import type { TraineeId } from "@/app/_schemas/trainee";
 import type { UTCDateString } from "@/app/_schemas/utc-date-string";
 import type { FC } from "react";
 
 type Props = {
-  traineeId: string;
+  traineeId: TraineeId;
   selected: UTCDateString;
 };
 export const WeeklyTrainingCalendar: FC<Props> = async (props) => {
@@ -19,7 +21,7 @@ export const WeeklyTrainingCalendar: FC<Props> = async (props) => {
   const trainings = result.value;
 
   return (
-    <WeeklyTrainingCalendarClient
+    <TrainingCalendarWeek
       traineeId={props.traineeId}
       selected={props.selected}
       trainings={trainings}

@@ -2,22 +2,28 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { TrainingCalendarWeek } from "@/app/_components/training-calendar-week";
 import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
+import { getTraineeBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-trainee-by-session";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
 import { DailyTrainingList } from "./_components/daily-training-list";
 import { WeeklyTrainingCalendar } from "./_components/weekly-training-calendar";
-import { WeeklyTrainingCalendarClient } from "./_components/weekly-training-calendar-client";
 
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
 
-const Page: NextPage = (props) => {
-  const traineeId = props.params?.["trainee_id"];
-  if (!traineeId) {
+const Page: NextPage = async (props) => {
+  const traineeIdParam = props.params?.["trainee_id"];
+  const getTraineeResult = await getTraineeBySession();
+  if (
+    getTraineeResult.isErr() ||
+    getTraineeResult.value.id !== traineeIdParam
+  ) {
     redirect("/" satisfies Route);
   }
+  const traineeId = getTraineeResult.value.id;
   const year = props.params?.["year"];
   const month = props.params?.["month"];
   const date = props.params?.["date"];
@@ -48,7 +54,7 @@ const Page: NextPage = (props) => {
         </p>
         <Suspense
           fallback={
-            <WeeklyTrainingCalendarClient
+            <TrainingCalendarWeek
               traineeId={traineeId}
               selected={selected}
               trainings={[]}

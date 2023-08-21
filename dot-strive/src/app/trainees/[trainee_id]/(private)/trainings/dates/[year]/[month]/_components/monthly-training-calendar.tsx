@@ -7,7 +7,7 @@ import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
 import { css } from "styled-system/css";
 import { grid, stack } from "styled-system/patterns";
 
-import { useCalendar } from "../_hooks/use-calendar";
+import { useCalendar } from "../../../../../../../../_hooks/use-calendar";
 
 import type { Training } from "@/app/_schemas/training";
 import type { UTCDateString } from "@/app/_schemas/utc-date-string";
