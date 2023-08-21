@@ -2,22 +2,31 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { TrainingCalendarWeek } from "@/app/_components/training-calendar-week";
 import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
+import { getTraineeBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-trainee-by-session";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
 import { DailyTrainingList } from "./_components/daily-training-list";
-import { WeeklyTrainingCalendar } from "./_components/weekly-training-calendar";
-import { WeeklyTrainingCalendarClient } from "./_components/weekly-training-calendar-client";
+import { getWeeklyTrainings } from "./_repository/get-weekly-trainings";
 
+import type { TraineeId } from "@/app/_schemas/trainee";
+import type { UTCDateString } from "@/app/_schemas/utc-date-string";
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
+import type { FC } from "react";
 
-const Page: NextPage = (props) => {
-  const traineeId = props.params?.["trainee_id"];
-  if (!traineeId) {
+const Page: NextPage = async (props) => {
+  const traineeIdParam = props.params?.["trainee_id"];
+  const getTraineeResult = await getTraineeBySession();
+  if (
+    getTraineeResult.isErr() ||
+    getTraineeResult.value.id !== traineeIdParam
+  ) {
     redirect("/" satisfies Route);
   }
+  const traineeId = getTraineeResult.value.id;
   const year = props.params?.["year"];
   const month = props.params?.["month"];
   const date = props.params?.["date"];
@@ -48,14 +57,14 @@ const Page: NextPage = (props) => {
         </p>
         <Suspense
           fallback={
-            <WeeklyTrainingCalendarClient
+            <TrainingCalendarWeek
               traineeId={traineeId}
               selected={selected}
               trainings={[]}
             />
           }
         >
-          <WeeklyTrainingCalendar traineeId={traineeId} selected={selected} />
+          <FetchWeeklyTrainings traineeId={traineeId} selected={selected} />
         </Suspense>
       </div>
       <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
@@ -74,3 +83,26 @@ const Page: NextPage = (props) => {
   );
 };
 export default Page;
+
+type Props = {
+  traineeId: TraineeId;
+  selected: UTCDateString;
+};
+const FetchWeeklyTrainings: FC<Props> = async (props) => {
+  const result = await getWeeklyTrainings({
+    traineeId: props.traineeId,
+    date: props.selected,
+  });
+  if (result.isErr()) {
+    return <p>トレーニングデータの取得に失敗しました</p>;
+  }
+  const trainings = result.value;
+
+  return (
+    <TrainingCalendarWeek
+      traineeId={props.traineeId}
+      selected={props.selected}
+      trainings={trainings}
+    />
+  );
+};

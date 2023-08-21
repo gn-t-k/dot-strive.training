@@ -16,6 +16,7 @@ type Props = {
   traineeId: string;
   date: UTCDateString;
 };
+// TODO: serverでデータ取得できないか考える
 export const DailyTrainingList: FC<Props> = (props) => {
   const startOfDate = startOfDay(
     // クライアントのタイムゾーンで日付を指定するため、new Dateして時間をずらしている
