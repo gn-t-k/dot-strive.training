@@ -1,23 +1,44 @@
+import { addDays, addMinutes, endOfWeek, startOfWeek, subDays } from "date-fns";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { DailyTrainingList } from "@/app/_components/daily-training-list";
+import { TrainingCalendarWeek } from "@/app/_components/training-calendar-week";
+import { prisma } from "@/app/_libs/prisma/client";
+import { validateTraining } from "@/app/_schemas/training";
 import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
+import { getTraineeBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-trainee-by-session";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
-import { DailyTrainingList } from "./_components/daily-training-list";
-import { WeeklyTrainingCalendar } from "./_components/weekly-training-calendar";
-import { WeeklyTrainingCalendarClient } from "./_components/weekly-training-calendar-client";
-
+import type { TraineeId } from "@/app/_schemas/trainee";
+import type { UTCDateString } from "@/app/_schemas/utc-date-string";
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
+import type { FC } from "react";
 
-const Page: NextPage = (props) => {
-  const traineeId = props.params?.["trainee_id"];
-  if (!traineeId) {
+const Page: NextPage = async (props) => {
+  const traineeIdParam = props.params?.["trainee_id"];
+  const getTraineeResult = await getTraineeBySession();
+  if (
+    getTraineeResult.isErr() ||
+    getTraineeResult.value.id !== traineeIdParam
+  ) {
     redirect("/" satisfies Route);
   }
+  const traineeId = getTraineeResult.value.id;
+
+  const clientTimezoneOffsetParam =
+    props.searchParams?.["client_timezone_offset"];
+  const clientTimezoneOffset = ((): number => {
+    const number = Number(clientTimezoneOffsetParam);
+
+    return isNaN(number) ? 0 : number;
+  })();
+  const serverTimezoneOffset = new Date().getTimezoneOffset();
+  const timezoneOffset = clientTimezoneOffset - serverTimezoneOffset;
+
   const year = props.params?.["year"];
   const month = props.params?.["month"];
   const date = props.params?.["date"];
@@ -48,18 +69,26 @@ const Page: NextPage = (props) => {
         </p>
         <Suspense
           fallback={
-            <WeeklyTrainingCalendarClient
+            <TrainingCalendarWeek
               traineeId={traineeId}
               selected={selected}
               trainings={[]}
             />
           }
         >
-          <WeeklyTrainingCalendar traineeId={traineeId} selected={selected} />
+          <FetchWeeklyTrainings
+            traineeId={traineeId}
+            selected={selected}
+            timezoneOffset={timezoneOffset}
+          />
         </Suspense>
       </div>
       <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
-        <DailyTrainingList traineeId={traineeId} date={selected} />
+        <DailyTrainingList
+          traineeId={traineeId}
+          date={selected}
+          timezoneOffset={timezoneOffset}
+        />
       </Suspense>
       <Link
         href={`/trainees/${traineeId}/trainings/register?date=${year}-${month}-${date}`}
@@ -74,3 +103,77 @@ const Page: NextPage = (props) => {
   );
 };
 export default Page;
+
+type Props = {
+  traineeId: TraineeId;
+  selected: UTCDateString;
+  timezoneOffset: number;
+};
+const FetchWeeklyTrainings: FC<Props> = async (props) => {
+  const date = new Date(props.selected);
+  const startDate = startOfWeek(date);
+  const endDate = endOfWeek(date);
+  const bufferedStartDate = subDays(startDate, 1);
+  const bufferedEndDate = addDays(endDate, 1);
+  const offsetStartOfDate = addMinutes(bufferedStartDate, props.timezoneOffset);
+  const offsetEndOfDate = addMinutes(bufferedEndDate, props.timezoneOffset);
+
+  const data = await prisma.trainee.findUnique({
+    where: {
+      id: props.traineeId,
+    },
+    include: {
+      trainings: {
+        where: {
+          date: {
+            gte: offsetStartOfDate,
+            lte: offsetEndOfDate,
+          },
+        },
+        include: {
+          records: {
+            include: {
+              exercise: {
+                include: {
+                  targets: true,
+                },
+              },
+              sets: {
+                orderBy: {
+                  order: "asc",
+                },
+              },
+            },
+            orderBy: {
+              order: "asc",
+            },
+          },
+        },
+        orderBy: {
+          date: "asc",
+        },
+      },
+    },
+  });
+
+  if (!data) {
+    return <p>トレーニングデータの取得に失敗しました</p>;
+  }
+
+  const trainings = data.trainings.flatMap((training) => {
+    const result = validateTraining({
+      ...training,
+      date: training.date.toISOString(),
+    });
+
+    return result.isErr() ? [] : [result.value];
+  });
+
+  return (
+    <TrainingCalendarWeek
+      traineeId={props.traineeId}
+      selected={props.selected}
+      trainings={trainings}
+    />
+  );
+};

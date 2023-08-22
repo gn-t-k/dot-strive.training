@@ -15,9 +15,9 @@ type UseCalendar = (props: {
     select: Select;
   }
 ];
-type Month = Week[];
-type Week = CalendarDate[];
-type CalendarDate = {
+export type Month = Week[];
+export type Week = CalendarDate[];
+export type CalendarDate = {
   year: number;
   month: number;
   date: number;

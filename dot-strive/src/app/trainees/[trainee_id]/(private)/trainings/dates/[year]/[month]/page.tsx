@@ -1,22 +1,52 @@
-import { addMonths, subMonths } from "date-fns";
+import {
+  addDays,
+  addMinutes,
+  addMonths,
+  endOfMonth,
+  subDays,
+  subMonths,
+} from "date-fns";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { Loading } from "@/app/_components/loading";
+import { TrainingCalendarMonth } from "@/app/_components/training-calendar-month";
+import { prisma } from "@/app/_libs/prisma/client";
+import { validateTraining } from "@/app/_schemas/training";
+import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
-import { MonthlyTrainingList } from "./_components/monthly-training-list";
+import { getTraineeBySession } from "../../../../_repositories/get-trainee-by-session";
+import { TrainingDetailView } from "../../../_components/training-detail";
 
+import type { TraineeId } from "@/app/_schemas/trainee";
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
+import type { FC } from "react";
 
-const Page: NextPage = (props) => {
-  const traineeId = props.params?.["trainee_id"];
-  if (!traineeId) {
+const Page: NextPage = async (props) => {
+  const traineeIdParam = props.params?.["trainee_id"];
+  const getTraineeResult = await getTraineeBySession();
+  if (
+    getTraineeResult.isErr() ||
+    getTraineeResult.value.id !== traineeIdParam
+  ) {
     redirect("/" satisfies Route);
   }
+  const traineeId = getTraineeResult.value.id;
+
+  const clientTimezoneOffsetParam =
+    props.searchParams?.["client_timezone_offset"];
+  const clientTimezoneOffset = ((): number => {
+    const number = Number(clientTimezoneOffsetParam);
+
+    return isNaN(number) ? 0 : number;
+  })();
+  const serverTimezoneOffset = new Date().getTimezoneOffset();
+  const timezoneOffset = clientTimezoneOffset - serverTimezoneOffset;
+
   const year = props.params?.["year"];
   const month = props.params?.["month"];
   if (!year || !month || isNaN(Date.parse(`${year}-${month}`))) {
@@ -52,9 +82,113 @@ const Page: NextPage = (props) => {
       <Suspense
         fallback={<Loading description="トレーニングデータを取得しています" />}
       >
-        <MonthlyTrainingList traineeId={traineeId} year={year} month={month} />
+        <FetchMonthlyTrainings
+          traineeId={traineeId}
+          year={year}
+          month={month}
+          timezoneOffset={timezoneOffset}
+        />
       </Suspense>
     </section>
   );
 };
 export default Page;
+
+type Props = {
+  traineeId: TraineeId;
+  year: string;
+  month: string;
+  timezoneOffset: number;
+};
+const FetchMonthlyTrainings: FC<Props> = async (props) => {
+  const startDate = new Date(`${props.year}-${props.month}`);
+  const endDate = endOfMonth(startDate);
+  const bufferedStartDate = subDays(startDate, 7);
+  const bufferedEndDate = addDays(endDate, 7);
+  const offsetStartOfDate = addMinutes(bufferedStartDate, props.timezoneOffset);
+  const offsetEndOfDate = addMinutes(bufferedEndDate, props.timezoneOffset);
+
+  const data = await prisma.trainee.findUnique({
+    where: {
+      id: props.traineeId,
+    },
+    include: {
+      trainings: {
+        where: {
+          date: {
+            gte: offsetStartOfDate,
+            lte: offsetEndOfDate,
+          },
+        },
+        include: {
+          records: {
+            include: {
+              exercise: {
+                include: {
+                  targets: true,
+                },
+              },
+              sets: {
+                orderBy: {
+                  order: "asc",
+                },
+              },
+            },
+            orderBy: {
+              order: "asc",
+            },
+          },
+        },
+        orderBy: {
+          date: "asc",
+        },
+      },
+    },
+  });
+
+  if (!data) {
+    return <p>トレーニングデータの取得に失敗しました</p>;
+  }
+
+  const trainings = data.trainings.flatMap((training) => {
+    const result = validateTraining({
+      ...training,
+      date: training.date.toISOString(),
+    });
+
+    return result.isErr() ? [] : [result.value];
+  });
+
+  return (
+    <div className={stack({ direction: "column" })}>
+      <TrainingCalendarMonth
+        traineeId={props.traineeId}
+        trainings={trainings}
+        selected={utcDateStringSchema.parse(
+          new Date(`${props.year}-${props.month}-1`).toISOString()
+        )}
+      />
+      <ul className={stack({ direction: "column", gap: 12, p: 4 })}>
+        {trainings
+          .sort(
+            (a, b) => new Date(b.date).valueOf() - new Date(a.date).valueOf()
+          )
+          .map((training) => {
+            const styles = css({
+              border: "1px solid",
+            });
+
+            return (
+              <li key={training.id} className={styles}>
+                <Link
+                  href={`/trainees/${props.traineeId}/trainings/${training.id}`}
+                >
+                  <TrainingDetailView training={training} />
+                </Link>
+              </li>
+            );
+          })}
+      </ul>
+    </div>
+  );
+};
