@@ -17,7 +17,7 @@ export const SetClientTimezoneOffset: FC = () => {
     const timezoneOffset = new Date().getTimezoneOffset();
     const params = new URLSearchParams(Array.from(searchParams.entries()));
 
-    params.set(paramName, `${timezoneOffset}`);
+    params.set(paramName, String(timezoneOffset));
 
     router.replace(`${pathname}?${params.toString()}` as Route);
   }

@@ -1,15 +1,16 @@
+import { addDays, addMinutes, endOfWeek, startOfWeek, subDays } from "date-fns";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { DailyTrainingList } from "@/app/_components/daily-training-list";
 import { TrainingCalendarWeek } from "@/app/_components/training-calendar-week";
+import { prisma } from "@/app/_libs/prisma/client";
+import { validateTraining } from "@/app/_schemas/training";
 import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
 import { getTraineeBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-trainee-by-session";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
-
-import { getWeeklyTrainings } from "./_repository/get-weekly-trainings";
 
 import type { TraineeId } from "@/app/_schemas/trainee";
 import type { UTCDateString } from "@/app/_schemas/utc-date-string";
@@ -75,7 +76,11 @@ const Page: NextPage = async (props) => {
             />
           }
         >
-          <FetchWeeklyTrainings traineeId={traineeId} selected={selected} />
+          <FetchWeeklyTrainings
+            traineeId={traineeId}
+            selected={selected}
+            timezoneOffset={timezoneOffset}
+          />
         </Suspense>
       </div>
       <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
@@ -102,16 +107,67 @@ export default Page;
 type Props = {
   traineeId: TraineeId;
   selected: UTCDateString;
+  timezoneOffset: number;
 };
 const FetchWeeklyTrainings: FC<Props> = async (props) => {
-  const result = await getWeeklyTrainings({
-    traineeId: props.traineeId,
-    date: props.selected,
+  const date = new Date(props.selected);
+  const startDate = startOfWeek(date);
+  const endDate = endOfWeek(date);
+  const bufferedStartDate = subDays(startDate, 1);
+  const bufferedEndDate = addDays(endDate, 1);
+  const offsetStartOfDate = addMinutes(bufferedStartDate, props.timezoneOffset);
+  const offsetEndOfDate = addMinutes(bufferedEndDate, props.timezoneOffset);
+
+  const data = await prisma.trainee.findUnique({
+    where: {
+      id: props.traineeId,
+    },
+    include: {
+      trainings: {
+        where: {
+          date: {
+            gte: offsetStartOfDate,
+            lte: offsetEndOfDate,
+          },
+        },
+        include: {
+          records: {
+            include: {
+              exercise: {
+                include: {
+                  targets: true,
+                },
+              },
+              sets: {
+                orderBy: {
+                  order: "asc",
+                },
+              },
+            },
+            orderBy: {
+              order: "asc",
+            },
+          },
+        },
+        orderBy: {
+          date: "asc",
+        },
+      },
+    },
   });
-  if (result.isErr()) {
+
+  if (!data) {
     return <p>トレーニングデータの取得に失敗しました</p>;
   }
-  const trainings = result.value;
+
+  const trainings = data.trainings.flatMap((training) => {
+    const result = validateTraining({
+      ...training,
+      date: training.date.toISOString(),
+    });
+
+    return result.isErr() ? [] : [result.value];
+  });
 
   return (
     <TrainingCalendarWeek
