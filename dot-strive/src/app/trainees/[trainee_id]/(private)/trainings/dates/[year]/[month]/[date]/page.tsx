@@ -2,13 +2,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { DailyTrainingList } from "@/app/_components/daily-training-list";
 import { TrainingCalendarWeek } from "@/app/_components/training-calendar-week";
 import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
 import { getTraineeBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-trainee-by-session";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
-import { DailyTrainingList } from "./_components/daily-training-list";
 import { getWeeklyTrainings } from "./_repository/get-weekly-trainings";
 
 import type { TraineeId } from "@/app/_schemas/trainee";
@@ -27,6 +27,14 @@ const Page: NextPage = async (props) => {
     redirect("/" satisfies Route);
   }
   const traineeId = getTraineeResult.value.id;
+
+  const timezoneOffsetParam = props.searchParams?.["timezone_offset"];
+  const timezoneOffset = ((): number => {
+    const number = Number(timezoneOffsetParam);
+
+    return isNaN(number) ? 0 : number;
+  })();
+
   const year = props.params?.["year"];
   const month = props.params?.["month"];
   const date = props.params?.["date"];
@@ -52,6 +60,8 @@ const Page: NextPage = async (props) => {
           w: "full",
         })}
       >
+        <p>client timezone offset: {timezoneOffset}</p>
+        <p>server timezone offset: {new Date().getTimezoneOffset()}</p>
         <p>
           {year}年{month}月
         </p>
@@ -68,7 +78,11 @@ const Page: NextPage = async (props) => {
         </Suspense>
       </div>
       <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
-        <DailyTrainingList traineeId={traineeId} date={selected} />
+        <DailyTrainingList
+          traineeId={traineeId}
+          date={selected}
+          timezoneOffset={new Date().getTimezoneOffset() - timezoneOffset}
+        />
       </Suspense>
       <Link
         href={`/trainees/${traineeId}/trainings/register?date=${year}-${month}-${date}`}
