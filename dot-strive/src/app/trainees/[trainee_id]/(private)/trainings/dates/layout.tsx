@@ -1,10 +1,10 @@
-import { SetTimezoneOffset } from "@/app/_components/set-timezone-offset";
+import { SetClientTimezoneOffset } from "@/app/_components/set-client-timezone-offset";
 import { Layout } from "@/app/_types/layout";
 
 const Layout: Layout = ({ children }) => {
   return (
     <>
-      <SetTimezoneOffset />
+      <SetClientTimezoneOffset />
       {children}
     </>
   );

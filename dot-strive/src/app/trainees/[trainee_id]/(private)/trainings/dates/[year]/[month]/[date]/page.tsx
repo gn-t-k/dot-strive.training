@@ -28,12 +28,15 @@ const Page: NextPage = async (props) => {
   }
   const traineeId = getTraineeResult.value.id;
 
-  const timezoneOffsetParam = props.searchParams?.["timezone_offset"];
-  const timezoneOffset = ((): number => {
-    const number = Number(timezoneOffsetParam);
+  const clientTimezoneOffsetParam =
+    props.searchParams?.["client_timezone_offset"];
+  const clientTimezoneOffset = ((): number => {
+    const number = Number(clientTimezoneOffsetParam);
 
     return isNaN(number) ? 0 : number;
   })();
+  const serverTimezoneOffset = new Date().getTimezoneOffset();
+  const timezoneOffset = clientTimezoneOffset - serverTimezoneOffset;
 
   const year = props.params?.["year"];
   const month = props.params?.["month"];
@@ -60,8 +63,6 @@ const Page: NextPage = async (props) => {
           w: "full",
         })}
       >
-        <p>client timezone offset: {timezoneOffset}</p>
-        <p>server timezone offset: {new Date().getTimezoneOffset()}</p>
         <p>
           {year}年{month}月
         </p>
@@ -81,7 +82,7 @@ const Page: NextPage = async (props) => {
         <DailyTrainingList
           traineeId={traineeId}
           date={selected}
-          timezoneOffset={new Date().getTimezoneOffset() - timezoneOffset}
+          timezoneOffset={timezoneOffset}
         />
       </Suspense>
       <Link

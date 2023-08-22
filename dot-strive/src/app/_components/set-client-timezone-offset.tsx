@@ -5,11 +5,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Route } from "next";
 import type { FC } from "react";
 
-export const SetTimezoneOffset: FC = () => {
+export const SetClientTimezoneOffset: FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const paramName = "timezone_offset";
+  const paramName = "client_timezone_offset";
 
   const timezoneOffset = searchParams.get(paramName);
 
