@@ -12,9 +12,8 @@ import { Suspense } from "react";
 
 import { Loading } from "@/app/_components/loading";
 import { TrainingCalendarMonth } from "@/app/_components/training-calendar-month";
-import { prisma } from "@/app/_libs/prisma/client";
-import { validateTraining } from "@/app/_schemas/training";
 import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
+import { getTrainingsByDateRange } from "@/app/actions";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
@@ -108,56 +107,15 @@ const FetchMonthlyTrainings: FC<Props> = async (props) => {
   const offsetStartOfDate = addMinutes(bufferedStartDate, props.timezoneOffset);
   const offsetEndOfDate = addMinutes(bufferedEndDate, props.timezoneOffset);
 
-  const data = await prisma.trainee.findUnique({
-    where: {
-      id: props.traineeId,
-    },
-    include: {
-      trainings: {
-        where: {
-          date: {
-            gte: offsetStartOfDate,
-            lte: offsetEndOfDate,
-          },
-        },
-        include: {
-          records: {
-            include: {
-              exercise: {
-                include: {
-                  targets: true,
-                },
-              },
-              sets: {
-                orderBy: {
-                  order: "asc",
-                },
-              },
-            },
-            orderBy: {
-              order: "asc",
-            },
-          },
-        },
-        orderBy: {
-          date: "asc",
-        },
-      },
-    },
+  const getTrainingsResult = await getTrainingsByDateRange({
+    traineeId: props.traineeId,
+    from: offsetStartOfDate,
+    to: offsetEndOfDate,
   });
-
-  if (!data) {
+  if (getTrainingsResult.isErr()) {
     return <p>トレーニングデータの取得に失敗しました</p>;
   }
-
-  const trainings = data.trainings.flatMap((training) => {
-    const result = validateTraining({
-      ...training,
-      date: training.date.toISOString(),
-    });
-
-    return result.isErr() ? [] : [result.value];
-  });
+  const trainings = getTrainingsResult.value;
 
   return (
     <div className={stack({ direction: "column" })}>

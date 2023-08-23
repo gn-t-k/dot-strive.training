@@ -1,10 +1,9 @@
 import { addMinutes, endOfDay, startOfDay } from "date-fns";
 import Link from "next/link";
 
-import { prisma } from "@/app/_libs/prisma/client";
 import { stack } from "styled-system/patterns";
 
-import { validateTraining } from "../_schemas/training";
+import { getTrainingsByDateRange } from "../actions";
 import { TrainingDetailView } from "../trainees/[trainee_id]/(private)/trainings/_components/training-detail";
 
 import type { TraineeId } from "../_schemas/trainee";
@@ -22,56 +21,15 @@ export const DailyTrainingList: FC<Props> = async (props) => {
   const offsetStartOfDate = addMinutes(startOfDate, props.timezoneOffset);
   const offsetEndOfDate = addMinutes(endOfDate, props.timezoneOffset);
 
-  const data = await prisma.trainee.findUnique({
-    where: {
-      id: props.traineeId,
-    },
-    include: {
-      trainings: {
-        where: {
-          date: {
-            gte: offsetStartOfDate,
-            lte: offsetEndOfDate,
-          },
-        },
-        include: {
-          records: {
-            include: {
-              exercise: {
-                include: {
-                  targets: true,
-                },
-              },
-              sets: {
-                orderBy: {
-                  order: "asc",
-                },
-              },
-            },
-            orderBy: {
-              order: "asc",
-            },
-          },
-        },
-        orderBy: {
-          date: "asc",
-        },
-      },
-    },
+  const getTrainingsResult = await getTrainingsByDateRange({
+    traineeId: props.traineeId,
+    from: offsetStartOfDate,
+    to: offsetEndOfDate,
   });
-
-  if (!data) {
+  if (getTrainingsResult.isErr()) {
     return <p>トレーニングデータの取得に失敗しました</p>;
   }
-
-  const trainings = data.trainings.flatMap((training) => {
-    const result = validateTraining({
-      ...training,
-      date: training.date.toISOString(),
-    });
-
-    return result.isErr() ? [] : [result.value];
-  });
+  const trainings = getTrainingsResult.value;
 
   return (
     <ul className={stack({ direction: "column", gap: 12, p: 4 })}>
