@@ -1,5 +1,6 @@
 "use client";
 
+import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { ulid } from "ulid";
 
@@ -90,7 +91,7 @@ export const EditTraining: FC<Props> = (props) => {
       traineeId={props.traineeId}
       submitTraining={submitTraining}
       defaultValues={{
-        date: props.training.date,
+        date: format(new Date(props.training.date), "yyyy-MM-dd"),
         records: props.training.records.map((record) => {
           return {
             exerciseId: record.exercise.id,

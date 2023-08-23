@@ -3,15 +3,14 @@ import Link from "next/link";
 
 import { stack } from "styled-system/patterns";
 
-import { getTrainingsByDateRange } from "../actions";
+import { getTrainingsByDateRange } from "../_actions/get-trainings-by-date-range";
 import { TrainingDetailView } from "../trainees/[trainee_id]/(private)/trainings/_components/training-detail";
 
-import type { TraineeId } from "../_schemas/trainee";
 import type { UTCDateString } from "../_schemas/utc-date-string";
 import type { FC } from "react";
 
 type Props = {
-  traineeId: TraineeId;
+  traineeId: string;
   date: UTCDateString;
   timezoneOffset: number;
 };

@@ -4,14 +4,14 @@ import { ok, err } from "neverthrow";
 
 import { prisma } from "@/app/_libs/prisma/client";
 
-import { validateTraining } from "./_schemas/training";
+import { getTraineeBySession } from "./get-trainee-by-session";
+import { validateTraining } from "../_schemas/training";
 
-import type { TraineeId } from "./_schemas/trainee";
-import type { Training } from "./_schemas/training";
+import type { Training } from "../_schemas/training";
 import type { Result } from "neverthrow";
 
 type GetTrainingsByDateRange = (props: {
-  traineeId: TraineeId;
+  traineeId: string;
   from: Date;
   to: Date;
 }) => Promise<Result<Training[], Error>>;
@@ -19,6 +19,21 @@ export const getTrainingsByDateRange: GetTrainingsByDateRange = async (
   props
 ) => {
   try {
+    const trainee = await getTraineeBySession();
+    if (trainee.isErr()) {
+      throw new Error(
+        `トレーニーの取得に失敗しました: ${trainee.error.message}`
+      );
+    }
+    if (trainee.value.id !== props.traineeId) {
+      throw new Error(
+        `認証に失敗しました: ${JSON.stringify({
+          sessionTraineeId: trainee.value.id,
+          propsTraineeId: props.traineeId,
+        })}`
+      );
+    }
+
     const data = await prisma.trainee.findUnique({
       where: {
         id: props.traineeId,
@@ -71,7 +86,7 @@ export const getTrainingsByDateRange: GetTrainingsByDateRange = async (
 
       if (result.isErr()) {
         throw new Error(
-          `トレーニングデータの検証に失敗しました: ${JSON.stringify(training)}`
+          `トレーニングデータの検証に失敗しました: ${result.error.message}`
         );
       }
 

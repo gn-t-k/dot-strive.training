@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { getAllExercises } from "@/app/_actions/get-all-exercises";
+import { getTrainingById } from "@/app/_actions/get-training-by-id";
+
 import { EditTraining } from "./_components/edit-training";
-import { getAllExercisesBySession } from "../../../_repositories/get-all-exercises-by-session";
-import { getTrainingById } from "../_repositories/get-training-by-id";
 
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
@@ -11,7 +12,7 @@ import type { Route } from "next";
 const Page: NextPage = async (props) => {
   const traineeId = props.params?.["trainee_id"];
   if (!traineeId) {
-    redirect("/" satisfies Route);
+    redirect("/");
   }
 
   const trainingId = props.params?.["training_id"];
@@ -25,7 +26,7 @@ const Page: NextPage = async (props) => {
       traineeId,
       trainingId,
     }),
-    getAllExercisesBySession({
+    getAllExercises({
       traineeId,
     }),
   ]);

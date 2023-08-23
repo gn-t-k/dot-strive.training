@@ -36,7 +36,7 @@ export const GET: RouteHandler<Training> = async (_req, context) => {
     );
   }
 
-  const data = await prisma?.trainee.findUnique({
+  const data = await prisma.trainee.findUnique({
     where: {
       id: traineeId,
     },

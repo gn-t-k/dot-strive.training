@@ -10,13 +10,12 @@ import { TrainingCalendarDay } from "./training-calendar-day";
 import { useCalendar } from "../_hooks/use-calendar";
 import { utcDateStringSchema } from "../_schemas/utc-date-string";
 
-import type { TraineeId } from "../_schemas/trainee";
 import type { Training } from "../_schemas/training";
 import type { UTCDateString } from "../_schemas/utc-date-string";
 import type { FC } from "react";
 
 type Props = {
-  traineeId: TraineeId;
+  traineeId: string;
   selected: UTCDateString;
   trainings: Training[];
 };
