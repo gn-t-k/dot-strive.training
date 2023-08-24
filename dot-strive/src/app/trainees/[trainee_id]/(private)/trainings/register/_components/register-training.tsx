@@ -46,7 +46,7 @@ export const RegisterTraining: FC<Props> = (props) => {
 
     router.refresh();
     renderToast(
-      result.isOk()
+      result.isOk
         ? {
             title: "トレーニングを登録しました",
             variant: "success",

@@ -10,12 +10,12 @@ import type { NextPage } from "@/app/_types/page";
 
 const Page: NextPage = async () => {
   const registerResult = await registerInitialData();
-  if (registerResult.isErr()) {
+  if (registerResult.isErr) {
     return <p>登録に失敗しました</p>;
   }
 
   const getTraineeResult = await getTraineeBySession();
-  if (getTraineeResult.isErr()) {
+  if (getTraineeResult.isErr) {
     return <p>トレーニー情報の取得に失敗しました</p>;
   }
   const trainee = getTraineeResult.value;

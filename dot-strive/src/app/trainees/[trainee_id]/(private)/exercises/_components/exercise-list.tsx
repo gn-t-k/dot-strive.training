@@ -12,7 +12,7 @@ export const ExerciseList: FC<Props> = async (props) => {
     traineeId: props.traineeId,
   });
 
-  if (exercisesResult.isErr()) {
+  if (exercisesResult.isErr) {
     return <p>種目の取得に失敗しました</p>;
   }
   const exercises = exercisesResult.value;

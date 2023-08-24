@@ -34,7 +34,7 @@ export const ExerciseInformation: FC<ExerciseInformationProps> = (props) => {
       const trainings = data.flatMap((training) => {
         const validateTrainingResult = validateTraining(training);
 
-        return validateTrainingResult.isErr()
+        return validateTrainingResult.isErr
           ? []
           : [validateTrainingResult.value];
       });

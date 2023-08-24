@@ -3,8 +3,7 @@ import { redirect } from "next/navigation";
 
 import { getAllExercises } from "@/app/_actions/get-all-exercises";
 import { getTrainingById } from "@/app/_actions/get-training-by-id";
-
-import { EditTraining } from "./_components/edit-training";
+import { TrainingEditingForm } from "@/app/_components/training-editing-form";
 
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
@@ -31,7 +30,7 @@ const Page: NextPage = async (props) => {
     }),
   ]);
 
-  if (getTrainingResult.isErr() || getExercisesResult.isErr()) {
+  if (getTrainingResult.isErr || getExercisesResult.isErr) {
     return <p>データの取得に失敗しました</p>;
   }
   const training = getTrainingResult.value;
@@ -40,7 +39,7 @@ const Page: NextPage = async (props) => {
   return (
     <section>
       <h1>トレーニングを編集する</h1>
-      <EditTraining
+      <TrainingEditingForm
         traineeId={traineeId}
         training={training}
         registeredExercises={registeredExercises}

@@ -9,11 +9,11 @@ import { err, ok } from "../_utils/result";
 import type { Training } from "../_schemas/training";
 import type { Result } from "../_utils/result";
 
-type GetTrainingById = (props: {
+type DeleteTraining = (props: {
   traineeId: string;
   trainingId: string;
 }) => Promise<Result<Training, Error>>;
-export const getTrainingById: GetTrainingById = async (props) => {
+export const deleteTraining: DeleteTraining = async (props) => {
   try {
     const trainee = await getTraineeBySession();
     if (trainee.isErr) {
@@ -42,26 +42,18 @@ export const getTrainingById: GetTrainingById = async (props) => {
           include: {
             records: {
               include: {
+                sets: true,
                 exercise: {
                   include: {
                     targets: true,
                   },
                 },
-                sets: {
-                  orderBy: {
-                    order: "asc",
-                  },
-                },
-              },
-              orderBy: {
-                order: "asc",
               },
             },
           },
         },
       },
     });
-
     if (!data) {
       throw new Error(
         `トレーニングデータが見つかりませんでした: ${JSON.stringify(props)}`
@@ -74,20 +66,64 @@ export const getTrainingById: GetTrainingById = async (props) => {
     }
 
     const result = validateTraining({
-      ...trainingData,
+      id: trainingData.id,
       date: trainingData.date.toISOString(),
+      records: trainingData.records.map((record) => {
+        return {
+          id: record.id,
+          memo: record.memo,
+          exercise: record.exercise,
+          order: record.order,
+          sets: record.sets.map((set) => {
+            return {
+              id: set.id,
+              weight: set.weight,
+              repetition: set.repetition,
+              order: set.order,
+            };
+          }),
+        };
+      }),
     });
     if (result.isErr) {
       throw new Error(
         `トレーニングデータの検証に失敗しました: ${result.error.message}`
       );
     }
+    const training = result.value;
 
-    return ok(result.value);
+    const recordIds = training.records.map((record) => record.id);
+    const setIds = training.records.flatMap((record) =>
+      record.sets.map((set) => set.id)
+    );
+
+    await prisma.$transaction(async (tx) => {
+      await tx.set.deleteMany({
+        where: {
+          id: {
+            in: setIds,
+          },
+        },
+      });
+      await tx.record.deleteMany({
+        where: {
+          id: {
+            in: recordIds,
+          },
+        },
+      });
+      await tx.training.delete({
+        where: {
+          id: training.id,
+        },
+      });
+    });
+
+    return ok(training);
   } catch (error) {
     return err(
       new Error(
-        `トレーニングデータの取得に失敗しました: ${
+        `トレーニングデータの削除に失敗しました: ${
           error instanceof Error ? error.message : "不明なエラー"
         }`
       )

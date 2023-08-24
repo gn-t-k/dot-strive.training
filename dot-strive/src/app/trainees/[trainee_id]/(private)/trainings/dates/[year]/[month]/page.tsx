@@ -17,7 +17,7 @@ import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
-import { TrainingDetailView } from "../../../_components/training-detail";
+import { TrainingDetailView } from "../../../../../../../_components/training-detail";
 
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
@@ -105,7 +105,7 @@ const FetchMonthlyTrainings: FC<Props> = async (props) => {
     from: offsetStartOfDate,
     to: offsetEndOfDate,
   });
-  if (getTrainingsResult.isErr()) {
+  if (getTrainingsResult.isErr) {
     return <p>トレーニングデータの取得に失敗しました</p>;
   }
   const trainings = getTrainingsResult.value;

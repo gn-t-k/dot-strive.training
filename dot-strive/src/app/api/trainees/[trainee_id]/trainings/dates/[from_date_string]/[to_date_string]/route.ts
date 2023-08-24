@@ -96,7 +96,7 @@ export const GET: RouteHandler<Training[]> = async (_req, context) => {
       })
     )
     .flatMap((validationResult) =>
-      validationResult.isErr() ? [] : [validationResult.value]
+      validationResult.isErr ? [] : [validationResult.value]
     );
 
   return NextResponse.json(trainings);

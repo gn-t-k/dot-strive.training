@@ -1,11 +1,12 @@
-import { err, ok } from "neverthrow";
+"use server";
 
 import { prisma } from "@/app/_libs/prisma/client";
 
 import { getTraineeBySession } from "./get-trainee-by-session";
 import { validateExercise, type Exercise } from "../_schemas/exercise";
+import { err, ok } from "../_utils/result";
 
-import type { Result } from "neverthrow";
+import type { Result } from "../_utils/result";
 
 type GetAllExercises = (props: {
   traineeId: string;
@@ -13,7 +14,7 @@ type GetAllExercises = (props: {
 export const getAllExercises: GetAllExercises = async (props) => {
   try {
     const trainee = await getTraineeBySession();
-    if (trainee.isErr()) {
+    if (trainee.isErr) {
       throw new Error(
         `トレーニーの取得に失敗しました: ${trainee.error.message}`
       );
@@ -49,7 +50,7 @@ export const getAllExercises: GetAllExercises = async (props) => {
     const exercises = data.exercises.map((exercise) => {
       const result = validateExercise(exercise);
 
-      if (result.isErr()) {
+      if (result.isErr) {
         throw new Error(
           `種目データの検証に失敗しました: ${result.error.message}`
         );

@@ -1,4 +1,3 @@
-import { err, ok } from "neverthrow";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { ulid } from "ulid";
@@ -8,11 +7,12 @@ import { prisma } from "@/app/_libs/prisma/client";
 import { validateExercise, type Exercise } from "@/app/_schemas/exercise";
 import { validateMuscle } from "@/app/_schemas/muscle";
 import { validateTrainee } from "@/app/_schemas/trainee";
+import { err, ok } from "@/app/_utils/result";
 
 import type { Muscle } from "@/app/_schemas/muscle";
 import type { Trainee } from "@/app/_schemas/trainee";
+import type { Result } from "@/app/_utils/result";
 import type { RouteHandler } from "@/app/api/_types/route-handler";
-import type { Result } from "neverthrow";
 import type { Session } from "next-auth";
 
 export const POST: RouteHandler = async (_req, _context) => {
@@ -28,7 +28,7 @@ export const POST: RouteHandler = async (_req, _context) => {
         authUserId: session.user.id,
         prisma: tx,
       });
-      if (registerTraineeResult.isErr()) {
+      if (registerTraineeResult.isErr) {
         throw new Error(
           `トレーニーの登録に失敗しました: ${registerTraineeResult.error}`
         );
@@ -39,7 +39,7 @@ export const POST: RouteHandler = async (_req, _context) => {
         trainee,
         prisma: tx,
       });
-      if (registerMusclesResult.isErr()) {
+      if (registerMusclesResult.isErr) {
         throw new Error(
           `部位の登録に失敗しました: ${registerMusclesResult.error}`
         );
@@ -51,7 +51,7 @@ export const POST: RouteHandler = async (_req, _context) => {
         muscles,
         prisma: tx,
       });
-      if (registerExercisesResult.isErr()) {
+      if (registerExercisesResult.isErr) {
         throw new Error(
           `種目の登録に失敗しました: ${registerExercisesResult.error}`
         );
@@ -140,7 +140,7 @@ const registerTrainee: RegisterTrainee = async (props) => {
     name: props.session.user.name ?? "",
     image: props.session.user.image ?? "",
   });
-  if (unvalidatedTrainee.isErr()) {
+  if (unvalidatedTrainee.isErr) {
     return err({
       message: "トレーニーの登録に失敗しました",
       status: 500,
@@ -155,7 +155,7 @@ const registerTrainee: RegisterTrainee = async (props) => {
       },
     });
     const validated = validateTrainee(created);
-    if (validated.isErr()) {
+    if (validated.isErr) {
       return err({
         message: "トレーニーの登録に失敗しました",
         status: 500,
@@ -191,7 +191,7 @@ const registerMuscles: RegisterMuscles = async (props) => {
       name,
     });
 
-    return result.isErr() ? [] : [result.value];
+    return result.isErr ? [] : [result.value];
   });
 
   try {
@@ -235,7 +235,7 @@ const registerExercises: RegisterExercises = async (props) => {
       }),
     });
 
-    return result.isErr() ? [] : [result.value];
+    return result.isErr ? [] : [result.value];
   });
 
   try {

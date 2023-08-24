@@ -35,7 +35,7 @@ export const EditMuscle: FC<Props> = (props) => {
 
       router.refresh();
       renderToast(
-        result.isOk()
+        result.isOk
           ? {
               title: `部位「${props.muscle.name}」の名前を「${result.value.name}」に更新しました`,
               variant: "success",

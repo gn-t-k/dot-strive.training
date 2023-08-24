@@ -1,71 +1,48 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+"use server";
 
-import { nextAuthOptions } from "@/app/_libs/next-auth/options";
 import { prisma } from "@/app/_libs/prisma/client";
-import { validateTraining } from "@/app/_schemas/training";
 
-import type { Training } from "@/app/_schemas/training";
-import type { RouteHandler } from "@/app/api/_types/route-handler";
+import { getTraineeBySession } from "./get-trainee-by-session";
+import { err, ok } from "../_utils/result";
 
-export const POST: RouteHandler<Training> = async (req, context) => {
-  const session = await getServerSession(nextAuthOptions);
-  if (!session?.user.id) {
-    return NextResponse.json(
-      {
-        error: "セッションが取得できませんでした",
+import type { Training } from "../_schemas/training";
+import type { Result } from "../_utils/result";
+
+type UpdateTraining = (props: {
+  traineeId: string;
+  training: Training;
+}) => Promise<Result<Training, Error>>;
+export const updateTraining: UpdateTraining = async (props) => {
+  try {
+    const trainee = await getTraineeBySession();
+    if (trainee.isErr) {
+      throw new Error(
+        `トレーニーの取得に失敗しました: ${trainee.error.message}`
+      );
+    }
+    if (trainee.value.id !== props.traineeId) {
+      throw new Error(
+        `認証に失敗しました: ${JSON.stringify({
+          sessionTraineeId: trainee.value.id,
+          propsTraineeId: props.traineeId,
+        })}`
+      );
+    }
+
+    const newTraining = props.training;
+    const oldTraining = await prisma.training.findUnique({
+      where: {
+        id: newTraining.id,
       },
-      {
-        status: 401,
-      }
-    );
-  }
-
-  const data = await req.json();
-  const validateBodyResult = validateTraining(data);
-
-  if (validateBodyResult.isErr) {
-    return NextResponse.json(
-      { error: "bodyの検証に失敗しました" },
-      { status: 400 }
-    );
-  }
-  const newTraining = validateBodyResult.value;
-
-  const traineeId = context?.params?.["trainee_id"];
-  if (!traineeId) {
-    return NextResponse.json(
-      { error: "trainee-idが指定されていません" },
-      { status: 400 }
-    );
-  }
-
-  const trainee = await prisma.trainee.findUnique({
-    where: {
-      id: traineeId,
-    },
-  });
-  if (trainee?.authUserId !== session.user.id) {
-    return NextResponse.json(
-      { error: "trainingを保存できませんでした" },
-      { status: 401 }
-    );
-  }
-
-  const oldTraining = await prisma.training.findUnique({
-    where: {
-      id: newTraining.id,
-    },
-    include: {
-      records: {
-        include: {
-          sets: true,
+      include: {
+        records: {
+          include: {
+            sets: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  try {
     await prisma.$transaction(async (tx) => {
       const executedAt = new Date();
       const newTrainingDate = new Date(newTraining.date);
@@ -92,7 +69,7 @@ export const POST: RouteHandler<Training> = async (req, context) => {
             updatedAt: executedAt,
             trainee: {
               connect: {
-                id: trainee.id,
+                id: trainee.value.id,
               },
             },
           },
@@ -185,11 +162,14 @@ export const POST: RouteHandler<Training> = async (req, context) => {
       }
     });
 
-    return NextResponse.json(newTraining);
+    return ok(newTraining);
   } catch (error) {
-    return NextResponse.json(
-      { error: "trainingを作成できませんでした" },
-      { status: 500 }
+    return err(
+      new Error(
+        `トレーニングデータの更新に失敗しました: ${
+          error instanceof Error ? error.message : "不明なエラー"
+        }`
+      )
     );
   }
 };

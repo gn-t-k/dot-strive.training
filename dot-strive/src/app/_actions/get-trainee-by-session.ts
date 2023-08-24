@@ -1,15 +1,15 @@
 "use server";
 
-import { err, ok } from "neverthrow";
 import { getServerSession } from "next-auth";
 
 import { prisma } from "@/app/_libs/prisma/client";
 
 import { nextAuthOptions } from "../_libs/next-auth/options";
 import { validateTrainee } from "../_schemas/trainee";
+import { err, ok } from "../_utils/result";
 
+import type { Result } from "../_utils/result";
 import type { Trainee } from "@prisma/client";
-import type { Result } from "neverthrow";
 
 type GetTraineeBySession = () => Promise<Result<Trainee, Error>>;
 export const getTraineeBySession: GetTraineeBySession = async () => {
@@ -31,7 +31,7 @@ export const getTraineeBySession: GetTraineeBySession = async () => {
     }
 
     const result = validateTrainee(data);
-    if (result.isErr()) {
+    if (result.isErr) {
       throw new Error(
         `トレーニーの検証に失敗しました: ${result.error.message}`
       );

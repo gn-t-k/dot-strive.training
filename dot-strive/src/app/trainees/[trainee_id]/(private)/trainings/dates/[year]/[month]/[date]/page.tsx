@@ -115,7 +115,7 @@ const FetchWeeklyTrainings: FC<Props> = async (props) => {
     from: offsetStartOfDate,
     to: offsetEndOfDate,
   });
-  if (getTrainingsResult.isErr()) {
+  if (getTrainingsResult.isErr) {
     return <p>トレーニングデータの取得に失敗しました</p>;
   }
   const trainings = getTrainingsResult.value;

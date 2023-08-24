@@ -3,8 +3,8 @@ import Link from "next/link";
 
 import { stack } from "styled-system/patterns";
 
+import { TrainingDetailView } from "./training-detail";
 import { getTrainingsByDateRange } from "../_actions/get-trainings-by-date-range";
-import { TrainingDetailView } from "../trainees/[trainee_id]/(private)/trainings/_components/training-detail";
 
 import type { UTCDateString } from "../_schemas/utc-date-string";
 import type { FC } from "react";
@@ -25,7 +25,7 @@ export const DailyTrainingList: FC<Props> = async (props) => {
     from: offsetStartOfDate,
     to: offsetEndOfDate,
   });
-  if (getTrainingsResult.isErr()) {
+  if (getTrainingsResult.isErr) {
     return <p>トレーニングデータの取得に失敗しました</p>;
   }
   const trainings = getTrainingsResult.value;

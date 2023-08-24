@@ -17,7 +17,7 @@ const Layout: Layout = async ({ children }) => {
 
   const getTraineeResult = await getTraineeBySession();
 
-  if (getTraineeResult.isOk()) {
+  if (getTraineeResult.isOk) {
     const trainee = getTraineeResult.value;
     const to = `/trainees/${trainee.id}` as const;
     redirect(to satisfies Route<typeof to>);

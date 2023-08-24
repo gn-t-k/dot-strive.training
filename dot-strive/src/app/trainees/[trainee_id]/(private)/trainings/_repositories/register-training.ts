@@ -1,14 +1,14 @@
 import { setDate, setMonth, setYear } from "date-fns";
-import { err } from "neverthrow";
 import { ulid } from "ulid";
 
 import { validateTraining } from "@/app/_schemas/training";
 import { getFetcher } from "@/app/_utils/get-fetcher";
+import { err } from "@/app/_utils/result";
 
 import { getAllExercisesBySession } from "../../_repositories/get-all-exercises-by-session";
 
 import type { Training } from "@/app/_schemas/training";
-import type { Result } from "neverthrow";
+import type { Result } from "@/app/_utils/result";
 
 type RegisterTraining = (props: Props) => Promise<Result<Training, Error>>;
 type Props = {
@@ -29,7 +29,7 @@ export const registerTraining: RegisterTraining = async (props) => {
   const getExercisesResult = await getAllExercisesBySession({
     traineeId: props.traineeId,
   });
-  if (getExercisesResult.isErr()) {
+  if (getExercisesResult.isErr) {
     return err(
       new Error(
         `exercisesを取得できませんでした: ${getExercisesResult.error.message}}`
@@ -77,7 +77,7 @@ export const registerTraining: RegisterTraining = async (props) => {
       ];
     }),
   });
-  if (validateTrainingResult.isErr()) {
+  if (validateTrainingResult.isErr) {
     return validateTrainingResult;
   }
   const training = validateTrainingResult.value;

@@ -12,7 +12,7 @@ export const WeeklyNumberOfSets: FC<Props> = async (props) => {
     muscleId: props.muscleId,
     date: new Date(),
   });
-  if (getWeeklyNumberOfSetsResult.isErr()) {
+  if (getWeeklyNumberOfSetsResult.isErr) {
     return <p>今週の合計セット数の取得に失敗しました</p>;
   }
   const weeklyNumberOfSets = getWeeklyNumberOfSetsResult.value;

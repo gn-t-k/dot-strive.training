@@ -4,11 +4,11 @@ import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { ulid } from "ulid";
 
+import { updateTraining } from "@/app/_actions/update-training";
 import { useToast } from "@/app/_hooks/use-toast";
 import { validateTraining, type Training } from "@/app/_schemas/training";
 
-import { TrainingForm } from "../../../_components/training-form";
-import { updateTraining } from "../_repositories/update-training";
+import { TrainingForm } from "../trainees/[trainee_id]/(private)/trainings/_components/training-form";
 
 import type { Exercise } from "@/app/_schemas/exercise";
 import type { ComponentProps, FC } from "react";
@@ -18,7 +18,7 @@ type Props = {
   training: Training;
   registeredExercises: Exercise[];
 };
-export const EditTraining: FC<Props> = (props) => {
+export const TrainingEditingForm: FC<Props> = (props) => {
   const router = useRouter();
   const { renderToast } = useToast();
 
@@ -55,7 +55,7 @@ export const EditTraining: FC<Props> = (props) => {
         ];
       }),
     });
-    if (validateTrainingResult.isErr()) {
+    if (validateTrainingResult.isErr) {
       renderToast({
         title: "トレーニングの更新に失敗しました",
         variant: "error",
@@ -71,7 +71,7 @@ export const EditTraining: FC<Props> = (props) => {
 
     router.refresh();
     renderToast(
-      result.isOk()
+      result.isOk
         ? {
             title: "トレーニングを更新しました",
             variant: "success",

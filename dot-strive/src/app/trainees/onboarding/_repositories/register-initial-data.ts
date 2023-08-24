@@ -1,6 +1,7 @@
-import { err, ok, type Result } from "neverthrow";
-
 import { getFetcher } from "@/app/_utils/get-fetcher";
+import { err, ok } from "@/app/_utils/result";
+
+import type { Result } from "@/app/_utils/result";
 
 type RegisterInitialData = () => Promise<Result<string, Error>>;
 export const registerInitialData: RegisterInitialData = async () => {

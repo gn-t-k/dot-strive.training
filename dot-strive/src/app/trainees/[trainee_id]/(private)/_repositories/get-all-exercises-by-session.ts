@@ -1,10 +1,9 @@
-import { err, ok } from "neverthrow";
-
 import { validateExercise } from "@/app/_schemas/exercise";
 import { getFetcher } from "@/app/_utils/get-fetcher";
+import { err, ok } from "@/app/_utils/result";
 
 import type { Exercise } from "@/app/_schemas/exercise";
-import type { Result } from "neverthrow";
+import type { Result } from "@/app/_utils/result";
 
 type GetAllExercisesBySession = (
   props: Props
@@ -27,7 +26,7 @@ export const getAllExercisesBySession: GetAllExercisesBySession = async (
   const exercises = data.flatMap((exercise) => {
     const result = validateExercise(exercise);
 
-    return result.isErr() ? [] : [result.value];
+    return result.isErr ? [] : [result.value];
   });
 
   return ok(exercises);

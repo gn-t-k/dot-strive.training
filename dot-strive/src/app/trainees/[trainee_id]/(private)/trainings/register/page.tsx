@@ -19,7 +19,7 @@ const Page: NextPage = async (props) => {
   const getExercisesResult = await getAllExercisesBySession({
     traineeId,
   });
-  if (getExercisesResult.isErr()) {
+  if (getExercisesResult.isErr) {
     return <p>種目データの取得に失敗しました</p>;
   }
   const registeredExercises = getExercisesResult.value;

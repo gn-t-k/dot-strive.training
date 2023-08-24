@@ -66,7 +66,7 @@ export const GET: RouteHandler<Exercise> = async (req, context) => {
   }
 
   const exercise = validateExercise(data.exercises[0]);
-  if (exercise.isErr()) {
+  if (exercise.isErr) {
     return NextResponse.json(
       { error: "exerciseのデータが不正です" },
       { status: 500 }
@@ -108,7 +108,7 @@ export const PATCH: RouteHandler<Exercise> = async (req, context) => {
   const body = await req.json();
   const validatedBodyResult = validateExercise(body);
   if (
-    validatedBodyResult.isErr() ||
+    validatedBodyResult.isErr ||
     validatedBodyResult.value.id !== exerciseId
   ) {
     return NextResponse.json(
@@ -184,7 +184,7 @@ export const PATCH: RouteHandler<Exercise> = async (req, context) => {
 
     const validateResult = validateExercise(unvalidatedUpdated);
 
-    if (validateResult.isErr()) {
+    if (validateResult.isErr) {
       return NextResponse.json(
         { error: "exerciseのデータが不正です" },
         { status: 500 }
@@ -258,7 +258,7 @@ export const DELETE: RouteHandler<Exercise> = async (req, context) => {
   }
 
   const exercise = validateExercise(data.exercises[0]);
-  if (exercise.isErr()) {
+  if (exercise.isErr) {
     return NextResponse.json(
       { error: "exerciseのデータが不正です" },
       { status: 500 }
@@ -276,7 +276,7 @@ export const DELETE: RouteHandler<Exercise> = async (req, context) => {
     });
 
     const validateResult = validateExercise(result);
-    if (validateResult.isErr()) {
+    if (validateResult.isErr) {
       return NextResponse.json(
         { error: "exerciseのデータが不正です" },
         { status: 500 }

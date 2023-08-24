@@ -30,7 +30,7 @@ export const RegisterExercise: FC<Props> = (props) => {
       });
 
       renderToast(
-        result.isOk()
+        result.isOk
           ? {
               title: `種目「${fieldValues.name}」を登録しました`,
               variant: "success",

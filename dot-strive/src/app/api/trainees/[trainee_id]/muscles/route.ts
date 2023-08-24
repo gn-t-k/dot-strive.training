@@ -46,7 +46,7 @@ export const GET: RouteHandler<Muscle[]> = async (_req, context) => {
 
   const muscles = data.muscles
     .map(validateMuscle)
-    .flatMap((muscle) => (muscle.isErr() ? [] : [muscle.value]));
+    .flatMap((muscle) => (muscle.isErr ? [] : [muscle.value]));
 
   return NextResponse.json(muscles);
 };
@@ -67,7 +67,7 @@ export const POST: RouteHandler<Muscle> = async (req, context) => {
   const data = await req.json();
   const validateBodyResult = validateMuscle(data);
 
-  if (validateBodyResult.isErr()) {
+  if (validateBodyResult.isErr) {
     return NextResponse.json(
       { error: "bodyの検証に失敗しました" },
       { status: 400 }
@@ -105,7 +105,7 @@ export const POST: RouteHandler<Muscle> = async (req, context) => {
     });
 
     const validateCreatedResult = validateMuscle(created);
-    if (validateCreatedResult.isErr()) {
+    if (validateCreatedResult.isErr) {
       return NextResponse.json(
         { error: "muscleの検証に失敗しました" },
         { status: 500 }
