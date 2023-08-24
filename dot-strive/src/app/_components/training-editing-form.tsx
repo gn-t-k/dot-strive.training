@@ -4,11 +4,11 @@ import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { ulid } from "ulid";
 
-import { updateTraining } from "@/app/_actions/update-training";
+import { registerOrUpdateTraining } from "@/app/_actions/register-or-update-training";
 import { useToast } from "@/app/_hooks/use-toast";
 import { validateTraining, type Training } from "@/app/_schemas/training";
 
-import { TrainingForm } from "../trainees/[trainee_id]/(private)/trainings/_components/training-form";
+import { TrainingForm } from "./training-form";
 
 import type { Exercise } from "@/app/_schemas/exercise";
 import type { ComponentProps, FC } from "react";
@@ -64,7 +64,7 @@ export const TrainingEditingForm: FC<Props> = (props) => {
     }
     const training = validateTrainingResult.value;
 
-    const result = await updateTraining({
+    const result = await registerOrUpdateTraining({
       traineeId: props.traineeId,
       training,
     });

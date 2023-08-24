@@ -1,22 +1,23 @@
 "use client";
 
-import { format } from "date-fns";
+import { format, setDate, setMonth, setYear } from "date-fns";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ulid } from "ulid";
 
+import { registerOrUpdateTraining } from "@/app/_actions/register-or-update-training";
+import { TrainingForm } from "@/app/_components/training-form";
 import { useToast } from "@/app/_hooks/use-toast";
-import { TrainingForm } from "@/app/trainees/[trainee_id]/(private)/trainings/_components/training-form";
+import { validateTraining } from "@/app/_schemas/training";
 
-import { registerTraining } from "../../_repositories/register-training";
-
+import type { TrainingField } from "@/app/_components/training-form";
 import type { Exercise } from "@/app/_schemas/exercise";
-import type { TrainingField } from "@/app/trainees/[trainee_id]/(private)/trainings/_components/training-form";
 import type { ComponentProps, FC } from "react";
 
 type Props = {
   traineeId: string;
   registeredExercises: Exercise[];
 };
-export const RegisterTraining: FC<Props> = (props) => {
+export const TrainingRegistrationForm: FC<Props> = (props) => {
   const router = useRouter();
   const { renderToast } = useToast();
   const searchParams = useSearchParams();
@@ -25,26 +26,60 @@ export const RegisterTraining: FC<Props> = (props) => {
   const submitTraining: ComponentProps<
     typeof TrainingForm
   >["submitTraining"] = async (fieldValues) => {
-    const result = await registerTraining({
-      traineeId: props.traineeId,
-      date: fieldValues.date,
-      records: fieldValues.records.map((record, index) => {
-        return {
-          exerciseId: record.exerciseId,
-          sets: record.sets.map((set, index) => {
-            return {
+    const inputDate = new Date(fieldValues.date);
+    const [year, month, date] = [
+      inputDate.getFullYear(),
+      inputDate.getMonth(),
+      inputDate.getDate(),
+    ];
+    const localDate = new Date();
+    const combinedDate = setDate(
+      setMonth(setYear(localDate, year), month),
+      date
+    );
+    const validateTrainingResult = validateTraining({
+      id: ulid(),
+      date: new Date(combinedDate).toISOString(),
+      records: fieldValues.records.flatMap((record, index) => {
+        const exercise = props.registeredExercises.find(
+          (exercise) => exercise.id === record.exerciseId
+        );
+
+        if (exercise === undefined) {
+          return [];
+        }
+
+        return [
+          {
+            id: ulid(),
+            exercise,
+            sets: record.sets.map((set, index) => ({
+              id: ulid(),
               weight: Number(set.weight),
               repetition: Number(set.repetition),
               order: index + 1,
-            };
-          }),
-          memo: record.memo,
-          order: index + 1,
-        };
+            })),
+            memo: record.memo,
+            order: index + 1,
+          },
+        ];
       }),
     });
+    if (validateTrainingResult.isErr) {
+      renderToast({
+        title: "トレーニングの登録に失敗しました",
+        variant: "error",
+      });
 
-    router.refresh();
+      return;
+    }
+    const training = validateTrainingResult.value;
+
+    const result = await registerOrUpdateTraining({
+      traineeId: props.traineeId,
+      training,
+    });
+
     renderToast(
       result.isOk
         ? {

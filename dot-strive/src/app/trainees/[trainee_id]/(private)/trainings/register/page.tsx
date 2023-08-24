@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { TrainingRegistrationForm } from "@/app/_components/training-registration-form";
 import { getAllExercisesBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-all-exercises-by-session";
 import { stack } from "styled-system/patterns";
-
-import { RegisterTraining } from "./_components/register-training";
 
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
@@ -27,7 +26,7 @@ const Page: NextPage = async (props) => {
   return (
     <section className={stack({ direction: "column" })}>
       <h1>トレーニングを登録</h1>
-      <RegisterTraining
+      <TrainingRegistrationForm
         traineeId={traineeId}
         registeredExercises={registeredExercises}
       />

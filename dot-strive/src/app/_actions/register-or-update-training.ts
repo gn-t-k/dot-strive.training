@@ -8,11 +8,13 @@ import { err, ok } from "../_utils/result";
 import type { Training } from "../_schemas/training";
 import type { Result } from "../_utils/result";
 
-type UpdateTraining = (props: {
+type RegisterOrUpdateTraining = (props: {
   traineeId: string;
   training: Training;
 }) => Promise<Result<Training, Error>>;
-export const updateTraining: UpdateTraining = async (props) => {
+export const registerOrUpdateTraining: RegisterOrUpdateTraining = async (
+  props
+) => {
   try {
     const trainee = await getTraineeBySession();
     if (trainee.isErr) {
