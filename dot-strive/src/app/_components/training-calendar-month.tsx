@@ -7,13 +7,12 @@ import { grid, stack } from "styled-system/patterns";
 
 import { useCalendar } from "../_hooks/use-calendar";
 
-import type { TraineeId } from "@/app/_schemas/trainee";
 import type { Training } from "@/app/_schemas/training";
 import type { UTCDateString } from "@/app/_schemas/utc-date-string";
 import type { FC } from "react";
 
 type Props = {
-  traineeId: TraineeId;
+  traineeId: string;
   trainings: Training[];
   selected: UTCDateString;
 };

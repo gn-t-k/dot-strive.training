@@ -23,7 +23,7 @@ const Page: NextPage = async (props) => {
       traineeId,
     }),
   ]);
-  if (getMusclesResult.isErr() || getExercisesResult.isErr()) {
+  if (getMusclesResult.isErr || getExercisesResult.isErr) {
     return <p>データの取得に失敗しました</p>;
   }
   const registeredMuscles = getMusclesResult.value;

@@ -1,13 +1,13 @@
-import { err } from "neverthrow";
 import { ulid } from "ulid";
 
 import { validateExercise } from "@/app/_schemas/exercise";
 import { getFetcher } from "@/app/_utils/get-fetcher";
+import { err } from "@/app/_utils/result";
 
 import { getAllMusclesBySession } from "../../_repositories/get-all-muscles-by-session";
 
 import type { Exercise } from "@/app/_schemas/exercise";
-import type { Result } from "neverthrow";
+import type { Result } from "@/app/_utils/result";
 
 type RegisterExercise = (props: Props) => Promise<Result<Exercise, Error>>;
 type Props = {
@@ -19,7 +19,7 @@ export const registerExercise: RegisterExercise = async (props) => {
   const getMusclesResult = await getAllMusclesBySession({
     traineeId: props.traineeId,
   });
-  if (getMusclesResult.isErr()) {
+  if (getMusclesResult.isErr) {
     return err(new Error("musclesを取得できませんでした"));
   }
   const muscles = getMusclesResult.value;
@@ -32,7 +32,7 @@ export const registerExercise: RegisterExercise = async (props) => {
     name: props.exerciseName,
     targets,
   });
-  if (validateExerciseResult.isErr()) {
+  if (validateExerciseResult.isErr) {
     return validateExerciseResult;
   }
   const exercise = validateExerciseResult.value;

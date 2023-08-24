@@ -1,10 +1,10 @@
 import { endOfWeek, format, startOfWeek } from "date-fns";
-import { err, ok } from "neverthrow";
 
 import { validateTraining } from "@/app/_schemas/training";
 import { getFetcher } from "@/app/_utils/get-fetcher";
+import { err, ok } from "@/app/_utils/result";
 
-import type { Result } from "neverthrow";
+import type { Result } from "@/app/_utils/result";
 
 type GetWeeklyNumberOfSets = (props: Props) => Promise<Result<number, Error>>;
 type Props = {
@@ -28,7 +28,7 @@ export const getWeeklyNumberOfSets: GetWeeklyNumberOfSets = async (props) => {
   const trainings = data.flatMap((training) => {
     const validateTrainingResult = validateTraining(training);
 
-    return validateTrainingResult.isOk() ? [validateTrainingResult.value] : [];
+    return validateTrainingResult.isOk ? [validateTrainingResult.value] : [];
   });
   const weeklyNumberOfSets = trainings
     .flatMap((training) => training.records)

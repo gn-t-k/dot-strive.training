@@ -10,31 +10,24 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { getTrainingsByDateRange } from "@/app/_actions/get-trainings-by-date-range";
 import { Loading } from "@/app/_components/loading";
 import { TrainingCalendarMonth } from "@/app/_components/training-calendar-month";
 import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
-import { getTrainingsByDateRange } from "@/app/actions";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
-import { getTraineeBySession } from "../../../../_repositories/get-trainee-by-session";
-import { TrainingDetailView } from "../../../_components/training-detail";
+import { TrainingDetailView } from "../../../../../../../_components/training-detail";
 
-import type { TraineeId } from "@/app/_schemas/trainee";
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
 import type { FC } from "react";
 
 const Page: NextPage = async (props) => {
-  const traineeIdParam = props.params?.["trainee_id"];
-  const getTraineeResult = await getTraineeBySession();
-  if (
-    getTraineeResult.isErr() ||
-    getTraineeResult.value.id !== traineeIdParam
-  ) {
-    redirect("/" satisfies Route);
+  const traineeId = props.params?.["trainee_id"];
+  if (!traineeId) {
+    redirect("/");
   }
-  const traineeId = getTraineeResult.value.id;
 
   const clientTimezoneOffsetParam =
     props.searchParams?.["client_timezone_offset"];
@@ -94,7 +87,7 @@ const Page: NextPage = async (props) => {
 export default Page;
 
 type Props = {
-  traineeId: TraineeId;
+  traineeId: string;
   year: string;
   month: string;
   timezoneOffset: number;
@@ -112,7 +105,7 @@ const FetchMonthlyTrainings: FC<Props> = async (props) => {
     from: offsetStartOfDate,
     to: offsetEndOfDate,
   });
-  if (getTrainingsResult.isErr()) {
+  if (getTrainingsResult.isErr) {
     return <p>トレーニングデータの取得に失敗しました</p>;
   }
   const trainings = getTrainingsResult.value;

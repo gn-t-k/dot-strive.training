@@ -64,7 +64,7 @@ export const GET: RouteHandler<Muscle> = async (req, context) => {
   }
 
   const muscle = validateMuscle(data.muscles[0]);
-  if (muscle.isErr()) {
+  if (muscle.isErr) {
     return NextResponse.json(
       { error: "muscleのデータが不正です" },
       { status: 500 }
@@ -105,7 +105,7 @@ export const PATCH: RouteHandler<Muscle> = async (req, context) => {
 
   const body = await req.json();
   const validateBodyResult = validateMuscle(body);
-  if (validateBodyResult.isErr()) {
+  if (validateBodyResult.isErr) {
     return NextResponse.json(
       { error: "bodyの検証に失敗しました" },
       { status: 400 }
@@ -143,7 +143,7 @@ export const PATCH: RouteHandler<Muscle> = async (req, context) => {
     });
     const validateUpdatedResult = validateMuscle(updated);
 
-    if (validateUpdatedResult.isErr()) {
+    if (validateUpdatedResult.isErr) {
       return NextResponse.json(
         { error: "muscleの検証に失敗しました" },
         { status: 500 }
@@ -211,7 +211,7 @@ export const DELETE: RouteHandler<Muscle> = async (req, context) => {
     });
 
     const result = validateMuscle(deleted);
-    if (result.isErr()) {
+    if (result.isErr) {
       return NextResponse.json(
         { error: "muscleの検証に失敗しました" },
         { status: 500 }

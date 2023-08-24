@@ -26,7 +26,7 @@ export const RegisterMuscle: FC<Props> = (props) => {
       });
 
       renderToast(
-        result.isOk()
+        result.isOk
           ? {
               title: `部位「${fieldValues.name}」を登録しました`,
               variant: "success",

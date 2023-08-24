@@ -1,7 +1,8 @@
-import { err, ok } from "neverthrow";
 import { z } from "zod";
 
-import type { Result } from "neverthrow";
+import { err, ok } from "../_utils/result";
+
+import type { Result } from "../_utils/result";
 
 export const traineeIdSchema = z.string().brand("trainee-id");
 const traineeSchema = z.object({

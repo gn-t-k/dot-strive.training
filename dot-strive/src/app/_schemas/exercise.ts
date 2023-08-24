@@ -1,10 +1,11 @@
-import { ok, err } from "neverthrow";
 import { z } from "zod";
 
 import { muscleSchema } from "@/app/_schemas/muscle";
 
+import { err, ok } from "../_utils/result";
+
 import type { UnvalidatedMuscle } from "./muscle";
-import type { Result } from "neverthrow";
+import type { Result } from "../_utils/result";
 
 const exerciseIdSchema = z.string().brand("exercise-id");
 export const exerciseSchema = z.object({

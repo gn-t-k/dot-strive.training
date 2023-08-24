@@ -36,7 +36,7 @@ export const GET: RouteHandler<Training> = async (_req, context) => {
     );
   }
 
-  const data = await prisma?.trainee.findUnique({
+  const data = await prisma.trainee.findUnique({
     where: {
       id: traineeId,
     },
@@ -86,7 +86,7 @@ export const GET: RouteHandler<Training> = async (_req, context) => {
     ...data.trainings[0],
     date: data.trainings[0].date.toISOString(),
   });
-  if (validateTrainingResult.isErr()) {
+  if (validateTrainingResult.isErr) {
     return NextResponse.json(
       {
         error: `trainingの取得に失敗しました: ${validateTrainingResult.error}`,
@@ -184,7 +184,7 @@ export const DELETE: RouteHandler<Training> = async (_req, context) => {
       };
     }),
   });
-  if (validateTrainingResult.isErr()) {
+  if (validateTrainingResult.isErr) {
     return NextResponse.json(
       {
         error: `trainingの取得に失敗しました: ${validateTrainingResult.error}`,

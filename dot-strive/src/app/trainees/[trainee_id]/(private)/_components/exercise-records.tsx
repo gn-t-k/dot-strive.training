@@ -14,7 +14,7 @@ export const ExerciseRecords: FC<Props> = async (props) => {
     traineeId: props.traineeId,
     exerciseId: props.exerciseId,
   });
-  if (getRecordsResult.isErr()) {
+  if (getRecordsResult.isErr) {
     return <p>記録データの取得に失敗しました</p>;
   }
   const records = getRecordsResult.value;

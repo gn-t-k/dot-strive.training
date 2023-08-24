@@ -31,7 +31,7 @@ export const GET: RouteHandler<Trainee | null> = async (_req, _context) => {
   }
 
   const trainee = validateTrainee(data);
-  if (trainee.isErr()) {
+  if (trainee.isErr) {
     return NextResponse.json(
       { error: "traineeのデータが不正です" },
       { status: 500 }

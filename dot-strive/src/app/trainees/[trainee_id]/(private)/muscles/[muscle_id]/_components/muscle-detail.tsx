@@ -13,7 +13,7 @@ export const MuscleDetail: FC<Props> = async (props) => {
     traineeId: props.traineeId,
     muscleId: props.muscleId,
   });
-  if (getMuscleResult.isErr()) {
+  if (getMuscleResult.isErr) {
     return <p>部位データの取得に失敗しました</p>;
   }
   const muscle = getMuscleResult.value;
