@@ -2,7 +2,7 @@ import { validateMuscle } from "@/app/_schemas/muscle";
 import { getFetcher } from "@/app/_utils/get-fetcher";
 
 import type { Muscle } from "@/app/_schemas/muscle";
-import type { Result } from "neverthrow";
+import type { Result } from "@/app/_utils/result";
 
 type GetMuscleById = (props: Props) => Promise<Result<Muscle, Error>>;
 type Props = {

@@ -3,11 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { deleteTraining } from "@/app/_actions/delete-training";
 import { Button } from "@/app/_components/button";
 import { useToast } from "@/app/_hooks/use-toast";
 import { stack } from "styled-system/patterns";
-
-import { deleteTraining } from "../_repositories/delete-training";
 
 import type { Training } from "@/app/_schemas/training";
 import type { FC, MouseEventHandler } from "react";
@@ -16,7 +15,7 @@ type Props = {
   traineeId: string;
   training: Training;
 };
-export const DeleteTrainingClient: FC<Props> = (props) => {
+export const TrainingDeleteAndConfirm: FC<Props> = (props) => {
   const router = useRouter();
   const { renderToast } = useToast();
   const [isConfirming, setIsConfirming] = useState(false);
@@ -38,7 +37,7 @@ export const DeleteTrainingClient: FC<Props> = (props) => {
     setIsConfirming(false);
 
     renderToast(
-      result.isOk()
+      result.isOk
         ? {
             title: "トレーニングを削除しました",
             variant: "success",
@@ -48,7 +47,7 @@ export const DeleteTrainingClient: FC<Props> = (props) => {
             variant: "error",
           }
     );
-    if (result.isOk()) {
+    if (result.isOk) {
       router.push(`/trainees/${props.traineeId}/trainings`);
     }
   };

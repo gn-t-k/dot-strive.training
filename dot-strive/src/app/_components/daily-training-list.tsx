@@ -3,15 +3,14 @@ import Link from "next/link";
 
 import { stack } from "styled-system/patterns";
 
-import { getTrainingsByDateRange } from "../actions";
-import { TrainingDetailView } from "../trainees/[trainee_id]/(private)/trainings/_components/training-detail";
+import { TrainingDetailView } from "./training-detail";
+import { getTrainingsByDateRange } from "../_actions/get-trainings-by-date-range";
 
-import type { TraineeId } from "../_schemas/trainee";
 import type { UTCDateString } from "../_schemas/utc-date-string";
 import type { FC } from "react";
 
 type Props = {
-  traineeId: TraineeId;
+  traineeId: string;
   date: UTCDateString;
   timezoneOffset: number;
 };
@@ -26,7 +25,7 @@ export const DailyTrainingList: FC<Props> = async (props) => {
     from: offsetStartOfDate,
     to: offsetEndOfDate,
   });
-  if (getTrainingsResult.isErr()) {
+  if (getTrainingsResult.isErr) {
     return <p>トレーニングデータの取得に失敗しました</p>;
   }
   const trainings = getTrainingsResult.value;

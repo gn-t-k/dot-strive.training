@@ -1,7 +1,6 @@
+import { getTrainingById } from "@/app/_actions/get-training-by-id";
 import { LocalDate } from "@/app/_components/local-date";
 import { stack } from "styled-system/patterns";
-
-import { getTrainingById } from "../[training_id]/_repositories/get-training-by-id";
 
 import type { Training } from "@/app/_schemas/training";
 import type { FC } from "react";
@@ -15,7 +14,7 @@ export const TrainingDetail: FC<Props> = async (props) => {
     traineeId: props.traineeId,
     trainingId: props.trainingId,
   });
-  if (getTrainingResult.isErr()) {
+  if (getTrainingResult.isErr) {
     return <p>データの取得に失敗しました</p>;
   }
   const training = getTrainingResult.value;

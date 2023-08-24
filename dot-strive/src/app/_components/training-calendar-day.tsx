@@ -8,12 +8,11 @@ import { stack } from "styled-system/patterns";
 import { EmojiIcon } from "./emoji-icon";
 
 import type { CalendarDate } from "../_hooks/use-calendar";
-import type { TraineeId } from "../_schemas/trainee";
 import type { Training } from "../_schemas/training";
 import type { FC } from "react";
 
 type Props = {
-  traineeId: TraineeId;
+  traineeId: string;
   trainings: Training[];
   day: CalendarDate;
 };

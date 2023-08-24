@@ -1,13 +1,14 @@
 "use client";
 
+import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { ulid } from "ulid";
 
+import { registerOrUpdateTraining } from "@/app/_actions/register-or-update-training";
 import { useToast } from "@/app/_hooks/use-toast";
 import { validateTraining, type Training } from "@/app/_schemas/training";
 
-import { TrainingForm } from "../../../_components/training-form";
-import { updateTraining } from "../_repositories/update-training";
+import { TrainingForm } from "./training-form";
 
 import type { Exercise } from "@/app/_schemas/exercise";
 import type { ComponentProps, FC } from "react";
@@ -17,7 +18,7 @@ type Props = {
   training: Training;
   registeredExercises: Exercise[];
 };
-export const EditTraining: FC<Props> = (props) => {
+export const TrainingEditingForm: FC<Props> = (props) => {
   const router = useRouter();
   const { renderToast } = useToast();
 
@@ -54,7 +55,7 @@ export const EditTraining: FC<Props> = (props) => {
         ];
       }),
     });
-    if (validateTrainingResult.isErr()) {
+    if (validateTrainingResult.isErr) {
       renderToast({
         title: "トレーニングの更新に失敗しました",
         variant: "error",
@@ -63,14 +64,14 @@ export const EditTraining: FC<Props> = (props) => {
     }
     const training = validateTrainingResult.value;
 
-    const result = await updateTraining({
+    const result = await registerOrUpdateTraining({
       traineeId: props.traineeId,
       training,
     });
 
     router.refresh();
     renderToast(
-      result.isOk()
+      result.isOk
         ? {
             title: "トレーニングを更新しました",
             variant: "success",
@@ -90,7 +91,7 @@ export const EditTraining: FC<Props> = (props) => {
       traineeId={props.traineeId}
       submitTraining={submitTraining}
       defaultValues={{
-        date: props.training.date,
+        date: format(new Date(props.training.date), "yyyy-MM-dd"),
         records: props.training.records.map((record) => {
           return {
             exerciseId: record.exercise.id,

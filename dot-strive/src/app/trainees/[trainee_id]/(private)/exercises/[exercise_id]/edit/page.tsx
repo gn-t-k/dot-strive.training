@@ -34,9 +34,9 @@ const Page: NextPage = async (props) => {
       }),
     ]);
   if (
-    getExerciseResult.isErr() ||
-    getExercisesResult.isErr() ||
-    getMusclesResult.isErr()
+    getExerciseResult.isErr ||
+    getExercisesResult.isErr ||
+    getMusclesResult.isErr
   ) {
     return <p>データの取得に失敗しました</p>;
   }

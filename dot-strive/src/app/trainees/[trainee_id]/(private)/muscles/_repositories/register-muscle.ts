@@ -4,7 +4,7 @@ import { validateMuscle } from "@/app/_schemas/muscle";
 import { getFetcher } from "@/app/_utils/get-fetcher";
 
 import type { Muscle } from "@/app/_schemas/muscle";
-import type { Result } from "neverthrow";
+import type { Result } from "@/app/_utils/result";
 
 type RegisterMuscle = (props: Props) => Promise<Result<Muscle, Error>>;
 type Props = {
@@ -16,7 +16,7 @@ export const registerMuscle: RegisterMuscle = async (props) => {
     id: ulid(),
     name: props.muscleName,
   });
-  if (validateMuscleResult.isErr()) {
+  if (validateMuscleResult.isErr) {
     return validateMuscleResult;
   }
 

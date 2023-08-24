@@ -38,7 +38,7 @@ export const DeleteExerciseClient: FC<Props> = (props) => {
     setIsConfirming(false);
 
     renderToast(
-      result.isOk()
+      result.isOk
         ? {
             title: `種目「${props.exercise.name}」を削除しました`,
             variant: "success",
@@ -48,7 +48,7 @@ export const DeleteExerciseClient: FC<Props> = (props) => {
             variant: "error",
           }
     );
-    if (result.isOk()) {
+    if (result.isOk) {
       router.push(`/trainees/${props.traineeId}/exercises`);
     }
   };

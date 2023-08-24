@@ -17,7 +17,7 @@ const Page: NextPage = async (props) => {
   const getMusclesResult = await getAllMusclesBySession({
     traineeId,
   });
-  if (getMusclesResult.isErr()) {
+  if (getMusclesResult.isErr) {
     return <p>データの取得に失敗しました</p>;
   }
   const registeredMuscles = getMusclesResult.value;

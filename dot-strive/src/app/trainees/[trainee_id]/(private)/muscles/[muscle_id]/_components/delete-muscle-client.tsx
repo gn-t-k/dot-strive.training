@@ -42,7 +42,7 @@ export const DeleteMuscleClient: FC<Props> = (props) => {
 
       setIsLoading(false);
       renderToast(
-        result.isOk()
+        result.isOk
           ? {
               title: `部位「${result.value.name}」を削除しました`,
               variant: "success",
@@ -50,7 +50,7 @@ export const DeleteMuscleClient: FC<Props> = (props) => {
           : { title: "部位の削除に失敗しました", variant: "error" }
       );
       router.refresh();
-      if (result.isOk()) {
+      if (result.isOk) {
         router.replace(`/trainees/${props.traineeId}/muscles`);
       }
     },

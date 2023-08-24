@@ -39,13 +39,13 @@ export const EditExercise: FC<Props> = (props) => {
       });
 
       router.refresh();
-      if (result.isOk()) {
+      if (result.isOk) {
         router.push(
           `/trainees/${props.traineeId}/exercises/${props.exercise.id}`
         );
       }
       renderToast(
-        result.isOk()
+        result.isOk
           ? {
               title: `種目「${props.exercise.name}」を更新しました`,
               variant: "success",

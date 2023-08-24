@@ -1,11 +1,10 @@
-import { err, ok } from "neverthrow";
-
 import { validateTraining } from "@/app/_schemas/training";
 import { getFetcher } from "@/app/_utils/get-fetcher";
+import { err, ok } from "@/app/_utils/result";
 
 import type { Record } from "@/app/_schemas/training";
 import type { UTCDateString } from "@/app/_schemas/utc-date-string";
-import type { Result } from "neverthrow";
+import type { Result } from "@/app/_utils/result";
 
 type GetExerciseRecords = (props: Props) => Promise<
   Result<
@@ -32,7 +31,7 @@ export const getExerciseRecords: GetExerciseRecords = async (props) => {
   const trainings = data.flatMap((training) => {
     const result = validateTraining(training);
 
-    return result.isErr() ? [] : [result.value];
+    return result.isErr ? [] : [result.value];
   });
 
   return ok(

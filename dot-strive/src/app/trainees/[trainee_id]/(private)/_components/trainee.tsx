@@ -8,7 +8,7 @@ import type { FC } from "react";
 export const Trainee: FC = async () => {
   const traineeResult = await getTraineeBySession();
 
-  if (traineeResult.isErr()) {
+  if (traineeResult.isErr) {
     return <p>データの検証に失敗しました</p>;
   }
 

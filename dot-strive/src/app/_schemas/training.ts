@@ -1,11 +1,11 @@
-import { err, ok } from "neverthrow";
 import { z } from "zod";
 
 import { exerciseSchema } from "./exercise";
 import { utcDateStringSchema } from "./utc-date-string";
+import { err, ok } from "../_utils/result";
 
 import type { UnvalidatedExercise } from "./exercise";
-import type { Result } from "neverthrow";
+import type { Result } from "../_utils/result";
 
 const setIdSchema = z.string().brand("set-id");
 const setSchema = z.object({

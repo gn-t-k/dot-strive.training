@@ -55,12 +55,12 @@ export const GET: RouteHandler<Exercise[]> = async (req, context) => {
       targets: exercise.targets.flatMap((target) => {
         const validateMuscleResult = validateMuscle(target);
 
-        return validateMuscleResult.isErr() ? [] : [validateMuscleResult.value];
+        return validateMuscleResult.isErr ? [] : [validateMuscleResult.value];
       }),
     }))
     .map(validateExercise)
     .flatMap((validateExerciseResult) =>
-      validateExerciseResult.isErr() ? [] : [validateExerciseResult.value]
+      validateExerciseResult.isErr ? [] : [validateExerciseResult.value]
     );
 
   return NextResponse.json(exercises);
@@ -82,7 +82,7 @@ export const POST: RouteHandler<Exercise> = async (req, context) => {
   const data = await req.json();
   const validateBodyResult = validateExercise(data);
 
-  if (validateBodyResult.isErr()) {
+  if (validateBodyResult.isErr) {
     return NextResponse.json(
       { error: "bodyの検証に失敗しました" },
       { status: 400 }
@@ -126,7 +126,7 @@ export const POST: RouteHandler<Exercise> = async (req, context) => {
     });
 
     const validateCreatedResult = validateExercise(created);
-    if (validateCreatedResult.isErr()) {
+    if (validateCreatedResult.isErr) {
       return NextResponse.json(
         { error: "exerciseの検証に失敗しました" },
         { status: 500 }
