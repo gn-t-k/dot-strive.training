@@ -42,6 +42,7 @@ export const registerOrUpdateTraining: RegisterOrUpdateTraining = async (
             sets: true,
           },
         },
+        trainee: true,
       },
     });
 
@@ -99,6 +100,15 @@ export const registerOrUpdateTraining: RegisterOrUpdateTraining = async (
           ),
         });
       } else {
+        if (oldTraining.trainee.id !== trainee.value.id) {
+          throw new Error(
+            `認証に失敗しました: ${JSON.stringify({
+              trainingTraineeId: oldTraining.trainee.id,
+              propsTraineeId: props.traineeId,
+            })}`
+          );
+        }
+
         const [year, month, day, hours, minutes, seconds, milliseconds] = [
           newTrainingDate.getUTCFullYear(),
           newTrainingDate.getUTCMonth(),
@@ -169,7 +179,7 @@ export const registerOrUpdateTraining: RegisterOrUpdateTraining = async (
     return err(
       new Error(
         `トレーニングデータの更新に失敗しました: ${
-          error instanceof Error ? error.message : "不明なエラー"
+          error instanceof Error ? error.message : JSON.stringify(error)
         }`
       )
     );

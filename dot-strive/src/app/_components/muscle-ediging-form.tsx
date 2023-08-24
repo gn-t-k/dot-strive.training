@@ -3,14 +3,14 @@
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
+import { registerOrUpdateMuscle } from "@/app/_actions/register-or-update-muscle";
 import { useToast } from "@/app/_hooks/use-toast";
+import { validateMuscle, type Muscle } from "@/app/_schemas/muscle";
 
-import { MuscleForm } from "../../../_components/muscle-form";
-import { updateMuscle } from "../../_repositories/update-muscle";
+import { MuscleForm } from "../trainees/[trainee_id]/(private)/muscles/_components/muscle-form";
 
-import type { SubmitMuscle } from "../../../_components/muscle-form";
-import type { MuscleField } from "../../../_hooks/use-muscle-form";
-import type { Muscle } from "@/app/_schemas/muscle";
+import type { SubmitMuscle } from "../trainees/[trainee_id]/(private)/muscles/_components/muscle-form";
+import type { MuscleField } from "../trainees/[trainee_id]/(private)/muscles/_hooks/use-muscle-form";
 import type { FC } from "react";
 
 type Props = {
@@ -18,7 +18,7 @@ type Props = {
   muscle: Muscle;
   registeredMuscles: Muscle[];
 };
-export const EditMuscle: FC<Props> = (props) => {
+export const MuscleEditingForm: FC<Props> = (props) => {
   const { renderToast } = useToast();
   const router = useRouter();
 
@@ -27,10 +27,23 @@ export const EditMuscle: FC<Props> = (props) => {
   };
   const submitMuscle = useCallback<SubmitMuscle>(
     async (fieldValues) => {
-      const result = await updateMuscle({
+      const validateMuscleResult = validateMuscle({
+        id: props.muscle.id,
+        name: fieldValues.name,
+      });
+      if (validateMuscleResult.isErr) {
+        renderToast({
+          title: "部位の更新に失敗しました",
+          variant: "error",
+        });
+
+        return;
+      }
+      const muscle = validateMuscleResult.value;
+
+      const result = await registerOrUpdateMuscle({
         traineeId: props.traineeId,
-        muscleId: props.muscle.id,
-        muscleName: fieldValues.name,
+        muscle,
       });
 
       router.refresh();
@@ -42,6 +55,9 @@ export const EditMuscle: FC<Props> = (props) => {
             }
           : { title: "部位の更新に失敗しました", variant: "error" }
       );
+
+      router.refresh();
+      router.push(`/trainees/${props.traineeId}/muscles`);
     },
     [props.muscle.id, props.muscle.name, props.traineeId, renderToast, router]
   );

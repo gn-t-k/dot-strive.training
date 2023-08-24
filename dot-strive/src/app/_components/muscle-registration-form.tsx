@@ -2,27 +2,42 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, type FC } from "react";
+import { ulid } from "ulid";
 
+import { registerOrUpdateMuscle } from "@/app/_actions/register-or-update-muscle";
 import { useToast } from "@/app/_hooks/use-toast";
+import { validateMuscle, type Muscle } from "@/app/_schemas/muscle";
 
-import { MuscleForm } from "../../_components/muscle-form";
-import { registerMuscle } from "../../_repositories/register-muscle";
+import { MuscleForm } from "../trainees/[trainee_id]/(private)/muscles/_components/muscle-form";
 
-import type { SubmitMuscle } from "../../_components/muscle-form";
-import type { Muscle } from "@/app/_schemas/muscle";
+import type { SubmitMuscle } from "../trainees/[trainee_id]/(private)/muscles/_components/muscle-form";
 
 type Props = {
   traineeId: string;
   registeredMuscles: Muscle[];
 };
-export const RegisterMuscle: FC<Props> = (props) => {
+export const MuscleRegistrationForm: FC<Props> = (props) => {
   const { renderToast } = useToast();
   const router = useRouter();
   const submitMuscle = useCallback<SubmitMuscle>(
     async (fieldValues) => {
-      const result = await registerMuscle({
+      const validateMuscleResult = validateMuscle({
+        id: ulid(),
+        name: fieldValues.name,
+      });
+      if (validateMuscleResult.isErr) {
+        renderToast({
+          title: `部位「${fieldValues.name}」の登録に失敗しました`,
+          variant: "error",
+        });
+
+        return;
+      }
+      const muscle = validateMuscleResult.value;
+
+      const result = await registerOrUpdateMuscle({
         traineeId: props.traineeId,
-        muscleName: fieldValues.name,
+        muscle,
       });
 
       renderToast(
