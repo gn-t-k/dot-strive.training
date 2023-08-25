@@ -9,8 +9,7 @@ import { validateMuscle, type Muscle } from "@/app/_schemas/muscle";
 
 import { MuscleForm } from "./muscle-form";
 
-import type { SubmitMuscle } from "./muscle-form";
-import type { MuscleField } from "../trainees/[trainee_id]/(private)/muscles/_hooks/use-muscle-form";
+import type { MuscleField, SubmitMuscle } from "./muscle-form";
 import type { FC } from "react";
 
 type Props = {
