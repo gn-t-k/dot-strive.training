@@ -2,15 +2,16 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { getExerciseById } from "@/app/_actions/get-exercise-by-id";
+import { ExerciseDeletionAndConfirm } from "@/app/_components/exercise-deletion-and-confirm";
+import { ExerciseDetail } from "@/app/_components/exercise-detail";
+import { ExerciseRecords } from "@/app/_components/exercise-records";
 import { Loading } from "@/app/_components/loading";
 import { stack } from "styled-system/patterns";
 
-import { DeleteExercise } from "./_components/delete-exercise";
-import { ExerciseDetail } from "./_components/exercise-detail";
-import { ExerciseRecords } from "../../_components/exercise-records";
-
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
+import type { FC } from "react";
 
 const Page: NextPage = (props) => {
   const traineeId = props.params?.["trainee_id"];
@@ -33,10 +34,32 @@ const Page: NextPage = (props) => {
           種目を編集する
         </Link>
         <ExerciseRecords traineeId={traineeId} exerciseId={exerciseId} />
-        <DeleteExercise traineeId={traineeId} exerciseId={exerciseId} />
+        <FetchExercise traineeId={traineeId} exerciseId={exerciseId} />
       </Suspense>
       <Link href={`/trainees/${traineeId}/exercises`}>種目一覧</Link>
     </section>
   );
 };
 export default Page;
+
+type Props = {
+  traineeId: string;
+  exerciseId: string;
+};
+const FetchExercise: FC<Props> = async (props) => {
+  const result = await getExerciseById({
+    traineeId: props.traineeId,
+    exerciseId: props.exerciseId,
+  });
+  if (result.isErr) {
+    return <p>種目データの取得に失敗しました</p>;
+  }
+  const exercise = result.value;
+
+  return (
+    <ExerciseDeletionAndConfirm
+      traineeId={props.traineeId}
+      exercise={exercise}
+    />
+  );
+};

@@ -3,11 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { deleteExercise } from "@/app/_actions/delete-exercise";
 import { Button } from "@/app/_components/button";
 import { useToast } from "@/app/_hooks/use-toast";
 import { stack } from "styled-system/patterns";
-
-import { deleteExercise } from "../_repositories/delete-exercise";
 
 import type { Exercise } from "@/app/_schemas/exercise";
 import type { FC, MouseEventHandler } from "react";
@@ -16,7 +15,7 @@ type Props = {
   traineeId: string;
   exercise: Exercise;
 };
-export const DeleteExerciseClient: FC<Props> = (props) => {
+export const ExerciseDeletionAndConfirm: FC<Props> = (props) => {
   const router = useRouter();
   const { renderToast } = useToast();
   const [isConfirming, setIsConfirming] = useState(false);

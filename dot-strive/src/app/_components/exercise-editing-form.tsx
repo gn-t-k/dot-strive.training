@@ -3,16 +3,15 @@
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
+import { registerOrUpdateExercise } from "@/app/_actions/register-or-update-exercise";
+import { ExerciseForm } from "@/app/_components/exercise-form";
 import { useToast } from "@/app/_hooks/use-toast";
-
-import { ExerciseForm } from "../../../_components/exercise-form";
-import { updateExercise } from "../../_repositories/update-exercise";
+import { validateExercise, type Exercise } from "@/app/_schemas/exercise";
 
 import type {
   ExerciseField,
   SubmitExercise,
-} from "../../../_components/exercise-form";
-import type { Exercise } from "@/app/_schemas/exercise";
+} from "@/app/_components/exercise-form";
 import type { Muscle } from "@/app/_schemas/muscle";
 import type { FC } from "react";
 
@@ -22,7 +21,7 @@ type Props = {
   registeredExercises: Exercise[];
   registeredMuscles: Muscle[];
 };
-export const EditExercise: FC<Props> = (props) => {
+export const ExerciseEditingForm: FC<Props> = (props) => {
   const router = useRouter();
   const { renderToast } = useToast();
   const defaultValues: ExerciseField = {
@@ -31,11 +30,27 @@ export const EditExercise: FC<Props> = (props) => {
   };
   const submitExercise = useCallback<SubmitExercise>(
     async (fieldValues) => {
-      const result = await updateExercise({
+      const targets = props.registeredMuscles.filter((muscle) =>
+        fieldValues.targets.includes(muscle.id)
+      );
+      const validateExerciseResult = validateExercise({
+        id: props.exercise.id,
+        name: fieldValues.name,
+        targets,
+      });
+      if (validateExerciseResult.isErr) {
+        renderToast({
+          title: `種目「${props.exercise.name}」の更新に失敗しました`,
+          variant: "error",
+        });
+
+        return;
+      }
+      const exercise = validateExerciseResult.value;
+
+      const result = await registerOrUpdateExercise({
         traineeId: props.traineeId,
-        exerciseId: props.exercise.id,
-        exerciseName: fieldValues.name,
-        targetIds: fieldValues.targets,
+        exercise,
       });
 
       router.refresh();
@@ -59,6 +74,7 @@ export const EditExercise: FC<Props> = (props) => {
     [
       props.exercise.id,
       props.exercise.name,
+      props.registeredMuscles,
       props.traineeId,
       renderToast,
       router,
