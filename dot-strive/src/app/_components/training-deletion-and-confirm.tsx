@@ -15,7 +15,7 @@ type Props = {
   traineeId: string;
   training: Training;
 };
-export const TrainingDeleteAndConfirm: FC<Props> = (props) => {
+export const TrainingDeletionAndConfirm: FC<Props> = (props) => {
   const router = useRouter();
   const { renderToast } = useToast();
   const [isConfirming, setIsConfirming] = useState(false);

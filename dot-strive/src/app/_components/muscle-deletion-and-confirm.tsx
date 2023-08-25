@@ -3,11 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
+import { deleteMuscle } from "@/app/_actions/delete-muscle";
 import { Button } from "@/app/_components/button";
 import { useToast } from "@/app/_hooks/use-toast";
 import { stack } from "styled-system/patterns";
-
-import { deleteMuscle } from "../_repositories/delete-muscle";
 
 import type { Muscle } from "@/app/_schemas/muscle";
 import type { FC, MouseEventHandler } from "react";
@@ -16,7 +15,7 @@ type Props = {
   traineeId: string;
   muscle: Muscle;
 };
-export const DeleteMuscleClient: FC<Props> = (props) => {
+export const MuscleDeletionAndConfirm: FC<Props> = (props) => {
   const [isConfirming, setIsConfirming] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { renderToast } = useToast();

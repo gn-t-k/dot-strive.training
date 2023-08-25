@@ -3,9 +3,8 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { Loading } from "@/app/_components/loading";
+import { MuscleList } from "@/app/_components/muscle-list";
 import { stack } from "styled-system/patterns";
-
-import { MuscleList } from "./_components/muscle-list";
 
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";

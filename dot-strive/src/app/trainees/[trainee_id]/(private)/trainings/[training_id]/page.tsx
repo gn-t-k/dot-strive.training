@@ -4,7 +4,7 @@ import { Suspense } from "react";
 
 import { getTrainingById } from "@/app/_actions/get-training-by-id";
 import { Loading } from "@/app/_components/loading";
-import { TrainingDeleteAndConfirm } from "@/app/_components/training-delete-and-confirm";
+import { TrainingDeletionAndConfirm } from "@/app/_components/training-deletion-and-confirm";
 import { TrainingDetailView } from "@/app/_components/training-detail";
 import { stack } from "styled-system/patterns";
 
@@ -60,7 +60,7 @@ const FetchTraining: FC<Props> = async (props) => {
       >
         トレーニングを編集する
       </Link>
-      <TrainingDeleteAndConfirm
+      <TrainingDeletionAndConfirm
         traineeId={props.traineeId}
         training={training}
       />

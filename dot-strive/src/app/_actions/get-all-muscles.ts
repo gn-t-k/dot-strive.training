@@ -3,15 +3,16 @@
 import { prisma } from "@/app/_libs/prisma/client";
 
 import { getTraineeBySession } from "./get-trainee-by-session";
-import { validateExercise, type Exercise } from "../_schemas/exercise";
+import { validateMuscle } from "../_schemas/muscle";
 import { err, ok } from "../_utils/result";
 
+import type { Muscle } from "../_schemas/muscle";
 import type { Result } from "../_utils/result";
 
-type GetAllExercises = (props: {
+type GetAllMuscles = (props: {
   traineeId: string;
-}) => Promise<Result<Exercise[], Error>>;
-export const getAllExercises: GetAllExercises = async (props) => {
+}) => Promise<Result<Muscle[], Error>>;
+export const getAllMuscles: GetAllMuscles = async (props) => {
   try {
     const trainee = await getTraineeBySession();
     if (trainee.isErr) {
@@ -28,42 +29,34 @@ export const getAllExercises: GetAllExercises = async (props) => {
       );
     }
 
-    const data = await prisma.trainee.findUnique({
+    const data = await prisma.muscle.findMany({
       where: {
-        id: props.traineeId,
-      },
-      include: {
-        exercises: {
-          include: {
-            targets: true,
-          },
-        },
+        traineeId: props.traineeId,
       },
     });
 
     if (!data) {
       throw new Error(
-        `種目データが見つかりませんでした: ${JSON.stringify(props)}`
+        `部位データが見つかりませんでした: ${JSON.stringify(props)}`
       );
     }
 
-    const exercises = data.exercises.map((exercise) => {
-      const result = validateExercise(exercise);
-
-      if (result.isErr) {
+    const muscles = data.map((muscle) => {
+      const validateMuscleResult = validateMuscle(muscle);
+      if (validateMuscleResult.isErr) {
         throw new Error(
-          `種目データの検証に失敗しました: ${result.error.message}`
+          `部位データの検証に失敗しました: ${validateMuscleResult.error.message}`
         );
       }
 
-      return result.value;
+      return validateMuscleResult.value;
     });
 
-    return ok(exercises);
+    return ok(muscles);
   } catch (error) {
     return err(
       new Error(
-        `トレーニングデータの取得に失敗しました: ${
+        `部位データの取得に失敗しました: ${
           error instanceof Error ? error.message : JSON.stringify(error)
         }`
       )
