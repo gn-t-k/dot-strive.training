@@ -1,8 +1,7 @@
 import Link from "next/link";
 
+import { getExerciseById } from "@/app/_actions/get-exercise-by-id";
 import { stack } from "styled-system/patterns";
-
-import { getExerciseById } from "../_repositories/get-exercise-by-id";
 
 import type { FC } from "react";
 

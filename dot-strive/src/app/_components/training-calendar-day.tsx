@@ -7,7 +7,7 @@ import { stack } from "styled-system/patterns";
 
 import { EmojiIcon } from "./emoji-icon";
 
-import type { CalendarDate } from "../_hooks/use-calendar";
+import type { CalendarDate } from "./use-calendar";
 import type { Training } from "../_schemas/training";
 import type { FC } from "react";
 

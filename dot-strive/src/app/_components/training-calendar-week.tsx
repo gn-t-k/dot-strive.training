@@ -7,7 +7,7 @@ import { grid } from "styled-system/patterns";
 
 import { EmojiIcon } from "./emoji-icon";
 import { TrainingCalendarDay } from "./training-calendar-day";
-import { useCalendar } from "../_hooks/use-calendar";
+import { useCalendar } from "./use-calendar";
 import { utcDateStringSchema } from "../_schemas/utc-date-string";
 
 import type { Training } from "../_schemas/training";

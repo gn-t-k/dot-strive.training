@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { getAllExercisesBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-all-exercises-by-session";
+import { getAllExercises } from "@/app/_actions/get-all-exercises";
 
 import type { FC } from "react";
 
@@ -8,7 +8,7 @@ type Props = {
   traineeId: string;
 };
 export const ExerciseList: FC<Props> = async (props) => {
-  const exercisesResult = await getAllExercisesBySession({
+  const exercisesResult = await getAllExercises({
     traineeId: props.traineeId,
   });
 

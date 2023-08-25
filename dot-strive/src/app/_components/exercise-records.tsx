@@ -1,7 +1,6 @@
+import { getRecordsByExerciseId } from "@/app/_actions/get-records-by-exercise-id";
 import { LocalDate } from "@/app/_components/local-date";
 import { stack } from "styled-system/patterns";
-
-import { getExerciseRecords } from "../_repositories/get-exercise-records";
 
 import type { FC } from "react";
 
@@ -10,9 +9,10 @@ type Props = {
   exerciseId: string;
 };
 export const ExerciseRecords: FC<Props> = async (props) => {
-  const getRecordsResult = await getExerciseRecords({
+  const getRecordsResult = await getRecordsByExerciseId({
     traineeId: props.traineeId,
     exerciseId: props.exerciseId,
+    take: 10,
   });
   if (getRecordsResult.isErr) {
     return <p>記録データの取得に失敗しました</p>;

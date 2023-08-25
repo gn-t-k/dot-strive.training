@@ -5,8 +5,9 @@ import { useCallback, useState } from "react";
 
 import { deleteMuscle } from "@/app/_actions/delete-muscle";
 import { Button } from "@/app/_components/button";
-import { useToast } from "@/app/_hooks/use-toast";
 import { stack } from "styled-system/patterns";
+
+import { useToast } from "./use-toast";
 
 import type { Muscle } from "@/app/_schemas/muscle";
 import type { FC, MouseEventHandler } from "react";

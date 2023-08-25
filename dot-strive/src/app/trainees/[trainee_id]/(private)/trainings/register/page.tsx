@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { getAllExercises } from "@/app/_actions/get-all-exercises";
 import { TrainingRegistrationForm } from "@/app/_components/training-registration-form";
-import { getAllExercisesBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-all-exercises-by-session";
 import { stack } from "styled-system/patterns";
 
 import type { NextPage } from "@/app/_types/page";
@@ -15,7 +15,7 @@ const Page: NextPage = async (props) => {
     redirect("/" satisfies Route);
   }
 
-  const getExercisesResult = await getAllExercisesBySession({
+  const getExercisesResult = await getAllExercises({
     traineeId,
   });
   if (getExercisesResult.isErr) {

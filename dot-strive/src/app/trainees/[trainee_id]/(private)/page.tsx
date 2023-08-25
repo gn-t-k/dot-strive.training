@@ -3,7 +3,7 @@ import { Suspense } from "react";
 
 import { Loading } from "@/app/_components/loading";
 import { LogoutButton } from "@/app/_components/logout-button";
-import { Trainee } from "@/app/trainees/[trainee_id]/(private)/_components/trainee";
+import { Trainee } from "@/app/_components/trainee";
 import { stack } from "styled-system/patterns";
 
 import type { NextPage } from "@/app/_types/page";
