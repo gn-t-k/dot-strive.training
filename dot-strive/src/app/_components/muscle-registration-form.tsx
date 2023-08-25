@@ -5,10 +5,10 @@ import { useCallback, type FC } from "react";
 import { ulid } from "ulid";
 
 import { registerOrUpdateMuscle } from "@/app/_actions/register-or-update-muscle";
-import { useToast } from "@/app/_hooks/use-toast";
 import { validateMuscle, type Muscle } from "@/app/_schemas/muscle";
 
 import { MuscleForm } from "./muscle-form";
+import { useToast } from "./use-toast";
 
 import type { SubmitMuscle } from "./muscle-form";
 

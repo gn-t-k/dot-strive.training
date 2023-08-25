@@ -6,8 +6,9 @@ import { ulid } from "ulid";
 
 import { registerOrUpdateTraining } from "@/app/_actions/register-or-update-training";
 import { TrainingForm } from "@/app/_components/training-form";
-import { useToast } from "@/app/_hooks/use-toast";
 import { validateTraining } from "@/app/_schemas/training";
+
+import { useToast } from "./use-toast";
 
 import type { TrainingField } from "@/app/_components/training-form";
 import type { Exercise } from "@/app/_schemas/exercise";

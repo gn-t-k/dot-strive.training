@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import { getTraineeBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-trainee-by-session";
+import { getTraineeBySession } from "@/app/_actions/get-trainee-by-session";
 import { stack } from "styled-system/patterns";
 
 import type { FC } from "react";

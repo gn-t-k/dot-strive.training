@@ -1,10 +1,9 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
+import { getTraineeBySession } from "@/app/_actions/get-trainee-by-session";
 import { nextAuthOptions } from "@/app/_libs/next-auth/options";
 import { Layout } from "@/app/_types/layout";
-
-import { getTraineeBySession } from "../[trainee_id]/(private)/_repositories/get-trainee-by-session";
 
 import type { Route } from "next";
 

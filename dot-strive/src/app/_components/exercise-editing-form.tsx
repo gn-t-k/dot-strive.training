@@ -5,8 +5,9 @@ import { useCallback } from "react";
 
 import { registerOrUpdateExercise } from "@/app/_actions/register-or-update-exercise";
 import { ExerciseForm } from "@/app/_components/exercise-form";
-import { useToast } from "@/app/_hooks/use-toast";
 import { validateExercise, type Exercise } from "@/app/_schemas/exercise";
+
+import { useToast } from "./use-toast";
 
 import type {
   ExerciseField,

@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { ulid } from "ulid";
 
-import { useToast } from "@/app/_hooks/use-toast";
 import { validateExercise, type Exercise } from "@/app/_schemas/exercise";
 
 import { ExerciseForm } from "./exercise-form";
+import { useToast } from "./use-toast";
 import { registerOrUpdateExercise } from "../_actions/register-or-update-exercise";
 
 import type { SubmitExercise } from "./exercise-form";

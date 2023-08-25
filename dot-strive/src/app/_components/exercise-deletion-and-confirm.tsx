@@ -5,8 +5,9 @@ import { useState } from "react";
 
 import { deleteExercise } from "@/app/_actions/delete-exercise";
 import { Button } from "@/app/_components/button";
-import { useToast } from "@/app/_hooks/use-toast";
 import { stack } from "styled-system/patterns";
+
+import { useToast } from "./use-toast";
 
 import type { Exercise } from "@/app/_schemas/exercise";
 import type { FC, MouseEventHandler } from "react";
