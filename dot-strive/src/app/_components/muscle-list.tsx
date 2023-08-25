@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { getAllMusclesBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-all-muscles-by-session";
+import { getAllMuscles } from "@/app/_actions/get-all-muscles";
 import { stack } from "styled-system/patterns";
 
 import type { FC } from "react";
@@ -9,7 +9,7 @@ type Props = {
   traineeId: string;
 };
 export const MuscleList: FC<Props> = async (props) => {
-  const result = await getAllMusclesBySession({
+  const result = await getAllMuscles({
     traineeId: props.traineeId,
   });
 

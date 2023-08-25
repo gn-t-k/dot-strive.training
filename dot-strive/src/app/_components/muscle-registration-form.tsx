@@ -8,9 +8,9 @@ import { registerOrUpdateMuscle } from "@/app/_actions/register-or-update-muscle
 import { useToast } from "@/app/_hooks/use-toast";
 import { validateMuscle, type Muscle } from "@/app/_schemas/muscle";
 
-import { MuscleForm } from "../trainees/[trainee_id]/(private)/muscles/_components/muscle-form";
+import { MuscleForm } from "./muscle-form";
 
-import type { SubmitMuscle } from "../trainees/[trainee_id]/(private)/muscles/_components/muscle-form";
+import type { SubmitMuscle } from "./muscle-form";
 
 type Props = {
   traineeId: string;
