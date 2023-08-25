@@ -1,7 +1,7 @@
 import { NextAuthProvider } from "@/app/_libs/next-auth/provider";
 import "./global.css";
 
-import { ToastProvider } from "./_hooks/use-toast";
+import { ToastProvider } from "./_components/use-toast";
 
 import type { Layout } from "@/app/_types/layout";
 

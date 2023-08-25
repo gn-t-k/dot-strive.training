@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
-import { EditMuscle } from "./_components/edit-muscle";
-import { getAllMusclesBySession } from "../../../_repositories/get-all-muscles-by-session";
-import { getMuscleById } from "../_repositories/get-muscle-by-id";
+import { getAllMuscles } from "@/app/_actions/get-all-muscles";
+import { MuscleEditingForm } from "@/app/_components/muscle-ediging-form";
 
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
+import type { FC } from "react";
 
 const Page: NextPage = async (props) => {
   const traineeId = props.params?.["trainee_id"];
@@ -19,29 +20,12 @@ const Page: NextPage = async (props) => {
     redirect(to satisfies Route<typeof to>);
   }
 
-  const [getMuscleResult, getMusclesResult] = await Promise.all([
-    getMuscleById({
-      traineeId,
-      muscleId,
-    }),
-    getAllMusclesBySession({
-      traineeId,
-    }),
-  ]);
-  if (getMuscleResult.isErr || getMusclesResult.isErr) {
-    return <p>部位データの取得に失敗しました</p>;
-  }
-  const muscle = getMuscleResult.value;
-  const registeredMuscles = getMusclesResult.value;
-
   return (
     <section>
       <h1>部位を編集する</h1>
-      <EditMuscle
-        traineeId={traineeId}
-        muscle={muscle}
-        registeredMuscles={registeredMuscles}
-      />
+      <Suspense fallback={<p>部位データを取得しています</p>}>
+        <FetchMuscles traineeId={traineeId} muscleId={muscleId} />
+      </Suspense>
       <Link href={`/trainees/${traineeId}/muscles/${muscleId}`}>
         編集をやめる
       </Link>
@@ -49,3 +33,31 @@ const Page: NextPage = async (props) => {
   );
 };
 export default Page;
+
+type Props = {
+  traineeId: string;
+  muscleId: string;
+};
+const FetchMuscles: FC<Props> = async (props) => {
+  const getMusclesResult = await getAllMuscles({
+    traineeId: props.traineeId,
+  });
+  if (getMusclesResult.isErr) {
+    return <p>部位データの取得に失敗しました</p>;
+  }
+  const registeredMuscles = getMusclesResult.value;
+  const muscle = registeredMuscles.find(
+    (muscle) => muscle.id === props.muscleId
+  );
+  if (!muscle) {
+    return <p>部位データの取得に失敗しました</p>;
+  }
+
+  return (
+    <MuscleEditingForm
+      traineeId={props.traineeId}
+      muscle={muscle}
+      registeredMuscles={registeredMuscles}
+    />
+  );
+};

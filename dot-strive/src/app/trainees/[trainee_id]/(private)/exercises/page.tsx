@@ -2,10 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { ExerciseList } from "@/app/_components/exercise-list";
 import { Loading } from "@/app/_components/loading";
 import { stack } from "styled-system/patterns";
-
-import { ExerciseList } from "./_components/exercise-list";
 
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";

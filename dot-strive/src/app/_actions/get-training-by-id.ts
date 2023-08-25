@@ -88,7 +88,7 @@ export const getTrainingById: GetTrainingById = async (props) => {
     return err(
       new Error(
         `トレーニングデータの取得に失敗しました: ${
-          error instanceof Error ? error.message : "不明なエラー"
+          error instanceof Error ? error.message : JSON.stringify(error)
         }`
       )
     );

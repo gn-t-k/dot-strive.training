@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { ulid } from "ulid";
 
 import { registerOrUpdateTraining } from "@/app/_actions/register-or-update-training";
-import { useToast } from "@/app/_hooks/use-toast";
 import { validateTraining, type Training } from "@/app/_schemas/training";
 
 import { TrainingForm } from "./training-form";
+import { useToast } from "./use-toast";
 
 import type { Exercise } from "@/app/_schemas/exercise";
 import type { ComponentProps, FC } from "react";

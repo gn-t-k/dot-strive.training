@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { getAllMusclesBySession } from "@/app/trainees/[trainee_id]/(private)/_repositories/get-all-muscles-by-session";
-
-import { RegisterMuscle } from "./_components/register-muscle";
+import { getAllMuscles } from "@/app/_actions/get-all-muscles";
+import { MuscleRegistrationForm } from "@/app/_components/muscle-registration-form";
 
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
@@ -14,7 +13,7 @@ const Page: NextPage = async (props) => {
     redirect("/" satisfies Route);
   }
 
-  const getMusclesResult = await getAllMusclesBySession({
+  const getMusclesResult = await getAllMuscles({
     traineeId,
   });
   if (getMusclesResult.isErr) {
@@ -25,7 +24,7 @@ const Page: NextPage = async (props) => {
   return (
     <section>
       <h1>部位を登録する</h1>
-      <RegisterMuscle
+      <MuscleRegistrationForm
         traineeId={traineeId}
         registeredMuscles={registeredMuscles}
       />

@@ -1,26 +1,45 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
-import { RegisterExercise } from "./_components/register-exercise";
-import { getAllExercisesBySession } from "../../_repositories/get-all-exercises-by-session";
-import { getAllMusclesBySession } from "../../_repositories/get-all-muscles-by-session";
+import { getAllExercises } from "@/app/_actions/get-all-exercises";
+import { getAllMuscles } from "@/app/_actions/get-all-muscles";
+
+import { ExerciseRegistrationForm } from "../../../../../_components/exercise-registration-form";
 
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
+import type { FC } from "react";
 
-const Page: NextPage = async (props) => {
+const Page: NextPage = (props) => {
   const traineeId = props.params?.["trainee_id"];
 
   if (!traineeId) {
     redirect("/" satisfies Route);
   }
 
+  return (
+    <section>
+      <h1>種目を登録する</h1>
+      <Suspense fallback={<p>データを取得しています</p>}>
+        <FetchMusclesAndExercises traineeId={traineeId} />
+      </Suspense>
+      <Link href={`/trainees/${traineeId}/exercises`}>種目一覧</Link>
+    </section>
+  );
+};
+export default Page;
+
+type Props = {
+  traineeId: string;
+};
+const FetchMusclesAndExercises: FC<Props> = async (props) => {
   const [getMusclesResult, getExercisesResult] = await Promise.all([
-    getAllMusclesBySession({
-      traineeId,
+    getAllMuscles({
+      traineeId: props.traineeId,
     }),
-    getAllExercisesBySession({
-      traineeId,
+    getAllExercises({
+      traineeId: props.traineeId,
     }),
   ]);
   if (getMusclesResult.isErr || getExercisesResult.isErr) {
@@ -30,15 +49,10 @@ const Page: NextPage = async (props) => {
   const registeredExercises = getExercisesResult.value;
 
   return (
-    <section>
-      <h1>種目を登録する</h1>
-      <RegisterExercise
-        traineeId={traineeId}
-        registeredMuscles={registeredMuscles}
-        registeredExercises={registeredExercises}
-      />
-      <Link href={`/trainees/${traineeId}/exercises`}>種目一覧</Link>
-    </section>
+    <ExerciseRegistrationForm
+      traineeId={props.traineeId}
+      registeredMuscles={registeredMuscles}
+      registeredExercises={registeredExercises}
+    />
   );
 };
-export default Page;
