@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { getAllExercises } from "@/app/_actions/get-all-exercises";
 import { TrainingRegistrationForm } from "@/app/_components/training-registration-form";
@@ -7,16 +8,33 @@ import { stack } from "styled-system/patterns";
 
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
+import type { FC } from "react";
 
-const Page: NextPage = async (props) => {
+const Page: NextPage = (props) => {
   const traineeId = props.params?.["trainee_id"];
 
   if (!traineeId) {
     redirect("/" satisfies Route);
   }
 
+  return (
+    <section className={stack({ direction: "column" })}>
+      <h1>トレーニングを登録</h1>
+      <Suspense fallback={<p>種目データを取得しています</p>}>
+        <FetchExercises traineeId={traineeId} />
+      </Suspense>
+      <Link href={`/trainees/${traineeId}/trainings`}>トレーニング一覧</Link>
+    </section>
+  );
+};
+export default Page;
+
+type Props = {
+  traineeId: string;
+};
+const FetchExercises: FC<Props> = async (props) => {
   const getExercisesResult = await getAllExercises({
-    traineeId,
+    traineeId: props.traineeId,
   });
   if (getExercisesResult.isErr) {
     return <p>種目データの取得に失敗しました</p>;
@@ -24,14 +42,9 @@ const Page: NextPage = async (props) => {
   const registeredExercises = getExercisesResult.value;
 
   return (
-    <section className={stack({ direction: "column" })}>
-      <h1>トレーニングを登録</h1>
-      <TrainingRegistrationForm
-        traineeId={traineeId}
-        registeredExercises={registeredExercises}
-      />
-      <Link href={`/trainees/${traineeId}/trainings`}>トレーニング一覧</Link>
-    </section>
+    <TrainingRegistrationForm
+      traineeId={props.traineeId}
+      registeredExercises={registeredExercises}
+    />
   );
 };
-export default Page;

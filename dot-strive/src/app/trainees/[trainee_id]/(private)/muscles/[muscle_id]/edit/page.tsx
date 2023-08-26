@@ -9,7 +9,7 @@ import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
 import type { FC } from "react";
 
-const Page: NextPage = async (props) => {
+const Page: NextPage = (props) => {
   const traineeId = props.params?.["trainee_id"];
   if (!traineeId) {
     redirect("/" satisfies Route);
