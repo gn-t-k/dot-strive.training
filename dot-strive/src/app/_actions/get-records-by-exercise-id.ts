@@ -14,7 +14,7 @@ type GetRecordsByExerciseId = (props: {
   traineeId: string;
   exerciseId: string;
   take: number;
-}) => Promise<Result<{ date: UTCDateString; record: Record }[], Error>>;
+}) => Promise<Result<{ date: UTCDateString; records: Record[] }[], Error>>;
 export const getRecordsByExerciseId: GetRecordsByExerciseId = async (props) => {
   try {
     const trainee = await getTraineeBySession();
@@ -85,13 +85,10 @@ export const getRecordsByExerciseId: GetRecordsByExerciseId = async (props) => {
     });
 
     return ok(
-      trainings.flatMap((training) => {
-        const record = training.records.find(
-          (record) => record.exercise.id === props.exerciseId
-        );
-
-        return record ? [{ date: training.date, record }] : [];
-      })
+      trainings.map((training) => ({
+        date: training.date,
+        records: training.records,
+      }))
     );
   } catch (error) {
     return err(
