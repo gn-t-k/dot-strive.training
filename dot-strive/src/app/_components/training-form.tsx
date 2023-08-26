@@ -14,15 +14,14 @@ import { LocalDate } from "@/app/_components/local-date";
 import { Select } from "@/app/_components/select";
 import { TextArea } from "@/app/_components/text-area";
 import { useForm } from "@/app/_libs/react-hook-form/use-form";
-import { validateTraining } from "@/app/_schemas/training";
-import { getFetcher } from "@/app/_utils/get-fetcher";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
+
+import { getRecordsByExerciseId } from "../_actions/get-records-by-exercise-id";
 
 import type { Exercise } from "@/app/_schemas/exercise";
 import type { Record } from "@/app/_schemas/training";
 import type { UTCDateString } from "@/app/_schemas/utc-date-string";
-import type { Route } from "next";
 import type { SubmitHandler, UseFormReturn } from "react-hook-form";
 
 type Props = {
@@ -391,28 +390,17 @@ export const ExerciseInformation: FC<ExerciseInformationProps> = (props) => {
       records: Record[];
     }[]
   >(
-    `/api/trainees/${props.traineeId}/trainings/exercises/${props.exerciseId}`,
-    async (url: Route) => {
-      const response = await getFetcher()(url);
-      const data = await response.json();
-
-      if (!Array.isArray(data)) {
-        throw new Error("種目データの取得に失敗しました");
+    `get-records-by-exercise-id?traineeId=${props.traineeId}&exerciseId=${props.exerciseId}`,
+    async () => {
+      const result = await getRecordsByExerciseId({
+        traineeId: props.traineeId,
+        exerciseId: props.exerciseId,
+        take: 10,
+      });
+      if (result.isErr) {
+        throw result.error;
       }
-      const trainings = data.flatMap((training) => {
-        const validateTrainingResult = validateTraining(training);
-
-        return validateTrainingResult.isErr
-          ? []
-          : [validateTrainingResult.value];
-      });
-
-      return trainings.map((training) => {
-        return {
-          date: training.date,
-          records: training.records,
-        };
-      });
+      return result.value;
     },
     {
       suspense: true,

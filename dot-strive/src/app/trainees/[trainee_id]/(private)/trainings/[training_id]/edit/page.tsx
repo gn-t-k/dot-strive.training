@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { getAllExercises } from "@/app/_actions/get-all-exercises";
 import { getTrainingById } from "@/app/_actions/get-training-by-id";
@@ -7,8 +8,9 @@ import { TrainingEditingForm } from "@/app/_components/training-editing-form";
 
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
+import type { FC } from "react";
 
-const Page: NextPage = async (props) => {
+const Page: NextPage = (props) => {
   const traineeId = props.params?.["trainee_id"];
   if (!traineeId) {
     redirect("/");
@@ -20,13 +22,32 @@ const Page: NextPage = async (props) => {
     redirect(to satisfies Route<typeof to>);
   }
 
+  return (
+    <section>
+      <h1>トレーニングを編集する</h1>
+      <Suspense fallback={<p>データを取得しています</p>}>
+        <FetchData traineeId={traineeId} trainingId={trainingId} />
+      </Suspense>
+      <Link href={`/trainees/${traineeId}/trainings/${trainingId}`}>
+        編集をやめる
+      </Link>
+    </section>
+  );
+};
+export default Page;
+
+type Props = {
+  traineeId: string;
+  trainingId: string;
+};
+const FetchData: FC<Props> = async (props) => {
   const [getTrainingResult, getExercisesResult] = await Promise.all([
     getTrainingById({
-      traineeId,
-      trainingId,
+      traineeId: props.traineeId,
+      trainingId: props.trainingId,
     }),
     getAllExercises({
-      traineeId,
+      traineeId: props.traineeId,
     }),
   ]);
 
@@ -37,17 +58,10 @@ const Page: NextPage = async (props) => {
   const registeredExercises = getExercisesResult.value;
 
   return (
-    <section>
-      <h1>トレーニングを編集する</h1>
-      <TrainingEditingForm
-        traineeId={traineeId}
-        training={training}
-        registeredExercises={registeredExercises}
-      />
-      <Link href={`/trainees/${traineeId}/trainings/${trainingId}`}>
-        編集をやめる
-      </Link>
-    </section>
+    <TrainingEditingForm
+      traineeId={props.traineeId}
+      training={training}
+      registeredExercises={registeredExercises}
+    />
   );
 };
-export default Page;

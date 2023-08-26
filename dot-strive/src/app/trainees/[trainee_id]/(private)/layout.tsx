@@ -1,49 +1,38 @@
 import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
 import { Suspense } from "react";
 
+import { getTraineeOrRedirect } from "@/app/_actions/get-trainee-or-redirect";
 import { GlobalNavigation } from "@/app/_components/global-navigation";
-import { nextAuthOptions } from "@/app/_libs/next-auth/options";
-import { prisma } from "@/app/_libs/prisma/client";
 import { container } from "styled-system/patterns";
 
 import type { Layout } from "@/app/_types/layout";
 import type { Route } from "next";
 import type { FC } from "react";
 
-const PrivateLayout: Layout = async ({ children, params }) => {
+const PrivateLayout: Layout = ({ children, params }) => {
+  const traineeId = params?.["trainee_id"];
+  if (!traineeId) {
+    redirect("/" satisfies Route);
+  }
+
   return (
-    <Suspense fallback={<p>認証情報を確認しています</p>}>
+    <>
       <main className={container({ minH: "100dvh" })}>{children}</main>
       <GlobalNavigation />
-      <RedirectByAuth traineeId={params?.["trainee_id"]} />
-    </Suspense>
+      <Suspense>
+        <CheckSession traineeId={traineeId} />
+      </Suspense>
+    </>
   );
 };
 export default PrivateLayout;
 
 type Props = {
-  traineeId: string | undefined;
+  traineeId: string;
 };
-const RedirectByAuth: FC<Props> = async (props) => {
-  const session = await getServerSession(nextAuthOptions);
-  const authUserId = session?.user.id;
-
-  if (!authUserId) {
-    redirect("/login" satisfies Route);
-  }
-
-  const trainee = await prisma.trainee.findUnique({
-    where: {
-      authUserId,
-    },
-  });
-
-  if (!trainee) {
-    redirect("/trainees/onboarding" satisfies Route);
-  }
-
-  if (!props.traineeId || props.traineeId !== trainee.id) {
+const CheckSession: FC<Props> = async (props) => {
+  const trainee = await getTraineeOrRedirect();
+  if (trainee.id !== props.traineeId) {
     const to = `/trainees/${trainee.id}` as const;
     redirect(to satisfies Route<typeof to>);
   }

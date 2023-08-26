@@ -17,29 +17,34 @@ export const ExerciseRecords: FC<Props> = async (props) => {
   if (getRecordsResult.isErr) {
     return <p>記録データの取得に失敗しました</p>;
   }
-  const records = getRecordsResult.value;
+  const trainings = getRecordsResult.value;
 
   return (
     <div className={stack({ direction: "column" })}>
       <p>記録</p>
       <ul className={stack({ direction: "column", gap: 4, pl: 4 })}>
-        {records.map(({ date, record }, index) => {
+        {trainings.map((training, index) => {
           return (
             <div
               className={stack({ direction: "column" })}
-              key={`${index}-${date}`}
+              key={`${index}-${training.date}`}
             >
-              <LocalDate utcDateString={date} />
+              <LocalDate utcDateString={training.date} />
               <ul className={stack({ direction: "column", pl: 4 })}>
-                {record.sets.map((set) => {
-                  return (
-                    <li key={set.id} className={stack({ direction: "column" })}>
-                      <p>
-                        {set.weight}kg {set.repetition}回
-                      </p>
-                    </li>
-                  );
-                })}
+                {training.records
+                  .flatMap((record) => record.sets)
+                  .map((set) => {
+                    return (
+                      <li
+                        key={set.id}
+                        className={stack({ direction: "column" })}
+                      >
+                        <p>
+                          {set.weight}kg {set.repetition}回
+                        </p>
+                      </li>
+                    );
+                  })}
               </ul>
             </div>
           );
