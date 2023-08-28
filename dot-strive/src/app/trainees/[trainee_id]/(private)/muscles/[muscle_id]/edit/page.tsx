@@ -16,7 +16,7 @@ const Page: NextPage = (props) => {
   }
   const muscleId = props.params?.["muscle_id"];
   if (!muscleId) {
-    const to = `/trainees/${traineeId}/muscles` as const;
+    const to = `/trainees/${traineeId}` as const;
     redirect(to satisfies Route<typeof to>);
   }
 

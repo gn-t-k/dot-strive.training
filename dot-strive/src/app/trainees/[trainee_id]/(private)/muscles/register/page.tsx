@@ -21,7 +21,7 @@ const Page: NextPage = (props) => {
       <Suspense fallback={<p>部位データを取得しています</p>}>
         <FetchMuscles traineeId={traineeId} />
       </Suspense>
-      <Link href={`/trainees/${traineeId}/muscles`}>部位一覧</Link>
+      <Link href={`/trainees/${traineeId}`}>トレーニーページ</Link>
     </section>
   );
 };
