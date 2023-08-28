@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { getAllExercises } from "@/app/_actions/get-all-exercises";
+import { stack } from "styled-system/patterns";
 
 import type { FC } from "react";
 
@@ -17,14 +18,20 @@ export const ExerciseList: FC<Props> = async (props) => {
   }
   const exercises = exercisesResult.value;
 
-  return exercises.map((exercise) => {
-    return (
-      <Link
-        href={`/trainees/${props.traineeId}/exercises/${exercise.id}`}
-        key={exercise.id}
-      >
-        {exercise.name}
-      </Link>
-    );
-  });
+  return (
+    <ul className={stack({ direction: "column" })}>
+      {exercises.map((exercise) => {
+        return (
+          <li key={exercise.id}>
+            <Link
+              href={`/trainees/${props.traineeId}/exercises/${exercise.id}`}
+              key={exercise.id}
+            >
+              {exercise.name}
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
 };

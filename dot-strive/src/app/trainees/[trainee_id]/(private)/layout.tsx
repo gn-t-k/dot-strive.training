@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { getTraineeOrRedirect } from "@/app/_actions/get-trainee-or-redirect";
-import { GlobalNavigation } from "@/app/_components/global-navigation";
+import { HeaderNavigation } from "@/app/_components/header-navigation";
 import { container } from "styled-system/patterns";
 
 import type { Layout } from "@/app/_types/layout";
@@ -17,9 +17,9 @@ const PrivateLayout: Layout = ({ children, params }) => {
 
   return (
     <>
-      <main className={container({ minH: "100dvh" })}>{children}</main>
-      <GlobalNavigation />
-      <Suspense>
+      <HeaderNavigation traineeId={traineeId} />
+      <main className={container({ minH: "100dvh", pt: 12 })}>{children}</main>
+      <Suspense fallback={null}>
         <CheckSession traineeId={traineeId} />
       </Suspense>
     </>

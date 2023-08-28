@@ -53,7 +53,7 @@ export const MuscleRegistrationForm: FC<Props> = (props) => {
       );
 
       router.refresh();
-      router.push(`/trainees/${props.traineeId}/muscles`);
+      router.push(`/trainees/${props.traineeId}`);
     },
     [props.traineeId, renderToast, router]
   );

@@ -51,7 +51,7 @@ export const MuscleDeletionAndConfirm: FC<Props> = (props) => {
       );
       router.refresh();
       if (result.isOk) {
-        router.replace(`/trainees/${props.traineeId}/muscles`);
+        router.replace(`/trainees/${props.traineeId}`);
       }
     },
     [props.muscle.id, props.traineeId, renderToast, router]

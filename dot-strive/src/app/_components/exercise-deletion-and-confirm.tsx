@@ -49,7 +49,7 @@ export const ExerciseDeletionAndConfirm: FC<Props> = (props) => {
           }
     );
     if (result.isOk) {
-      router.push(`/trainees/${props.traineeId}/exercises`);
+      router.push(`/trainees/${props.traineeId}`);
     }
   };
   const onClickCancel: MouseEventHandler<HTMLButtonElement> = (event) => {
