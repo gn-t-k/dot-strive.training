@@ -60,7 +60,7 @@ export const ExerciseRegistrationForm: FC<Props> = (props) => {
       );
 
       router.refresh();
-      router.push(`/trainees/${props.traineeId}/exercises`);
+      router.push(`/trainees/${props.traineeId}`);
     },
     [props.registeredMuscles, props.traineeId, renderToast, router]
   );

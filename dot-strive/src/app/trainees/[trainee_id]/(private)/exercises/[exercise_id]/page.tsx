@@ -21,7 +21,7 @@ const Page: NextPage = (props) => {
 
   const exerciseId = props.params?.["exercise_id"];
   if (!exerciseId) {
-    const to = `/trainees/${traineeId}/exercises` as const;
+    const to = `/trainees/${traineeId}` as const;
     redirect(to satisfies Route<typeof to>);
   }
 
@@ -36,7 +36,7 @@ const Page: NextPage = (props) => {
         <ExerciseRecords traineeId={traineeId} exerciseId={exerciseId} />
         <FetchExercise traineeId={traineeId} exerciseId={exerciseId} />
       </Suspense>
-      <Link href={`/trainees/${traineeId}/exercises`}>種目一覧</Link>
+      <Link href={`/trainees/${traineeId}`}>トレーニーページ</Link>
     </section>
   );
 };

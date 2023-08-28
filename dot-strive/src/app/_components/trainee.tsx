@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import { getTraineeBySession } from "@/app/_actions/get-trainee-by-session";
+import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
 import type { FC } from "react";
@@ -15,10 +16,21 @@ export const Trainee: FC = async () => {
   const trainee = traineeResult.value;
 
   return (
-    <section className={stack({ direction: "column" })}>
-      <p>name: {trainee.name}</p>
+    <section
+      className={stack({
+        direction: "column",
+        align: "center",
+      })}
+    >
+      <Image
+        src={trainee.image}
+        alt={trainee.name}
+        width={48}
+        height={48}
+        className={css({ borderRadius: "50%" })}
+      />
+      <h1>{trainee.name}</h1>
       <p>id: {trainee.id}</p>
-      <Image src={trainee.image} alt={trainee.name} width={500} height={500} />
     </section>
   );
 };

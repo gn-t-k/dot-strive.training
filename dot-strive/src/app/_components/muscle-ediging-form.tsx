@@ -56,7 +56,7 @@ export const MuscleEditingForm: FC<Props> = (props) => {
       );
 
       router.refresh();
-      router.push(`/trainees/${props.traineeId}/muscles`);
+      router.push(`/trainees/${props.traineeId}`);
     },
     [props.muscle.id, props.muscle.name, props.traineeId, renderToast, router]
   );

@@ -19,7 +19,7 @@ const Page: NextPage = async (props) => {
   }
   const muscleId = props.params?.["muscle_id"];
   if (!muscleId) {
-    const to = `/trainees/${traineeId}/muscles` as const;
+    const to = `/trainees/${traineeId}` as const;
     redirect(to satisfies Route<typeof to>);
   }
 
@@ -29,7 +29,7 @@ const Page: NextPage = async (props) => {
       <Suspense fallback={<Loading description="部位データを取得しています" />}>
         <FetchMuscle traineeId={traineeId} muscleId={muscleId} />
       </Suspense>
-      <Link href={`/trainees/${traineeId}/muscles`}>部位一覧</Link>
+      <Link href={`/trainees/${traineeId}`}>トレーニーページ</Link>
     </section>
   );
 };
