@@ -18,7 +18,7 @@ const PrivateLayout: Layout = ({ children, params }) => {
   return (
     <>
       <HeaderNavigation traineeId={traineeId} />
-      <main className={container({ minH: "100dvh" })}>{children}</main>
+      <main className={container({ minH: "100dvh", pt: 12 })}>{children}</main>
       <Suspense fallback={null}>
         <CheckSession traineeId={traineeId} />
       </Suspense>

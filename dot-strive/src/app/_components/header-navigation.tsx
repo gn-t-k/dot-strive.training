@@ -13,15 +13,11 @@ type Props = {
   traineeId: string;
 };
 export const HeaderNavigation: FC<Props> = (props) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const [prevScrollPos, setPrevScrollPos] = useState(
-    typeof window !== "undefined" ? window.scrollY : 0
-  );
+  const [isVisible, setIsVisible] = useState(true);
+  const [prevScrollPos, setPrevScrollPos] = useState(window.scrollY);
 
   useEffect(() => {
     const handleScroll: EventListener = (_event) => {
-      if (typeof window === "undefined") return;
-
       const currentScrollPos = window.scrollY;
       setIsVisible(prevScrollPos > currentScrollPos);
       setPrevScrollPos(currentScrollPos);
@@ -39,9 +35,10 @@ export const HeaderNavigation: FC<Props> = (props) => {
       className={css({
         h: 12,
         bg: "white",
-        position: "sticky",
-        transition: "top 0.3s",
+        position: "fixed",
+        w: "full",
         top: isVisible ? 0 : -12,
+        transition: "top 0.3s",
         borderBottom: "1px solid",
         zIndex: 9999, // TODO: tokenとかで管理したい
         display: "flex",
