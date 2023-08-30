@@ -13,6 +13,8 @@ import { Suspense } from "react";
 import { getTrainingsByDateRange } from "@/app/_actions/get-trainings-by-date-range";
 import { Loading } from "@/app/_components/loading";
 import { Month } from "@/app/_components/training-calendar";
+import { TrainingCalendarMonth } from "@/app/_components/training-calendar-month";
+import { TrainingDetailView } from "@/app/_components/training-detail";
 import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
@@ -111,13 +113,38 @@ const FetchMonthlyTrainings: FC<Props> = async (props) => {
   return (
     <div className={stack({ direction: "column" })}>
       <Month
-        selected={utcDateStringSchema.parse(
-          new Date(`${props.year}-${props.month}-1`).toISOString()
-        )}
-        timezoneOffset={props.timezoneOffset}
+        selectedDate={new Date(`${props.year}-${props.month}`).getTime()}
         trainings={trainings}
         traineeId={props.traineeId}
       />
+      <TrainingCalendarMonth
+        traineeId={props.traineeId}
+        trainings={trainings}
+        selected={utcDateStringSchema.parse(
+          new Date(`${props.year}-${props.month}-1`).toISOString()
+        )}
+      />
+      <ul className={stack({ direction: "column", gap: 12, p: 4 })}>
+        {trainings
+          .sort(
+            (a, b) => new Date(b.date).valueOf() - new Date(a.date).valueOf()
+          )
+          .map((training) => {
+            const styles = css({
+              border: "1px solid",
+            });
+
+            return (
+              <li key={training.id} className={styles}>
+                <Link
+                  href={`/trainees/${props.traineeId}/trainings/${training.id}`}
+                >
+                  <TrainingDetailView training={training} />
+                </Link>
+              </li>
+            );
+          })}
+      </ul>
     </div>
   );
 };
