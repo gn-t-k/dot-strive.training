@@ -14,12 +14,16 @@ type Props = {
 };
 export const HeaderNavigation: FC<Props> = (props) => {
   const [isVisible, setIsVisible] = useState(true);
-  const [prevScrollPos, setPrevScrollPos] = useState(window.scrollY);
+  const [prevScrollPos, setPrevScrollPos] = useState(
+    typeof window !== "undefined" ? window.scrollY : 0
+  );
 
   useEffect(() => {
     const handleScroll: EventListener = (_event) => {
       const currentScrollPos = window.scrollY;
-      setIsVisible(prevScrollPos > currentScrollPos);
+      setIsVisible(
+        currentScrollPos === 0 ? true : prevScrollPos > currentScrollPos
+      );
       setPrevScrollPos(currentScrollPos);
     };
 
@@ -41,15 +45,20 @@ export const HeaderNavigation: FC<Props> = (props) => {
         transition: "top 0.3s",
         borderBottom: "1px solid",
         zIndex: 9999, // TODO: tokenとかで管理したい
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
       })}
     >
-      <Link href={`/trainees/${props.traineeId}/trainings`}>.STRIVE</Link>
-      <Link href={`/trainees/${props.traineeId}`}>
-        <EmojiIcon emoji="👤" label="マイページ" size="medium" />
-      </Link>
+      <nav
+        className={css({
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        })}
+      >
+        <Link href={`/trainees/${props.traineeId}/trainings`}>.STRIVE</Link>
+        <Link href={`/trainees/${props.traineeId}`}>
+          <EmojiIcon emoji="👤" label="マイページ" size="medium" />
+        </Link>
+      </nav>
     </header>
   );
 };

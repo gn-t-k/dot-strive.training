@@ -3,6 +3,8 @@ import {
   addMinutes,
   addMonths,
   endOfMonth,
+  getMonth,
+  getYear,
   subDays,
   subMonths,
 } from "date-fns";
@@ -13,11 +15,10 @@ import { Suspense } from "react";
 import { getTrainingsByDateRange } from "@/app/_actions/get-trainings-by-date-range";
 import { Loading } from "@/app/_components/loading";
 import { TrainingCalendarMonth } from "@/app/_components/training-calendar-month";
+import { TrainingDetailView } from "@/app/_components/training-detail";
 import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
-
-import { TrainingDetailView } from "../../../../../../../_components/training-detail";
 
 import type { NextPage } from "@/app/_types/page";
 import type { Route } from "next";
@@ -46,13 +47,15 @@ const Page: NextPage = (props) => {
     redirect(to satisfies Route<typeof to>);
   }
 
-  const thisMonthDate = new Date(`${year}-${month}`);
-  const nextMonthDate = addMonths(thisMonthDate, 1);
-  const nextMonthYear = nextMonthDate.getFullYear();
-  const nextMonthMonth = nextMonthDate.getMonth() + 1;
-  const prevMonthDate = subMonths(thisMonthDate, 1);
-  const prevMonthYear = prevMonthDate.getFullYear();
-  const prevMonthMonth = prevMonthDate.getMonth() + 1;
+  const thisMonthDate = new Date(`${year}-${month}`).getTime();
+
+  const prevMonthDate = subMonths(thisMonthDate, 1).getTime();
+  const prevMonthYear = getYear(prevMonthDate);
+  const prevMonthMonth = getMonth(prevMonthDate) + 1;
+
+  const nextMonthDate = addMonths(thisMonthDate, 1).getTime();
+  const nextMonthYear = getYear(nextMonthDate);
+  const nextMonthMonth = getMonth(nextMonthDate) + 1;
 
   return (
     <section className={stack({ direction: "column" })}>
@@ -93,7 +96,7 @@ type Props = {
   timezoneOffset: number;
 };
 const FetchMonthlyTrainings: FC<Props> = async (props) => {
-  const startDate = new Date(`${props.year}-${props.month}`);
+  const startDate = new Date(`${props.year}-${props.month}`).getTime();
   const endDate = endOfMonth(startDate);
   const bufferedStartDate = subDays(startDate, 7);
   const bufferedEndDate = addDays(endDate, 7);
