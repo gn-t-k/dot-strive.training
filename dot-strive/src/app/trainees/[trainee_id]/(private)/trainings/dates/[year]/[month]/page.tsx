@@ -14,7 +14,6 @@ import { Suspense } from "react";
 
 import { getTrainingsByDateRange } from "@/app/_actions/get-trainings-by-date-range";
 import { Loading } from "@/app/_components/loading";
-import { Month } from "@/app/_components/training-calendar";
 import { TrainingCalendarMonth } from "@/app/_components/training-calendar-month";
 import { TrainingDetailView } from "@/app/_components/training-detail";
 import { utcDateStringSchema } from "@/app/_schemas/utc-date-string";
@@ -116,12 +115,6 @@ const FetchMonthlyTrainings: FC<Props> = async (props) => {
 
   return (
     <div className={stack({ direction: "column" })}>
-      <Month
-        selectedDate={new Date(`${props.year}-${props.month}`).getTime()}
-        trainings={trainings}
-        traineeId={props.traineeId}
-        timezoneOffset={props.timezoneOffset}
-      />
       <TrainingCalendarMonth
         traineeId={props.traineeId}
         trainings={trainings}
