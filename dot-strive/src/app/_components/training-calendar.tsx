@@ -116,12 +116,9 @@ export const Day: FC<DayProps> = (props) => {
   const isToday = isSameDay(props.date, today);
   const isSelectedMonth = isSameMonth(props.date, props.selectedDate);
   const trainings = props.trainings.filter((training) => {
-    const date = addMinutes(
-      new Date(training.date),
-      props.timezoneOffset
-    ).getTime();
+    const date = new Date(training.date).getTime();
 
-    return isSameDay(date, props.date);
+    return isSameDay(date, addMinutes(props.date, props.timezoneOffset));
   });
   const isTrainingDay = trainings.length > 0;
   const style = css({
