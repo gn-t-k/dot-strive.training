@@ -1,6 +1,5 @@
 import {
   addDays,
-  addMinutes,
   addWeeks,
   format,
   getDate,
@@ -8,6 +7,7 @@ import {
   isSameMonth,
   startOfMonth,
   startOfWeek,
+  subMinutes,
 } from "date-fns";
 import Link from "next/link";
 
@@ -116,9 +116,12 @@ export const Day: FC<DayProps> = (props) => {
   const isToday = isSameDay(props.date, today);
   const isSelectedMonth = isSameMonth(props.date, props.selectedDate);
   const trainings = props.trainings.filter((training) => {
-    const date = new Date(training.date).getTime();
+    const date = subMinutes(
+      new Date(training.date),
+      props.timezoneOffset
+    ).getTime();
 
-    return isSameDay(date, addMinutes(props.date, props.timezoneOffset));
+    return isSameDay(date, props.date);
   });
   const isTrainingDay = trainings.length > 0;
   const style = css({
