@@ -1,5 +1,6 @@
 import {
   addDays,
+  addMinutes,
   addWeeks,
   format,
   getDate,
@@ -22,10 +23,19 @@ type MonthProps = {
   selectedDate: number;
   trainings: Training[];
   traineeId: string;
+  timezoneOffset: number;
 };
 export const Month: FC<MonthProps> = (props) => {
-  const month = getMonthlyCalendar({
-    selectedDate: props.selectedDate,
+  const topLeftDate = startOfWeek(startOfMonth(props.selectedDate)).getTime();
+
+  const month = [0, 1, 2, 3, 4, 5].map((weekIndex) => {
+    const startSunday = addWeeks(topLeftDate, weekIndex).getTime();
+
+    return [0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
+      const date = addDays(startSunday, dayIndex).getTime();
+
+      return date;
+    });
   });
 
   return (
@@ -48,6 +58,7 @@ export const Month: FC<MonthProps> = (props) => {
                     selectedDate={props.selectedDate}
                     trainings={props.trainings}
                     traineeId={props.traineeId}
+                    timezoneOffset={props.timezoneOffset}
                     key={date}
                   />
                 );
@@ -64,10 +75,15 @@ type WeekProps = {
   selectedDate: number;
   trainings: Training[];
   traineeId: string;
+  timezoneOffset: number;
 };
 export const Week: FC<WeekProps> = (props) => {
-  const week = getWeeklyCalendar({
-    selectedDate: props.selectedDate,
+  const startSunday = startOfWeek(props.selectedDate).getTime();
+
+  const week = [0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
+    const date = addDays(startSunday, dayIndex).getTime();
+
+    return date;
   });
 
   return (
@@ -79,6 +95,7 @@ export const Week: FC<WeekProps> = (props) => {
             selectedDate={props.selectedDate}
             trainings={props.trainings}
             traineeId={props.traineeId}
+            timezoneOffset={props.timezoneOffset}
             key={date}
           />
         );
@@ -92,13 +109,17 @@ type DayProps = {
   selectedDate: number;
   trainings: Training[];
   traineeId: string;
+  timezoneOffset: number;
 };
 export const Day: FC<DayProps> = (props) => {
   const today = new Date().getTime();
   const isToday = isSameDay(props.date, today);
   const isSelectedMonth = isSameMonth(props.date, props.selectedDate);
   const trainings = props.trainings.filter((training) => {
-    const date = new Date(training.date).getTime();
+    const date = addMinutes(
+      new Date(training.date),
+      props.timezoneOffset
+    ).getTime();
 
     return isSameDay(date, props.date);
   });
@@ -134,34 +155,4 @@ export const Day: FC<DayProps> = (props) => {
       </Link>
     </div>
   );
-};
-
-type Month = Week[];
-type Week = Timestamp[];
-type Timestamp = number;
-
-type GetMonthlyCalendar = (props: { selectedDate: number }) => Month;
-const getMonthlyCalendar: GetMonthlyCalendar = (props) => {
-  const topLeftDate = startOfWeek(startOfMonth(props.selectedDate)).getTime();
-
-  return [0, 1, 2, 3, 4, 5].map((weekIndex) => {
-    const startSunday = addWeeks(topLeftDate, weekIndex).getTime();
-
-    return [0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
-      const date = addDays(startSunday, dayIndex).getTime();
-
-      return date;
-    });
-  });
-};
-
-type GetWeeklyCalendar = (props: { selectedDate: number }) => Week;
-const getWeeklyCalendar: GetWeeklyCalendar = (props) => {
-  const startSunday = startOfWeek(props.selectedDate).getTime();
-
-  return [0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
-    const date = addDays(startSunday, dayIndex).getTime();
-
-    return date;
-  });
 };

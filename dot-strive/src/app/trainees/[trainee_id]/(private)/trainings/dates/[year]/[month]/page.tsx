@@ -3,6 +3,8 @@ import {
   addMinutes,
   addMonths,
   endOfMonth,
+  getMonth,
+  getYear,
   subDays,
   subMonths,
 } from "date-fns";
@@ -46,13 +48,15 @@ const Page: NextPage = (props) => {
     redirect(to satisfies Route<typeof to>);
   }
 
-  const thisMonthDate = new Date(`${year}-${month}`);
-  const nextMonthDate = addMonths(thisMonthDate, 1);
-  const nextMonthYear = nextMonthDate.getFullYear();
-  const nextMonthMonth = nextMonthDate.getMonth() + 1;
-  const prevMonthDate = subMonths(thisMonthDate, 1);
-  const prevMonthYear = prevMonthDate.getFullYear();
-  const prevMonthMonth = prevMonthDate.getMonth() + 1;
+  const thisMonthDate = new Date(`${year}-${month}`).getTime();
+
+  const prevMonthDate = subMonths(thisMonthDate, 1).getTime();
+  const prevMonthYear = getYear(prevMonthDate);
+  const prevMonthMonth = getMonth(prevMonthDate) + 1;
+
+  const nextMonthDate = addMonths(thisMonthDate, 1).getTime();
+  const nextMonthYear = getYear(nextMonthDate);
+  const nextMonthMonth = getMonth(nextMonthDate) + 1;
 
   return (
     <section className={stack({ direction: "column" })}>
@@ -93,7 +97,7 @@ type Props = {
   timezoneOffset: number;
 };
 const FetchMonthlyTrainings: FC<Props> = async (props) => {
-  const startDate = new Date(`${props.year}-${props.month}`);
+  const startDate = new Date(`${props.year}-${props.month}`).getTime();
   const endDate = endOfMonth(startDate);
   const bufferedStartDate = subDays(startDate, 7);
   const bufferedEndDate = addDays(endDate, 7);
@@ -116,6 +120,7 @@ const FetchMonthlyTrainings: FC<Props> = async (props) => {
         selectedDate={new Date(`${props.year}-${props.month}`).getTime()}
         trainings={trainings}
         traineeId={props.traineeId}
+        timezoneOffset={props.timezoneOffset}
       />
       <TrainingCalendarMonth
         traineeId={props.traineeId}
