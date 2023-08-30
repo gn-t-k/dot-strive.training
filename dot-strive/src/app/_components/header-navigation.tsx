@@ -14,7 +14,9 @@ type Props = {
 };
 export const HeaderNavigation: FC<Props> = (props) => {
   const [isVisible, setIsVisible] = useState(true);
-  const [prevScrollPos, setPrevScrollPos] = useState(window.scrollY);
+  const [prevScrollPos, setPrevScrollPos] = useState(
+    typeof window !== "undefined" ? window.scrollY : 0
+  );
 
   useEffect(() => {
     const handleScroll: EventListener = (_event) => {
