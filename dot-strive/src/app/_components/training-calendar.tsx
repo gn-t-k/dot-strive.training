@@ -17,7 +17,98 @@ import { grid, stack } from "styled-system/patterns";
 import { TrainingPopover } from "./trainings-popover";
 
 import type { Training } from "../_schemas/training";
+import type { None, Some } from "../_utils/option";
 import type { FC } from "react";
+
+type Input =
+  | {
+      view: "year";
+      year: number;
+      month: Some<number>;
+      day: Some<number>;
+    }
+  | {
+      view: "year";
+      year: number;
+      month: None;
+      day: None;
+    }
+  | {
+      view: "month";
+      year: number;
+      month: Some<number>;
+      day: Some<number>;
+    }
+  | {
+      view: "month";
+      year: number;
+      month: Some<number>;
+      day: None;
+    }
+  | {
+      view: "week";
+      year: number;
+      month: Some<number>;
+      day: Some<number>;
+    };
+
+type DayProps = {
+  date: number;
+  input: Input;
+  trainings: Training[];
+  traineeId: string;
+  timezoneOffset: number;
+};
+export const Day: FC<DayProps> = (props) => {
+  const isToday = isSameDay(props.date, new Date().getTime());
+
+  const isOutOfRange =
+    props.input.view === "month" &&
+    !isSameMonth(
+      props.date,
+      new Date(props.input.year, props.input.month.value)
+    );
+  const trainings = props.trainings.filter((training) => {
+    const date = subMinutes(
+      new Date(training.date),
+      props.timezoneOffset
+    ).getTime();
+
+    return isSameDay(date, props.date);
+  });
+  const isTrainingDay = trainings.length > 0;
+  const style = css({
+    color: isOutOfRange ? "black" : "gray.300",
+    bgColor: isTrainingDay ? "Highlight" : "transparent",
+    outline: isToday ? "3px solid" : "none",
+    outlineOffset: "-3px",
+    borderRadius: "50%",
+    width: "40px",
+    height: "40px",
+    lineHeight: "40px",
+    textAlign: "center",
+  });
+
+  return trainings.length > 0 ? (
+    <TrainingPopover traineeId={props.traineeId} trainings={trainings}>
+      <div role="cell" className={style}>
+        {getDate(props.date)}
+      </div>
+    </TrainingPopover>
+  ) : (
+    <div role="cell" className={style}>
+      <Link
+        href={`/trainees/${props.traineeId}/trainings/register?date=${format(
+          props.date,
+          "yyyy-MM-dd"
+        )}')}`}
+        className={css({ textAlign: "center" })}
+      >
+        {getDate(props.date)}
+      </Link>
+    </div>
+  );
+};
 
 type MonthProps = {
   selectedDate: number;
@@ -55,7 +146,7 @@ export const Month: FC<MonthProps> = (props) => {
                 return (
                   <Day
                     date={date}
-                    selectedDate={props.selectedDate}
+                    input={props.selectedDate}
                     trainings={props.trainings}
                     traineeId={props.traineeId}
                     timezoneOffset={props.timezoneOffset}
@@ -92,7 +183,7 @@ export const Week: FC<WeekProps> = (props) => {
         return (
           <Day
             date={date}
-            selectedDate={props.selectedDate}
+            input={props.selectedDate}
             trainings={props.trainings}
             traineeId={props.traineeId}
             timezoneOffset={props.timezoneOffset}
@@ -100,59 +191,6 @@ export const Week: FC<WeekProps> = (props) => {
           />
         );
       })}
-    </div>
-  );
-};
-
-type DayProps = {
-  date: number;
-  selectedDate: number;
-  trainings: Training[];
-  traineeId: string;
-  timezoneOffset: number;
-};
-export const Day: FC<DayProps> = (props) => {
-  const today = new Date().getTime();
-  const isToday = isSameDay(props.date, today);
-  const isSelectedMonth = isSameMonth(props.date, props.selectedDate);
-  const trainings = props.trainings.filter((training) => {
-    const date = subMinutes(
-      new Date(training.date),
-      props.timezoneOffset
-    ).getTime();
-
-    return isSameDay(date, props.date);
-  });
-  const isTrainingDay = trainings.length > 0;
-  const style = css({
-    color: isSelectedMonth ? "black" : "gray.300",
-    bgColor: isTrainingDay ? "Highlight" : "transparent",
-    outline: isToday ? "3px solid" : "none",
-    outlineOffset: "-3px",
-    borderRadius: "50%",
-    width: "40px",
-    height: "40px",
-    lineHeight: "40px",
-    textAlign: "center",
-  });
-
-  return trainings.length > 0 ? (
-    <TrainingPopover traineeId={props.traineeId} trainings={trainings}>
-      <div role="cell" className={style}>
-        {getDate(props.date)}
-      </div>
-    </TrainingPopover>
-  ) : (
-    <div role="cell" className={style}>
-      <Link
-        href={`/trainees/${props.traineeId}/trainings/register?date=${format(
-          props.date,
-          "yyyy-MM-dd"
-        )}')}`}
-        className={css({ textAlign: "center" })}
-      >
-        {getDate(props.date)}
-      </Link>
     </div>
   );
 };
