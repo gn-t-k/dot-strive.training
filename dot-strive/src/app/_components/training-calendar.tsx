@@ -1,8 +1,9 @@
 import {
   addDays,
   addWeeks,
-  format,
   getDate,
+  getMonth,
+  getYear,
   isSameDay,
   isSameMonth,
   startOfMonth,
@@ -14,11 +15,13 @@ import Link from "next/link";
 import { css } from "styled-system/css";
 import { grid, stack } from "styled-system/patterns";
 
+import { EmojiIcon } from "./emoji-icon";
 import { TrainingPopover } from "./trainings-popover";
+import { some, type None, type Option, type Some } from "../_utils/option";
 
 import type { Training } from "../_schemas/training";
-import type { None, Some } from "../_utils/option";
 import type { FC } from "react";
+import type { SystemStyleObject } from "styled-system/types";
 
 type Input =
   | {
@@ -37,13 +40,7 @@ type Input =
       view: "month";
       year: number;
       month: Some<number>;
-      day: Some<number>;
-    }
-  | {
-      view: "month";
-      year: number;
-      month: Some<number>;
-      day: None;
+      day: Option<number>;
     }
   | {
       view: "week";
@@ -62,12 +59,13 @@ type DayProps = {
 export const Day: FC<DayProps> = (props) => {
   const isToday = isSameDay(props.date, new Date().getTime());
 
-  const isOutOfRange =
+  const isOutOfMonth =
     props.input.view === "month" &&
     !isSameMonth(
       props.date,
       new Date(props.input.year, props.input.month.value)
     );
+
   const trainings = props.trainings.filter((training) => {
     const date = subMinutes(
       new Date(training.date),
@@ -77,47 +75,97 @@ export const Day: FC<DayProps> = (props) => {
     return isSameDay(date, props.date);
   });
   const isTrainingDay = trainings.length > 0;
-  const style = css({
-    color: isOutOfRange ? "black" : "gray.300",
-    bgColor: isTrainingDay ? "Highlight" : "transparent",
-    outline: isToday ? "3px solid" : "none",
-    outlineOffset: "-3px",
+
+  const year = getYear(props.date);
+  const month = getMonth(props.date);
+  const day = getDate(props.date);
+  const isSelected =
+    props.input.month.hasSome &&
+    props.input.day.hasSome &&
+    props.input.year === year &&
+    props.input.month.value === month &&
+    props.input.day.value === day;
+
+  const commonStyle: SystemStyleObject = {
     borderRadius: "50%",
     width: "40px",
     height: "40px",
     lineHeight: "40px",
     textAlign: "center",
-  });
+  } as const;
+  const dayStyle = isToday
+    ? css({
+        ...commonStyle,
+        color: "white",
+        bgColor: "blue",
+      })
+    : !isSelected && isOutOfMonth
+    ? css({
+        ...commonStyle,
+        color: "gray.300",
+      })
+    : isSelected && !isOutOfMonth
+    ? css({
+        ...commonStyle,
+        bgColor: "blue.300",
+      })
+    : css(commonStyle);
 
   return trainings.length > 0 ? (
     <TrainingPopover traineeId={props.traineeId} trainings={trainings}>
-      <div role="cell" className={style}>
-        {getDate(props.date)}
+      <div
+        role="cell"
+        className={stack({
+          direction: "column",
+          gap: 0,
+          height: "80px",
+          align: "center",
+        })}
+      >
+        <div className={dayStyle}>{getDate(props.date)}</div>
+        <EmojiIcon
+          emoji="🏋️"
+          label={`${year}/${month + 1}/${day}のトレーニングを${
+            isTrainingDay ? "確認" : "登録"
+          }`}
+          size="small"
+        />
       </div>
     </TrainingPopover>
   ) : (
-    <div role="cell" className={style}>
+    <div
+      role="cell"
+      className={stack({
+        direction: "column",
+        gap: 0,
+        height: "80px",
+        align: "center",
+      })}
+    >
       <Link
-        href={`/trainees/${props.traineeId}/trainings/register?date=${format(
-          props.date,
-          "yyyy-MM-dd"
-        )}')}`}
+        href={`/trainees/${props.traineeId}/trainings/dates/${year}/${
+          month + 1
+        }/${day}`}
         className={css({ textAlign: "center" })}
       >
-        {getDate(props.date)}
+        <div className={dayStyle}>{getDate(props.date)}</div>
       </Link>
     </div>
   );
 };
 
 type MonthProps = {
-  selectedDate: number;
+  year: number;
+  month: number;
+  day: Option<number>;
   trainings: Training[];
   traineeId: string;
   timezoneOffset: number;
 };
 export const Month: FC<MonthProps> = (props) => {
-  const topLeftDate = startOfWeek(startOfMonth(props.selectedDate)).getTime();
+  const topLeftDate = startOfWeek(
+    startOfMonth(new Date(props.year, props.month))
+  ).getTime();
 
   const month = [0, 1, 2, 3, 4, 5].map((weekIndex) => {
     const startSunday = addWeeks(topLeftDate, weekIndex).getTime();
@@ -146,7 +194,12 @@ export const Month: FC<MonthProps> = (props) => {
                 return (
                   <Day
                     date={date}
-                    input={props.selectedDate}
+                    input={{
+                      view: "month",
+                      year: props.year,
+                      month: some(props.month),
+                      day: props.day,
+                    }}
                     trainings={props.trainings}
                     traineeId={props.traineeId}
                     timezoneOffset={props.timezoneOffset}
