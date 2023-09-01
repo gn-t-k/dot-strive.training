@@ -216,13 +216,17 @@ export const Month: FC<MonthProps> = (props) => {
 };
 
 type WeekProps = {
-  selectedDate: number;
+  year: number;
+  month: number;
+  day: number;
   trainings: Training[];
   traineeId: string;
   timezoneOffset: number;
 };
 export const Week: FC<WeekProps> = (props) => {
-  const startSunday = startOfWeek(props.selectedDate).getTime();
+  const startSunday = startOfWeek(
+    new Date(props.year, props.month, props.day)
+  ).getTime();
 
   const week = [0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
     const date = addDays(startSunday, dayIndex).getTime();
@@ -236,7 +240,12 @@ export const Week: FC<WeekProps> = (props) => {
         return (
           <Day
             date={date}
-            input={props.selectedDate}
+            input={{
+              view: "week",
+              year: props.year,
+              month: some(props.month),
+              day: some(props.day),
+            }}
             trainings={props.trainings}
             traineeId={props.traineeId}
             timezoneOffset={props.timezoneOffset}
