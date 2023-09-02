@@ -17,7 +17,13 @@ import { grid, stack } from "styled-system/patterns";
 
 import { EmojiIcon } from "./emoji-icon";
 import { TrainingPopover } from "./trainings-popover";
-import { some, type None, type Option, type Some } from "../_utils/option";
+import {
+  some,
+  type None,
+  type Option,
+  type Some,
+  none,
+} from "../_utils/option";
 
 import type { Training } from "../_schemas/training";
 import type { FC } from "react";
@@ -47,6 +53,14 @@ type Input =
       year: number;
       month: Some<number>;
       day: Some<number>;
+      weekNumber: None;
+    }
+  | {
+      view: "week";
+      year: number;
+      month: Some<number>;
+      day: None;
+      weekNumber: Some<number>;
     };
 
 type DayProps = {
@@ -57,6 +71,8 @@ type DayProps = {
   timezoneOffset: number;
 };
 export const Day: FC<DayProps> = (props) => {
+  // TODO
+  const _ = props.input.view === "week" ? props.input.weekNumber : 0;
   const isToday = isSameDay(props.date, new Date().getTime());
 
   const isOutOfMonth =
@@ -218,15 +234,18 @@ export const Month: FC<MonthProps> = (props) => {
 type WeekProps = {
   year: number;
   month: number;
-  day: number;
+  day: Option<number>;
+  weekNumber: number;
   trainings: Training[];
   traineeId: string;
   timezoneOffset: number;
 };
 export const Week: FC<WeekProps> = (props) => {
-  const startSunday = startOfWeek(
-    new Date(props.year, props.month, props.day)
-  ).getTime();
+  const startSunday = props.day.hasSome
+    ? startOfWeek(new Date(props.year, props.month, props.day.value)).getTime()
+    : startOfWeek(
+        new Date(props.year, 0, 1 + (props.weekNumber - 1) * 7)
+      ).getTime();
 
   const week = [0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
     const date = addDays(startSunday, dayIndex).getTime();
@@ -240,12 +259,23 @@ export const Week: FC<WeekProps> = (props) => {
         return (
           <Day
             date={date}
-            input={{
-              view: "week",
-              year: props.year,
-              month: some(props.month),
-              day: some(props.day),
-            }}
+            input={
+              props.day.hasSome
+                ? {
+                    view: "week",
+                    year: props.year,
+                    month: some(props.month),
+                    day: props.day,
+                    weekNumber: none(),
+                  }
+                : {
+                    view: "week",
+                    year: props.year,
+                    month: some(props.month),
+                    day: none(),
+                    weekNumber: some(props.weekNumber),
+                  }
+            }
             trainings={props.trainings}
             traineeId={props.traineeId}
             timezoneOffset={props.timezoneOffset}
