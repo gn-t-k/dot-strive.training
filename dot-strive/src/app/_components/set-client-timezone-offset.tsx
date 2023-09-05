@@ -1,24 +1,14 @@
 "use client";
 
-import { redirect, usePathname, useSearchParams } from "next/navigation";
+import { useCookieState } from "ahooks";
 
-import type { Route } from "next";
 import type { FC } from "react";
 
 export const SetClientTimezoneOffset: FC = () => {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const paramName = "client_timezone_offset";
-
-  const timezoneOffset = searchParams.get(paramName);
-
-  if (!timezoneOffset || isNaN(Number(timezoneOffset))) {
-    const timezoneOffset = new Date().getTimezoneOffset();
-    const params = new URLSearchParams(Array.from(searchParams.entries()));
-
-    params.set(paramName, String(timezoneOffset));
-
-    redirect(`${pathname}?${params.toString()}` as Route);
+  const [cookie, setCookie] = useCookieState("client_timezone_offset");
+  const timezoneOffsetString = String(new Date().getTimezoneOffset());
+  if (!cookie || cookie !== timezoneOffsetString) {
+    setCookie(timezoneOffsetString);
   }
 
   return null;

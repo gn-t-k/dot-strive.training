@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { getTraineeOrRedirect } from "@/app/_actions/get-trainee-or-redirect";
 import { HeaderNavigation } from "@/app/_components/header-navigation";
+import { SetClientTimezoneOffset } from "@/app/_components/set-client-timezone-offset";
 import { container } from "styled-system/patterns";
 
 import type { Layout } from "@/app/_types/layout";
@@ -22,6 +23,7 @@ const PrivateLayout: Layout = ({ children, params }) => {
       <Suspense fallback={null}>
         <CheckSession traineeId={traineeId} />
       </Suspense>
+      <SetClientTimezoneOffset />
     </>
   );
 };
