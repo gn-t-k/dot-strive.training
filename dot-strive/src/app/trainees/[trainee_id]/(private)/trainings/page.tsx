@@ -10,11 +10,12 @@ import {
   Week,
   WeekView,
 } from "@/app/_components/training-calendar";
+import { TrainingListDay } from "@/app/_components/training-list-day";
+import { TrainingListMonth } from "@/app/_components/training-list-month";
 import { none, some } from "@/app/_utils/option";
 import { stack } from "styled-system/patterns";
 
 import type { NextPage } from "@/app/_types/page";
-import type { Option } from "@/app/_utils/option";
 import type { Route } from "next";
 import type { ComponentProps } from "react";
 
@@ -24,21 +25,52 @@ const Page: NextPage = (props) => {
     redirect("/" satisfies Route);
   }
 
+  const today = new Date();
+
   const view = z
     .enum(["year", "month", "week"])
     .catch("month")
     .parse(props.searchParams?.view);
-  const today = new Date();
-  const year = ((): number => {
-    const defaultYear = getYear(today);
-    const result = z.string().safeParse(props.searchParams?.year);
-    const year = result.success ? Number(result.data) : defaultYear;
+  const year = z
+    .preprocess((v) => Number(v), z.number().catch(getYear(today)))
+    .parse(props.searchParams?.year);
 
-    return isNaN(year) ? defaultYear : year;
-  })();
   const monthParam = props.searchParams?.month;
   const dayParam = props.searchParams?.day;
   const weekParam = props.searchParams?.week;
+
+  type GetMonthOrDefault = () => number;
+  const getMonthOrDefault: GetMonthOrDefault = () => {
+    const defaultMonth = getMonth(today);
+    const parseMonthParamResult = z.string().safeParse(monthParam);
+    const maybeMonth = parseMonthParamResult.success
+      ? Number(parseMonthParamResult.data)
+      : defaultMonth;
+
+    return isNaN(maybeMonth) ? defaultMonth : maybeMonth;
+  };
+
+  type GetDayOrDefault = () => number;
+  const getDayOrDefault: GetDayOrDefault = () => {
+    const defaultDay = getDate(today);
+    const parseDayParamResult = z.string().safeParse(dayParam);
+    const maybeDay = parseDayParamResult.success
+      ? Number(parseDayParamResult.data)
+      : defaultDay;
+
+    return isNaN(maybeDay) ? defaultDay : maybeDay;
+  };
+
+  type GetWeekOrDefault = () => number;
+  const getWeekOrDefault: GetWeekOrDefault = () => {
+    const defaultWeek = getWeek(today);
+    const parseWeekParamResult = z.string().safeParse(weekParam);
+    const maybeWeek = parseWeekParamResult.success
+      ? Number(parseWeekParamResult.data)
+      : defaultWeek;
+
+    return isNaN(maybeWeek) ? defaultWeek : maybeWeek;
+  };
 
   const timezoneOffset = getTimezoneOffset();
 
@@ -46,27 +78,8 @@ const Page: NextPage = (props) => {
     case "year":
       return <p>todo</p>;
     case "month": {
-      const defaultMonth = getMonth(today);
-      const parseMonthParamResult = z.string().safeParse(monthParam);
-      const maybeMonth = parseMonthParamResult.success
-        ? Number(parseMonthParamResult.data)
-        : defaultMonth;
-      const month = isNaN(maybeMonth) ? defaultMonth : maybeMonth;
-
-      const day = ((): Option<number> => {
-        if (dayParam === undefined) {
-          return none();
-        }
-
-        const defaultDay = getDate(today);
-        const parseDayParamResult = z.string().safeParse(dayParam);
-        const maybeDay = parseDayParamResult.success
-          ? Number(parseDayParamResult.data)
-          : defaultDay;
-        const day = isNaN(maybeDay) ? defaultDay : maybeDay;
-
-        return some(day);
-      })();
+      const month = getMonthOrDefault();
+      const day = dayParam === undefined ? none() : some(getDayOrDefault());
 
       return (
         <div className={stack({ direction: "column" })}>
@@ -95,56 +108,52 @@ const Page: NextPage = (props) => {
               ? `${year}年${month + 1}月${day.value}日のトレーニング`
               : `${year}年${month + 1}月のトレーニング`}
           </p>
+          {day.hasSome ? (
+            <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
+              <TrainingListDay
+                year={year}
+                month={month}
+                day={day.value}
+                traineeId={traineeId}
+                timezoneOffset={timezoneOffset}
+              />
+            </Suspense>
+          ) : (
+            <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
+              <TrainingListMonth
+                year={year}
+                month={month}
+                day={day}
+                traineeId={traineeId}
+                timezoneOffset={timezoneOffset}
+              />
+            </Suspense>
+          )}
         </div>
       );
     }
     case "week": {
-      const args = ((): ComponentProps<typeof Week> => {
-        const common = {
-          traineeId,
-          timezoneOffset,
-          year,
-        };
-
-        if (weekParam === undefined) {
-          const defaultMonth = getMonth(today);
-          const parseMonthParamResult = z.string().safeParse(monthParam);
-          const maybeMonth = parseMonthParamResult.success
-            ? Number(parseMonthParamResult.data)
-            : defaultMonth;
-          const month = isNaN(maybeMonth) ? defaultMonth : maybeMonth;
-
-          const defaultDay = getDate(today);
-          const parseDayParamResult = z.string().safeParse(dayParam);
-          const maybeDay = parseDayParamResult.success
-            ? Number(parseDayParamResult.data)
-            : defaultDay;
-          const day = isNaN(maybeDay) ? defaultDay : maybeDay;
-
-          return {
-            ...common,
-            fullDate: true,
-            month: some(month),
-            day: some(day),
-            week: none(),
-          };
-        }
-
-        const defaultWeek = getWeek(today);
-        const parseWeekParamResult = z.string().safeParse(weekParam);
-        const maybeWeek = parseWeekParamResult.success
-          ? Number(parseWeekParamResult.data)
-          : defaultWeek;
-        const week = isNaN(maybeWeek) ? defaultWeek : maybeWeek;
-
-        return {
-          ...common,
-          fullDate: false,
-          month: none(),
-          day: none(),
-          week: some(week),
-        };
-      })();
+      const commonArgs = {
+        traineeId,
+        timezoneOffset,
+        year,
+      };
+      const args: ComponentProps<typeof Week> =
+        weekParam === undefined
+          ? {
+              ...commonArgs,
+              fullDate: true,
+              month: some(getMonthOrDefault()),
+              day: some(getDayOrDefault()),
+              week: none(),
+            }
+          : {
+              ...commonArgs,
+              fullDate: false,
+              month: none(),
+              day: none(),
+              week: some(getWeekOrDefault()),
+            };
 
       return (
         <div className={stack({ direction: "column" })}>

@@ -256,7 +256,6 @@ export const Month: FC<MonthProps> = async (props) => {
   const firstDayOfMonth = new Date(props.year, props.month);
   const topLeftDate = startOfWeek(firstDayOfMonth);
   const bottomRightDate = endOfMonth(firstDayOfMonth);
-  console.log({ topLeftDate, bottomRightDate });
   const getTrainingsResult = await getTrainingsByDateRange({
     traineeId: props.traineeId,
     from: topLeftDate,
@@ -266,7 +265,6 @@ export const Month: FC<MonthProps> = async (props) => {
     return <p>トレーニングの取得に失敗しました</p>;
   }
   const trainings = getTrainingsResult.value;
-  console.log({ trainings });
 
   return (
     <MonthView
