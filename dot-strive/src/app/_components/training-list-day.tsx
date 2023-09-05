@@ -1,4 +1,4 @@
-import { endOfDay, startOfDay } from "date-fns";
+import { addMinutes, endOfDay, startOfDay } from "date-fns";
 
 import { TrainingDetailView } from "./training-detail";
 import { getTrainingsByDateRange } from "../_actions/get-trainings-by-date-range";
@@ -14,8 +14,8 @@ type Props = {
 };
 export const TrainingListDay: FC<Props> = async (props) => {
   const date = new Date(props.year, props.month, props.day);
-  const start = startOfDay(date);
-  const end = endOfDay(date);
+  const start = addMinutes(startOfDay(date), props.timezoneOffset);
+  const end = addMinutes(endOfDay(date), props.timezoneOffset);
   const getTrainingsResult = await getTrainingsByDateRange({
     traineeId: props.traineeId,
     from: start,
