@@ -217,7 +217,7 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
         day={props.day}
         traineeId={props.traineeId}
         timezoneOffset={props.timezoneOffset}
-        trainings={trainingsInMonth}
+        trainings={trainings}
       />
       <p>
         {props.day.hasSome
