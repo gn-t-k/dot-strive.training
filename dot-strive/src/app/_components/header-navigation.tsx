@@ -22,7 +22,7 @@ export const HeaderNavigation: FC<Props> = (props) => {
     const handleScroll: EventListener = (_event) => {
       const currentScrollPos = window.scrollY;
       setIsVisible(
-        currentScrollPos === 0 ? true : prevScrollPos > currentScrollPos
+        currentScrollPos <= 0 ? true : prevScrollPos > currentScrollPos
       );
       setPrevScrollPos(currentScrollPos);
     };
