@@ -3,13 +3,11 @@ import { addMinutes, endOfMonth, getMonth, startOfWeek } from "date-fns";
 import { TrainingDetailView } from "./training-detail";
 import { getTrainingsByDateRange } from "../_actions/get-trainings-by-date-range";
 
-import type { Option } from "../_utils/option";
 import type { FC } from "react";
 
 type Props = {
   year: number;
   month: number;
-  day: Option<number>;
   traineeId: string;
   timezoneOffset: number;
 };

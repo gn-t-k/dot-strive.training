@@ -1,23 +1,31 @@
-import { getDate, getMonth, getWeek, getYear } from "date-fns";
+import {
+  addMinutes,
+  endOfMonth,
+  getDate,
+  getMonth,
+  getWeek,
+  getYear,
+  isSameDay,
+  isSameMonth,
+  startOfWeek,
+  subMinutes,
+} from "date-fns";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { z } from "zod";
 
 import { getTimezoneOffset } from "@/app/_actions/get-timezone-offset";
-import {
-  Month,
-  MonthView,
-  Week,
-  WeekView,
-} from "@/app/_components/training-calendar";
-import { TrainingListDay } from "@/app/_components/training-list-day";
-import { TrainingListMonth } from "@/app/_components/training-list-month";
+import { getTrainingsByDateRange } from "@/app/_actions/get-trainings-by-date-range";
+import { MonthView, Week, WeekView } from "@/app/_components/training-calendar";
+import { TrainingDetailView } from "@/app/_components/training-detail";
 import { none, some } from "@/app/_utils/option";
 import { stack } from "styled-system/patterns";
 
+import type { Training } from "@/app/_schemas/training";
 import type { NextPage } from "@/app/_types/page";
+import type { Option } from "@/app/_utils/option";
 import type { Route } from "next";
-import type { ComponentProps } from "react";
+import type { ComponentProps, FC } from "react";
 
 const Page: NextPage = (props) => {
   const traineeId = props.params?.["trainee_id"];
@@ -82,54 +90,15 @@ const Page: NextPage = (props) => {
       const day = dayParam === undefined ? none() : some(getDayOrDefault());
 
       return (
-        <div className={stack({ direction: "column" })}>
-          <Suspense
-            fallback={
-              <MonthView
-                year={year}
-                month={month}
-                day={day}
-                traineeId={traineeId}
-                timezoneOffset={timezoneOffset}
-                trainings={[]}
-              />
-            }
-          >
-            <Month
-              year={year}
-              month={month}
-              day={day}
-              traineeId={traineeId}
-              timezoneOffset={timezoneOffset}
-            />
-          </Suspense>
-          <p>
-            {day.hasSome
-              ? `${year}年${month + 1}月${day.value}日のトレーニング`
-              : `${year}年${month + 1}月のトレーニング`}
-          </p>
-          {day.hasSome ? (
-            <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
-              <TrainingListDay
-                year={year}
-                month={month}
-                day={day.value}
-                traineeId={traineeId}
-                timezoneOffset={timezoneOffset}
-              />
-            </Suspense>
-          ) : (
-            <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
-              <TrainingListMonth
-                year={year}
-                month={month}
-                day={day}
-                traineeId={traineeId}
-                timezoneOffset={timezoneOffset}
-              />
-            </Suspense>
-          )}
-        </div>
+        <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
+          <MonthlyView
+            year={year}
+            month={month}
+            day={day}
+            traineeId={traineeId}
+            timezoneOffset={timezoneOffset}
+          />
+        </Suspense>
       );
     }
     case "week": {
@@ -182,3 +151,92 @@ const Page: NextPage = (props) => {
   }
 };
 export default Page;
+
+type MonthlyViewProps = {
+  year: number;
+  month: number;
+  day: Option<number>;
+  traineeId: string;
+  timezoneOffset: number;
+};
+const MonthlyView: FC<MonthlyViewProps> = async (props) => {
+  const firstDayOfMonth = new Date(props.year, props.month);
+  const topLeftDate = addMinutes(
+    startOfWeek(firstDayOfMonth),
+    props.timezoneOffset
+  );
+  const bottomRightDate = addMinutes(
+    endOfMonth(firstDayOfMonth),
+    props.timezoneOffset
+  );
+  const getTrainingsResult = await getTrainingsByDateRange({
+    traineeId: props.traineeId,
+    from: topLeftDate,
+    to: bottomRightDate,
+  });
+  if (getTrainingsResult.isErr) {
+    return <p>トレーニングの取得に失敗しました</p>;
+  }
+  const trainings = getTrainingsResult.value.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+
+  type IsTrainingInMonth = (date: Date) => (training: Training) => boolean;
+  const isTrainingInMonth: IsTrainingInMonth = (date) => (training) => {
+    const trainingMonth = subMinutes(
+      new Date(training.date),
+      props.timezoneOffset
+    );
+
+    return isSameMonth(date, trainingMonth);
+  };
+  const trainingsInMonth = trainings.filter(
+    isTrainingInMonth(new Date(props.year, props.month))
+  );
+
+  type IsTrainingInDay = (date: Date) => (training: Training) => boolean;
+  const isTrainingInDay: IsTrainingInDay = (date) => (training) => {
+    const trainingDay = subMinutes(
+      new Date(training.date),
+      props.timezoneOffset
+    );
+
+    return isSameDay(date, trainingDay);
+  };
+  const trainingsInDay = props.day.hasSome
+    ? trainings.filter(
+        isTrainingInDay(new Date(props.year, props.month, props.day.value))
+      )
+    : [];
+
+  return (
+    <div className={stack({ direction: "column" })}>
+      <MonthView
+        year={props.year}
+        month={props.month}
+        day={props.day}
+        traineeId={props.traineeId}
+        timezoneOffset={props.timezoneOffset}
+        trainings={trainingsInMonth}
+      />
+      <p>
+        {props.day.hasSome
+          ? `${props.year}年${props.month + 1}月${
+              props.day.value
+            }日のトレーニング`
+          : `${props.year}年${props.month + 1}月のトレーニング`}
+      </p>
+      <ul>
+        {(props.day.hasSome ? trainingsInDay : trainingsInMonth).map(
+          (training) => {
+            return (
+              <li key={training.id}>
+                <TrainingDetailView training={training} />
+              </li>
+            );
+          }
+        )}
+      </ul>
+    </div>
+  );
+};
