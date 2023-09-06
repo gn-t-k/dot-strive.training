@@ -1,5 +1,6 @@
 import {
   addMinutes,
+  endOfMonth,
   endOfWeek,
   getDate,
   getMonth,
@@ -166,7 +167,7 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
     props.timezoneOffset
   );
   const bottomRightDate = addMinutes(
-    endOfWeek(firstDayOfMonth),
+    endOfWeek(endOfMonth(firstDayOfMonth)),
     props.timezoneOffset
   );
   const getTrainingsResult = await getTrainingsByDateRange({
