@@ -1,8 +1,6 @@
 import {
   addDays,
   addWeeks,
-  endOfMonth,
-  endOfWeek,
   getDate,
   getMonth,
   getWeek,
@@ -19,7 +17,6 @@ import { css } from "styled-system/css";
 import { grid, stack } from "styled-system/patterns";
 
 import { EmojiIcon } from "./emoji-icon";
-import { getTrainingsByDateRange } from "../_actions/get-trainings-by-date-range";
 import {
   some,
   type None,
@@ -251,42 +248,9 @@ type MonthProps = {
   day: Option<number>;
   traineeId: string;
   timezoneOffset: number;
-};
-export const Month: FC<MonthProps> = async (props) => {
-  const firstDayOfMonth = new Date(props.year, props.month);
-  const topLeftDate = startOfWeek(firstDayOfMonth);
-  const bottomRightDate = endOfMonth(firstDayOfMonth);
-  const getTrainingsResult = await getTrainingsByDateRange({
-    traineeId: props.traineeId,
-    from: topLeftDate,
-    to: bottomRightDate,
-  });
-  if (getTrainingsResult.isErr) {
-    return <p>トレーニングの取得に失敗しました</p>;
-  }
-  const trainings = getTrainingsResult.value;
-
-  return (
-    <MonthView
-      year={props.year}
-      month={props.month}
-      day={props.day}
-      traineeId={props.traineeId}
-      timezoneOffset={props.timezoneOffset}
-      trainings={trainings}
-    />
-  );
-};
-
-type MonthViewProps = {
-  year: number;
-  month: number;
-  day: Option<number>;
-  traineeId: string;
-  timezoneOffset: number;
   trainings: Training[];
 };
-export const MonthView: FC<MonthViewProps> = (props) => {
+export const Month: FC<MonthProps> = (props) => {
   const month = [0, 1, 2, 3, 4, 5].map((weekIndex) => {
     const topLeftDate = startOfWeek(new Date(props.year, props.month));
     const startSunday = addWeeks(topLeftDate, weekIndex).getTime();
@@ -350,69 +314,6 @@ export const MonthView: FC<MonthViewProps> = (props) => {
 type WeekProps = {
   traineeId: string;
   timezoneOffset: number;
-} & (
-  | {
-      fullDate: true;
-      year: number;
-      month: Some<number>;
-      day: Some<number>;
-      week: None;
-    }
-  | {
-      fullDate: false;
-      year: number;
-      month: None;
-      day: None;
-      week: Some<number>;
-    }
-);
-export const Week: FC<WeekProps> = async (props) => {
-  const sunday = props.fullDate
-    ? new Date(props.year, props.month.value, props.day.value)
-    : new Date(props.year, 0, 1 + (props.week.value - 1) * 7);
-  const [startOfSunday, endOfSaturday] = [
-    startOfWeek(sunday),
-    endOfWeek(sunday),
-  ];
-  const getTrainingsResult = await getTrainingsByDateRange({
-    traineeId: props.traineeId,
-    from: startOfSunday,
-    to: endOfSaturday,
-  });
-  if (getTrainingsResult.isErr) {
-    return <p>トレーニングの取得に失敗しました</p>;
-  }
-  const trainings = getTrainingsResult.value;
-
-  const commonArgs = {
-    traineeId: props.traineeId,
-    timezoneOffset: props.timezoneOffset,
-    trainings,
-  };
-  const args: WeekViewProps = props.fullDate
-    ? {
-        ...commonArgs,
-        fullDate: true,
-        year: props.year,
-        month: props.month,
-        day: props.day,
-        week: none(),
-      }
-    : {
-        ...commonArgs,
-        fullDate: false,
-        year: props.year,
-        month: none(),
-        day: none(),
-        week: props.week,
-      };
-
-  return <WeekView {...args} />;
-};
-
-type WeekViewProps = {
-  traineeId: string;
-  timezoneOffset: number;
   trainings: Training[];
 } & (
   | {
@@ -430,7 +331,7 @@ type WeekViewProps = {
       week: Some<number>;
     }
 );
-export const WeekView: FC<WeekViewProps> = (props) => {
+export const Week: FC<WeekProps> = (props) => {
   const sunday = props.fullDate
     ? new Date(props.year, props.month.value, props.day.value)
     : new Date(props.year, 0, 1 + (props.week.value - 1) * 7);

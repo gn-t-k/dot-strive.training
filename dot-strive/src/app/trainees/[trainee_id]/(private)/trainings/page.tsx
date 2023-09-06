@@ -17,14 +17,14 @@ import { z } from "zod";
 
 import { getTimezoneOffset } from "@/app/_actions/get-timezone-offset";
 import { getTrainingsByDateRange } from "@/app/_actions/get-trainings-by-date-range";
-import { MonthView, Week, WeekView } from "@/app/_components/training-calendar";
+import * as TrainingCalendar from "@/app/_components/training-calendar";
 import { TrainingDetailView } from "@/app/_components/training-detail";
 import { none, some } from "@/app/_utils/option";
 import { stack } from "styled-system/patterns";
 
 import type { Training } from "@/app/_schemas/training";
 import type { NextPage } from "@/app/_types/page";
-import type { Option } from "@/app/_utils/option";
+import type { None, Option, Some } from "@/app/_utils/option";
 import type { Route } from "next";
 import type { ComponentProps, FC } from "react";
 
@@ -108,7 +108,7 @@ const Page: NextPage = (props) => {
         timezoneOffset,
         year,
       };
-      const args: ComponentProps<typeof Week> =
+      const args: ComponentProps<typeof WeeklyView> =
         weekParam === undefined
           ? {
               ...commonArgs,
@@ -126,27 +126,9 @@ const Page: NextPage = (props) => {
             };
 
       return (
-        <div className={stack({ direction: "column" })}>
-          <Suspense
-            fallback={
-              <WeekView
-                {...{
-                  ...args,
-                  trainings: [],
-                }}
-              />
-            }
-          >
-            <Week {...args} />
-          </Suspense>
-          <p>
-            {args.fullDate
-              ? `${year}年${args.month.value + 1}月${
-                  args.day.value
-                }日のトレーニング`
-              : `この週のトレーニング`}
-          </p>
-        </div>
+        <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
+          <WeeklyView {...args} />
+        </Suspense>
       );
     }
   }
@@ -212,7 +194,7 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
 
   return (
     <div className={stack({ direction: "column" })}>
-      <MonthView
+      <TrainingCalendar.Month
         year={props.year}
         month={props.month}
         day={props.day}
@@ -237,6 +219,88 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
             );
           }
         )}
+      </ul>
+    </div>
+  );
+};
+
+type WeeklyViewProps = {
+  traineeId: string;
+  timezoneOffset: number;
+} & (
+  | {
+      fullDate: true;
+      year: number;
+      month: Some<number>;
+      day: Some<number>;
+      week: None;
+    }
+  | {
+      fullDate: false;
+      year: number;
+      month: None;
+      day: None;
+      week: Some<number>;
+    }
+);
+const WeeklyView: FC<WeeklyViewProps> = async (props) => {
+  const sunday = props.fullDate
+    ? new Date(props.year, props.month.value, props.day.value)
+    : new Date(props.year, 0, 1 + (props.week.value - 1) * 7);
+  const [startOfSunday, endOfSaturday] = [
+    addMinutes(startOfWeek(sunday), props.timezoneOffset),
+    addMinutes(endOfWeek(sunday), props.timezoneOffset),
+  ];
+  const getTrainingsResult = await getTrainingsByDateRange({
+    traineeId: props.traineeId,
+    from: startOfSunday,
+    to: endOfSaturday,
+  });
+  if (getTrainingsResult.isErr) {
+    return <p>トレーニングの取得に失敗しました</p>;
+  }
+  const trainings = getTrainingsResult.value;
+
+  type IsTrainingInDay = (date: Date) => (training: Training) => boolean;
+  const isTrainingInDay: IsTrainingInDay = (date) => (training) => {
+    const trainingDay = subMinutes(
+      new Date(training.date),
+      props.timezoneOffset
+    );
+
+    return isSameDay(date, trainingDay);
+  };
+  const trainingsInDay = props.fullDate
+    ? trainings.filter(
+        isTrainingInDay(
+          new Date(props.year, props.month.value, props.day.value)
+        )
+      )
+    : [];
+
+  return (
+    <div className={stack({ direction: "column" })}>
+      <TrainingCalendar.Week
+        {...props}
+        traineeId={props.traineeId}
+        timezoneOffset={props.timezoneOffset}
+        trainings={trainings}
+      />
+      <p>
+        {props.fullDate
+          ? `${props.year}年${props.month.value + 1}月${
+              props.day.value
+            }日のトレーニング`
+          : `この週のトレーニング`}
+      </p>
+      <ul>
+        {(props.fullDate ? trainingsInDay : trainings).map((training) => {
+          return (
+            <li key={training.id}>
+              <TrainingDetailView training={training} />
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
