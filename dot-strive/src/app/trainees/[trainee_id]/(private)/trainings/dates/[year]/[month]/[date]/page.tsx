@@ -1,4 +1,5 @@
 import { addDays, addMinutes, endOfWeek, startOfWeek, subDays } from "date-fns";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -21,10 +22,9 @@ const Page: NextPage = async (props) => {
     redirect("/");
   }
 
-  const clientTimezoneOffsetParam =
-    props.searchParams?.["client_timezone_offset"];
+  const clientTimezoneOffsetCookie = cookies().get("client_timezone_offset");
   const clientTimezoneOffset = ((): number => {
-    const number = Number(clientTimezoneOffsetParam);
+    const number = Number(clientTimezoneOffsetCookie?.value);
 
     return isNaN(number) ? 0 : number;
   })();
