@@ -363,24 +363,36 @@ const WeeklyView: FC<WeeklyViewProps> = async (props) => {
         timezoneOffset={props.timezoneOffset}
         trainings={trainings}
       />
-      <p>
-        {props.calendar.week === undefined
-          ? `${props.calendar.year}年${props.calendar.month + 1}月${
-              props.calendar.day
-            }日のトレーニング`
-          : `この週のトレーニング`}
-      </p>
-      <ul>
-        {(props.calendar.week === undefined ? trainingsInDay : trainings).map(
-          (training) => {
-            return (
-              <li key={training.id}>
-                <TrainingDetailView training={training} />
-              </li>
-            );
-          }
-        )}
-      </ul>
+      {props.calendar.week === undefined ? (
+        <>
+          <p>
+            {props.calendar.year}年{props.calendar.month + 1}月
+            {props.calendar.day}日のトレーニング
+          </p>
+          <ul>
+            {trainingsInDay.map((training) => {
+              return (
+                <li key={training.id}>
+                  <TrainingDetailView training={training} />
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      ) : (
+        <>
+          <p>この週のトレーニング</p>
+          <ul>
+            {trainings.map((training) => {
+              return (
+                <li key={training.id}>
+                  <TrainingDetailView training={training} />
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
     </div>
   );
 };
