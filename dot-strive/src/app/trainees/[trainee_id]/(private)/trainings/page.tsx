@@ -4,32 +4,36 @@ import {
   endOfWeek,
   getDate,
   getMonth,
-  getWeek,
   getYear,
   isSameDay,
   isSameMonth,
   startOfWeek,
   subMinutes,
 } from "date-fns";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { z } from "zod";
 
 import { getTimezoneOffset } from "@/app/_actions/get-timezone-offset";
 import { getTrainingsByDateRange } from "@/app/_actions/get-trainings-by-date-range";
-import * as ToggleGroup from "@/app/_components/toggle-group";
 import * as TrainingCalendar from "@/app/_components/training-calendar";
+import { TrainingCalendarToggleGroup } from "@/app/_components/training-calendar-toggle-group";
 import { TrainingDetailView } from "@/app/_components/training-detail";
-import { none, some } from "@/app/_utils/option";
+import {
+  calendarSchema,
+  changeViewToMonth,
+  changeViewToWeek,
+  getDateFromCalendar,
+  getDateFromWeek,
+} from "@/app/_schemas/calendar";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
+import type { Calendar } from "@/app/_schemas/calendar";
 import type { Training } from "@/app/_schemas/training";
 import type { NextPage } from "@/app/_types/page";
-import type { None, Option, Some } from "@/app/_utils/option";
 import type { Route } from "next";
-import type { ComponentProps, FC } from "react";
+import type { FC } from "react";
 
 const Page: NextPage = (props) => {
   const traineeId = props.params?.["trainee_id"];
@@ -37,67 +41,49 @@ const Page: NextPage = (props) => {
     redirect("/" satisfies Route);
   }
 
-  const today = new Date();
-
-  const view = z
-    .enum(["year", "month", "week"])
-    .catch("month")
-    .parse(props.searchParams?.view);
-  const year = z
-    .preprocess((v) => Number(v), z.number().catch(getYear(today)))
-    .parse(props.searchParams?.year);
-
   const monthParam = props.searchParams?.month;
   const dayParam = props.searchParams?.day;
   const weekParam = props.searchParams?.week;
 
-  type GetMonthOrDefault = () => number;
-  const getMonthOrDefault: GetMonthOrDefault = () => {
-    const defaultMonth = getMonth(today);
-    const parseMonthParamResult = z.string().safeParse(monthParam);
-    const maybeMonth = parseMonthParamResult.success
-      ? Number(parseMonthParamResult.data)
-      : defaultMonth;
-
-    return isNaN(maybeMonth) ? defaultMonth : maybeMonth;
-  };
-
-  type GetDayOrDefault = () => number;
-  const getDayOrDefault: GetDayOrDefault = () => {
-    const defaultDay = getDate(today);
-    const parseDayParamResult = z.string().safeParse(dayParam);
-    const maybeDay = parseDayParamResult.success
-      ? Number(parseDayParamResult.data)
-      : defaultDay;
-
-    return isNaN(maybeDay) ? defaultDay : maybeDay;
-  };
-
-  type GetWeekOrDefault = () => number;
-  const getWeekOrDefault: GetWeekOrDefault = () => {
-    const defaultWeek = getWeek(today);
-    const parseWeekParamResult = z.string().safeParse(weekParam);
-    const maybeWeek = parseWeekParamResult.success
-      ? Number(parseWeekParamResult.data)
-      : defaultWeek;
-
-    return isNaN(maybeWeek) ? defaultWeek : maybeWeek;
-  };
+  const today = new Date();
 
   const timezoneOffset = getTimezoneOffset();
+
+  const defaultView = "month" satisfies Calendar["view"];
+  const defaultYear = getYear(today);
+  const defaultMonth = getMonth(today);
+  const defaultDay = getDate(today);
+
+  const view = z
+    .enum(["year", "month", "week"])
+    .catch(defaultView)
+    .parse(props.searchParams?.view);
+
+  const parseCalendarResult = calendarSchema.safeParse({
+    view,
+    year: z
+      .preprocess((v) => Number(v), z.number().catch(getYear(today)))
+      .parse(props.searchParams?.year),
+    month: monthParam === undefined ? undefined : Number(monthParam),
+    day: dayParam === undefined ? undefined : Number(dayParam),
+    week: weekParam === undefined ? undefined : Number(weekParam),
+  });
+  if (!parseCalendarResult.success) {
+    const searchParams = new URLSearchParams([
+      ["year", String(defaultYear)],
+      ["month", String(defaultMonth)],
+      ["day", String(defaultDay)],
+      ["view", String(defaultView)],
+    ]);
+    redirect(`/trainees/${traineeId}/trainings/?${searchParams.toString()}`);
+  }
+  const calendar = parseCalendarResult.data;
 
   switch (view) {
     case "year":
       return <p>todo</p>;
     case "month": {
-      const month = getMonthOrDefault();
-      const day = dayParam === undefined ? none() : some(getDayOrDefault());
-
-      const baseHref = day.hasSome
-        ? (`/trainees/${traineeId}/trainings/?year=${year}?month=${month}&day=${day.value}` as const)
-        : (`/trainees/${traineeId}/trainings/?year=${year}?month=${month}` as const);
-      const yearViewHref = `${baseHref}&view=year` as const;
-      const weekViewHref = `${baseHref}&view=week` as const;
+      const monthCalendar = changeViewToMonth(calendar);
 
       return (
         <div className={stack({ direction: "column" })}>
@@ -108,94 +94,23 @@ const Page: NextPage = (props) => {
               justifyContent: "center",
             })}
           >
-            <ToggleGroup.Root
-              type="single"
-              value={view}
-              className={stack({
-                direction: "row",
-                w: "full",
-                justify: "center",
-                align: "center",
-                bg: "gray.100",
-                borderRadius: "4px",
-                p: "4px",
-              })}
-            >
-              <ToggleGroup.Item
-                value="year"
-                className={css({
-                  w: "full",
-                  borderRadius: "4px",
-                })}
-              >
-                <Link href={yearViewHref}>
-                  <div>年</div>
-                </Link>
-              </ToggleGroup.Item>
-              <ToggleGroup.Item
-                value="month"
-                className={css({
-                  w: "full",
-                  borderRadius: "4px",
-                  bg: "white",
-                })}
-              >
-                <div>月</div>
-              </ToggleGroup.Item>
-              <ToggleGroup.Item
-                value="week"
-                className={css({
-                  w: "full",
-                  borderRadius: "4px",
-                })}
-              >
-                <Link href={weekViewHref}>
-                  <div>週</div>
-                </Link>
-              </ToggleGroup.Item>
-            </ToggleGroup.Root>
+            <TrainingCalendarToggleGroup
+              traineeId={traineeId}
+              calendar={monthCalendar}
+            />
           </div>
           <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
             <MonthlyView
-              year={year}
-              month={month}
-              day={day}
               traineeId={traineeId}
               timezoneOffset={timezoneOffset}
+              calendar={monthCalendar}
             />
           </Suspense>
         </div>
       );
     }
     case "week": {
-      const commonArgs = {
-        traineeId,
-        timezoneOffset,
-        year,
-      };
-      const args: ComponentProps<typeof WeeklyView> =
-        weekParam === undefined
-          ? {
-              ...commonArgs,
-              fullDate: true,
-              month: some(getMonthOrDefault()),
-              day: some(getDayOrDefault()),
-              week: none(),
-            }
-          : {
-              ...commonArgs,
-              fullDate: false,
-              month: none(),
-              day: none(),
-              week: some(getWeekOrDefault()),
-            };
-
-      const baseHref =
-        weekParam === undefined
-          ? (`/trainees/${traineeId}/trainings/?year=${year}?month=${getMonthOrDefault()}?day=${getDayOrDefault()}` as const)
-          : (`/trainees/${traineeId}/trainings/?year=${year}?week=${getWeekOrDefault()}` as const);
-      const yearViewHref = `${baseHref}&view=year` as const;
-      const monthViewHref = `${baseHref}&view=month` as const;
+      const weekCalendar = changeViewToWeek(calendar);
 
       return (
         <div className={stack({ direction: "column" })}>
@@ -206,55 +121,17 @@ const Page: NextPage = (props) => {
               justifyContent: "center",
             })}
           >
-            <ToggleGroup.Root
-              type="single"
-              value={view}
-              className={stack({
-                direction: "row",
-                w: "full",
-                justify: "center",
-                align: "center",
-                bg: "gray.100",
-                borderRadius: "4px",
-                p: "4px",
-              })}
-            >
-              <ToggleGroup.Item
-                value="year"
-                className={css({
-                  w: "full",
-                  borderRadius: "4px",
-                })}
-              >
-                <Link href={yearViewHref}>
-                  <div>年</div>
-                </Link>
-              </ToggleGroup.Item>
-              <ToggleGroup.Item
-                value="month"
-                className={css({
-                  w: "full",
-                  borderRadius: "4px",
-                })}
-              >
-                <Link href={monthViewHref}>
-                  <div>月</div>
-                </Link>
-              </ToggleGroup.Item>
-              <ToggleGroup.Item
-                value="week"
-                className={css({
-                  w: "full",
-                  borderRadius: "4px",
-                  bg: "white",
-                })}
-              >
-                <div>週</div>
-              </ToggleGroup.Item>
-            </ToggleGroup.Root>
+            <TrainingCalendarToggleGroup
+              traineeId={traineeId}
+              calendar={weekCalendar}
+            />
           </div>
           <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
-            <WeeklyView {...args} />
+            <WeeklyView
+              traineeId={traineeId}
+              timezoneOffset={timezoneOffset}
+              calendar={weekCalendar}
+            />
           </Suspense>
         </div>
       );
@@ -264,14 +141,12 @@ const Page: NextPage = (props) => {
 export default Page;
 
 type MonthlyViewProps = {
-  year: number;
-  month: number;
-  day: Option<number>;
+  calendar: Extract<Calendar, { view: "month" }>;
   traineeId: string;
   timezoneOffset: number;
 };
 const MonthlyView: FC<MonthlyViewProps> = async (props) => {
-  const firstDayOfMonth = new Date(props.year, props.month);
+  const firstDayOfMonth = new Date(props.calendar.year, props.calendar.month);
   const topLeftDate = addMinutes(
     startOfWeek(firstDayOfMonth),
     props.timezoneOffset
@@ -302,7 +177,7 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
     return isSameMonth(date, trainingMonth);
   };
   const trainingsInMonth = trainings.filter(
-    isTrainingInMonth(new Date(props.year, props.month))
+    isTrainingInMonth(new Date(props.calendar.year, props.calendar.month))
   );
 
   type IsTrainingInDay = (date: Date) => (training: Training) => boolean;
@@ -314,31 +189,30 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
 
     return isSameDay(date, trainingDay);
   };
-  const trainingsInDay = props.day.hasSome
-    ? trainings.filter(
-        isTrainingInDay(new Date(props.year, props.month, props.day.value))
-      )
-    : [];
+  const trainingsInDay =
+    props.calendar.day !== undefined
+      ? trainings.filter(isTrainingInDay(getDateFromCalendar(props.calendar)))
+      : [];
 
   return (
     <div className={stack({ direction: "column" })}>
       <TrainingCalendar.Month
-        year={props.year}
-        month={props.month}
-        day={props.day}
         traineeId={props.traineeId}
         timezoneOffset={props.timezoneOffset}
         trainings={trainings}
+        calendar={props.calendar}
       />
       <p>
-        {props.day.hasSome
-          ? `${props.year}年${props.month + 1}月${
-              props.day.value
+        {props.calendar.day !== undefined
+          ? `${props.calendar.year}年${props.calendar.month + 1}月${
+              props.calendar.day
             }日のトレーニング`
-          : `${props.year}年${props.month + 1}月のトレーニング`}
+          : `${props.calendar.year}年${
+              props.calendar.month + 1
+            }月のトレーニング`}
       </p>
       <ul>
-        {(props.day.hasSome ? trainingsInDay : trainingsInMonth).map(
+        {(props.calendar.day ? trainingsInDay : trainingsInMonth).map(
           (training) => {
             return (
               <li key={training.id}>
@@ -355,26 +229,13 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
 type WeeklyViewProps = {
   traineeId: string;
   timezoneOffset: number;
-} & (
-  | {
-      fullDate: true;
-      year: number;
-      month: Some<number>;
-      day: Some<number>;
-      week: None;
-    }
-  | {
-      fullDate: false;
-      year: number;
-      month: None;
-      day: None;
-      week: Some<number>;
-    }
-);
+  calendar: Extract<Calendar, { view: "week" }>;
+};
 const WeeklyView: FC<WeeklyViewProps> = async (props) => {
-  const sunday = props.fullDate
-    ? new Date(props.year, props.month.value, props.day.value)
-    : new Date(props.year, 0, 1 + (props.week.value - 1) * 7);
+  const sunday =
+    props.calendar.week === undefined
+      ? getDateFromCalendar(props.calendar)
+      : getDateFromWeek(props.calendar);
   const [startOfSunday, endOfSaturday] = [
     addMinutes(startOfWeek(sunday), props.timezoneOffset),
     addMinutes(endOfWeek(sunday), props.timezoneOffset),
@@ -398,13 +259,10 @@ const WeeklyView: FC<WeeklyViewProps> = async (props) => {
 
     return isSameDay(date, trainingDay);
   };
-  const trainingsInDay = props.fullDate
-    ? trainings.filter(
-        isTrainingInDay(
-          new Date(props.year, props.month.value, props.day.value)
-        )
-      )
-    : [];
+  const trainingsInDay =
+    props.calendar.week === undefined
+      ? trainings.filter(isTrainingInDay(getDateFromCalendar(props.calendar)))
+      : [];
 
   return (
     <div className={stack({ direction: "column" })}>
@@ -415,20 +273,22 @@ const WeeklyView: FC<WeeklyViewProps> = async (props) => {
         trainings={trainings}
       />
       <p>
-        {props.fullDate
-          ? `${props.year}年${props.month.value + 1}月${
-              props.day.value
+        {props.calendar.week === undefined
+          ? `${props.calendar.year}年${props.calendar.month + 1}月${
+              props.calendar.day
             }日のトレーニング`
           : `この週のトレーニング`}
       </p>
       <ul>
-        {(props.fullDate ? trainingsInDay : trainings).map((training) => {
-          return (
-            <li key={training.id}>
-              <TrainingDetailView training={training} />
-            </li>
-          );
-        })}
+        {(props.calendar.week === undefined ? trainingsInDay : trainings).map(
+          (training) => {
+            return (
+              <li key={training.id}>
+                <TrainingDetailView training={training} />
+              </li>
+            );
+          }
+        )}
       </ul>
     </div>
   );

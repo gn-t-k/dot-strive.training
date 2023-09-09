@@ -3,7 +3,6 @@ import {
   addWeeks,
   getDate,
   getMonth,
-  getWeek,
   getYear,
   isSameDay,
   isSameMonth,
@@ -18,66 +17,19 @@ import { grid, stack } from "styled-system/patterns";
 
 import { EmojiIcon } from "./emoji-icon";
 import {
-  some,
-  type None,
-  type Option,
-  type Some,
-  none,
-} from "../_utils/option";
+  deselectDate,
+  getDateFromCalendar,
+  getDateFromWeek,
+  selectDate,
+} from "../_schemas/calendar";
 
+import type { Calendar } from "../_schemas/calendar";
 import type { Training } from "../_schemas/training";
-import type { Route } from "next";
 import type { SystemStyleObject } from "styled-system/types";
-
-type Input =
-  | {
-      view: "year";
-      fullDate: true;
-      year: number;
-      month: Some<number>;
-      day: Some<number>;
-    }
-  | {
-      view: "year";
-      fullDate: false;
-      year: number;
-      month: None;
-      day: None;
-    }
-  | {
-      view: "month";
-      fullDate: true;
-      year: number;
-      month: Some<number>;
-      day: Some<number>;
-    }
-  | {
-      view: "month";
-      fullDate: false;
-      year: number;
-      month: Some<number>;
-      day: None;
-    }
-  | {
-      view: "week";
-      year: number;
-      fullDate: true;
-      month: Some<number>;
-      day: Some<number>;
-      week: None;
-    }
-  | {
-      view: "week";
-      year: number;
-      fullDate: false;
-      month: None;
-      day: None;
-      week: Some<number>;
-    };
 
 type DayProps = {
   date: number;
-  input: Input;
+  calendar: Calendar;
   trainings: Training[];
   traineeId: string;
   timezoneOffset: number;
@@ -86,22 +38,19 @@ export const Day: FC<DayProps> = (props) => {
   const isToday = isSameDay(props.date, new Date().getTime());
 
   const isOutOfMonth = ((): boolean => {
-    switch (props.input.view) {
+    switch (props.calendar.view) {
       case "year":
         return false;
       case "month":
         return !isSameMonth(
           props.date,
-          new Date(props.input.year, props.input.month.value)
+          new Date(props.calendar.year, props.calendar.month)
         );
       case "week": {
-        const dateInMonth = props.input.fullDate
-          ? new Date(
-              props.input.year,
-              props.input.month.value,
-              props.input.day.value
-            )
-          : new Date(props.input.year, 0, 1 + (props.input.week.value - 1) * 7);
+        const dateInMonth =
+          props.calendar.week !== undefined
+            ? getDateFromWeek(props.calendar)
+            : getDateFromCalendar(props.calendar);
         return !isSameMonth(props.date, dateInMonth);
       }
     }
@@ -121,11 +70,9 @@ export const Day: FC<DayProps> = (props) => {
   const month = getMonth(props.date);
   const day = getDate(props.date);
   const isSelected =
-    props.input.month.hasSome &&
-    props.input.day.hasSome &&
-    props.input.year === year &&
-    props.input.month.value === month &&
-    props.input.day.value === day;
+    props.calendar.month !== undefined &&
+    props.calendar.day !== undefined &&
+    isSameDay(props.date, getDateFromCalendar(props.calendar).getTime());
 
   const commonStyle: SystemStyleObject = {
     borderRadius: "50%",
@@ -152,68 +99,28 @@ export const Day: FC<DayProps> = (props) => {
       })
     : css(commonStyle);
 
-  const fullDateYearViewHref =
-    `/trainees/${props.traineeId}/trainings/?year=${year}&month=${month}&day=${day}&view=year` as const;
-  const fullDateMonthViewHref =
-    `/trainees/${props.traineeId}/trainings/?year=${year}&month=${month}&day=${day}&view=month` as const;
-  const fullDateWeekViewHref =
-    `/trainees/${props.traineeId}/trainings/?year=${year}&month=${month}&day=${day}&view=week` as const;
-  const yearHref =
-    `/trainees/${props.traineeId}/trainings/?year=${year}&view=year` as const;
-  const monthHref =
-    `/trainees/${props.traineeId}/trainings/?year=${year}&month=${month}&view=month` as const;
-  const weekHref = `/trainees/${
+  const clickedCalendar =
+    props.calendar.day !== undefined &&
+    isSameDay(props.date, getDateFromCalendar(props.calendar).getTime())
+      ? deselectDate(props.calendar)
+      : selectDate(props.calendar)({ year, month, day });
+
+  const searchParams = new URLSearchParams([
+    ["year", String(year)],
+    ["view", props.calendar.view],
+  ]);
+  if (clickedCalendar.month !== undefined) {
+    searchParams.append("month", String(clickedCalendar.month));
+  }
+  if (clickedCalendar.day !== undefined) {
+    searchParams.append("day", String(clickedCalendar.day));
+  }
+  if (clickedCalendar.week !== undefined) {
+    searchParams.append("week", String(clickedCalendar.week));
+  }
+  const href = `/trainees/${
     props.traineeId
-  }/trainings/?year=${year}&week=${getWeek(
-    new Date(props.date)
-  )}&view=week` as const;
-  const href = ((): Route<
-    | typeof fullDateYearViewHref
-    | typeof fullDateMonthViewHref
-    | typeof fullDateWeekViewHref
-    | typeof yearHref
-    | typeof monthHref
-    | typeof weekHref
-  > => {
-    switch (props.input.view) {
-      case "year":
-        return props.input.fullDate &&
-          isSameDay(
-            props.date,
-            new Date(
-              props.input.year,
-              props.input.month.value,
-              props.input.day.value
-            )
-          )
-          ? yearHref
-          : fullDateYearViewHref;
-      case "month":
-        return props.input.fullDate &&
-          isSameDay(
-            props.date,
-            new Date(
-              props.input.year,
-              props.input.month.value,
-              props.input.day.value
-            )
-          )
-          ? monthHref
-          : fullDateMonthViewHref;
-      case "week":
-        return props.input.fullDate &&
-          isSameDay(
-            props.date,
-            new Date(
-              props.input.year,
-              props.input.month.value,
-              props.input.day.value
-            )
-          )
-          ? weekHref
-          : fullDateWeekViewHref;
-    }
-  })();
+  }/trainings/?${searchParams.toString()}` as const;
 
   return (
     <div role="cell">
@@ -243,16 +150,16 @@ export const Day: FC<DayProps> = (props) => {
 };
 
 type MonthProps = {
-  year: number;
-  month: number;
-  day: Option<number>;
   traineeId: string;
   timezoneOffset: number;
   trainings: Training[];
+  calendar: Extract<Calendar, { view: "month" }>;
 };
 export const Month: FC<MonthProps> = (props) => {
   const month = [0, 1, 2, 3, 4, 5].map((weekIndex) => {
-    const topLeftDate = startOfWeek(new Date(props.year, props.month));
+    const topLeftDate = startOfWeek(
+      new Date(props.calendar.year, props.calendar.month)
+    );
     const startSunday = addWeeks(topLeftDate, weekIndex).getTime();
 
     return [0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
@@ -279,23 +186,7 @@ export const Month: FC<MonthProps> = (props) => {
                 return (
                   <Day
                     date={date}
-                    input={
-                      props.day.hasSome
-                        ? {
-                            view: "month",
-                            fullDate: true,
-                            year: props.year,
-                            month: some(props.month),
-                            day: props.day,
-                          }
-                        : {
-                            view: "month",
-                            fullDate: false,
-                            year: props.year,
-                            month: some(props.month),
-                            day: none(),
-                          }
-                    }
+                    calendar={props.calendar}
                     trainings={props.trainings}
                     traineeId={props.traineeId}
                     timezoneOffset={props.timezoneOffset}
@@ -315,29 +206,16 @@ type WeekProps = {
   traineeId: string;
   timezoneOffset: number;
   trainings: Training[];
-} & (
-  | {
-      fullDate: true;
-      year: number;
-      month: Some<number>;
-      day: Some<number>;
-      week: None;
-    }
-  | {
-      fullDate: false;
-      year: number;
-      month: None;
-      day: None;
-      week: Some<number>;
-    }
-);
+  calendar: Extract<Calendar, { view: "week" }>;
+};
 export const Week: FC<WeekProps> = (props) => {
-  const sunday = props.fullDate
-    ? new Date(props.year, props.month.value, props.day.value)
-    : new Date(props.year, 0, 1 + (props.week.value - 1) * 7);
-  const startOfSunday = startOfWeek(sunday);
+  const sunday = startOfWeek(
+    props.calendar.week !== undefined
+      ? getDateFromWeek(props.calendar)
+      : getDateFromCalendar(props.calendar)
+  );
   const week = [0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
-    const date = addDays(startOfSunday, dayIndex).getTime();
+    const date = addDays(sunday, dayIndex).getTime();
 
     return date;
   });
@@ -348,25 +226,7 @@ export const Week: FC<WeekProps> = (props) => {
         return (
           <Day
             date={date}
-            input={
-              props.fullDate
-                ? {
-                    view: "week",
-                    fullDate: true,
-                    year: props.year,
-                    month: props.month,
-                    day: props.day,
-                    week: none(),
-                  }
-                : {
-                    view: "week",
-                    fullDate: false,
-                    year: props.year,
-                    month: none(),
-                    day: none(),
-                    week: props.week,
-                  }
-            }
+            calendar={props.calendar}
             trainings={props.trainings}
             traineeId={props.traineeId}
             timezoneOffset={props.timezoneOffset}
