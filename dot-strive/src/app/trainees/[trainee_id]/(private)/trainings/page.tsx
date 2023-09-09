@@ -273,6 +273,8 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
       ? trainings.filter(isTrainingInDay(getDateFromCalendar(props.calendar)))
       : [];
 
+  const baseHref = `/trainees/${props.traineeId}/trainings/` as const;
+
   return (
     <div className={stack({ direction: "column" })}>
       <TrainingCalendar.Month
@@ -290,9 +292,11 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
           <ul>
             {trainingsInDay.map((training) => {
               return (
-                <li key={training.id}>
-                  <TrainingDetailView training={training} />
-                </li>
+                <Link href={`${baseHref}/${training.id}`} key={training.id}>
+                  <li>
+                    <TrainingDetailView training={training} />
+                  </li>
+                </Link>
               );
             })}
           </ul>
@@ -305,9 +309,11 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
           <ul>
             {trainingsInMonth.map((training) => {
               return (
-                <li key={training.id}>
-                  <TrainingDetailView training={training} />
-                </li>
+                <Link href={`${baseHref}/${training.id}`} key={training.id}>
+                  <li>
+                    <TrainingDetailView training={training} />
+                  </li>
+                </Link>
               );
             })}
           </ul>
@@ -355,6 +361,8 @@ const WeeklyView: FC<WeeklyViewProps> = async (props) => {
       ? trainings.filter(isTrainingInDay(getDateFromCalendar(props.calendar)))
       : [];
 
+  const baseHref = `/trainees/${props.traineeId}/trainings/` as const;
+
   return (
     <div className={stack({ direction: "column" })}>
       <TrainingCalendar.Week
@@ -372,9 +380,11 @@ const WeeklyView: FC<WeeklyViewProps> = async (props) => {
           <ul>
             {trainingsInDay.map((training) => {
               return (
-                <li key={training.id}>
-                  <TrainingDetailView training={training} />
-                </li>
+                <Link href={`${baseHref}/${training.id}`} key={training.id}>
+                  <li>
+                    <TrainingDetailView training={training} />
+                  </li>
+                </Link>
               );
             })}
           </ul>
@@ -385,9 +395,11 @@ const WeeklyView: FC<WeeklyViewProps> = async (props) => {
           <ul>
             {trainings.map((training) => {
               return (
-                <li key={training.id}>
-                  <TrainingDetailView training={training} />
-                </li>
+                <Link href={`${baseHref}/${training.id}`} key={training.id}>
+                  <li>
+                    <TrainingDetailView training={training} />
+                  </li>
+                </Link>
               );
             })}
           </ul>
