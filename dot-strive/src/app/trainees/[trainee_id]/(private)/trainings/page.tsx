@@ -4,22 +4,20 @@ import {
   endOfWeek,
   getDate,
   getMonth,
-  getWeek,
   getYear,
   isSameDay,
   isSameMonth,
   startOfWeek,
   subMinutes,
 } from "date-fns";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { z } from "zod";
 
 import { getTimezoneOffset } from "@/app/_actions/get-timezone-offset";
 import { getTrainingsByDateRange } from "@/app/_actions/get-trainings-by-date-range";
-import * as ToggleGroup from "@/app/_components/toggle-group";
 import * as TrainingCalendar from "@/app/_components/training-calendar";
+import { TrainingCalendarToggleGroup } from "@/app/_components/training-calendar-toggle-group";
 import { TrainingDetailView } from "@/app/_components/training-detail";
 import {
   calendarSchema,
@@ -87,47 +85,6 @@ const Page: NextPage = (props) => {
     case "month": {
       const monthCalendar = changeViewToMonth(calendar);
 
-      const baseHref = `/trainees/${traineeId}/trainings/` as const;
-
-      const yearViewSearchParams = new URLSearchParams(
-        monthCalendar.day === undefined
-          ? [
-              ["year", String(monthCalendar.year)],
-              ["month", String(monthCalendar.month)],
-              ["view", "year"],
-            ]
-          : [
-              ["year", String(monthCalendar.year)],
-              ["month", String(monthCalendar.month)],
-              ["day", String(monthCalendar.day)],
-              ["view", "year"],
-            ]
-      );
-      const yearViewHref =
-        `${baseHref}?${yearViewSearchParams.toString()}` as const;
-
-      const weekViewSearchParams = new URLSearchParams(
-        monthCalendar.day === undefined
-          ? [
-              ["year", String(monthCalendar.year)],
-              [
-                "week",
-                String(
-                  getWeek(new Date(monthCalendar.year, monthCalendar.month))
-                ),
-              ],
-              ["view", "week"],
-            ]
-          : [
-              ["year", String(monthCalendar.year)],
-              ["month", String(monthCalendar.month)],
-              ["day", String(monthCalendar.day)],
-              ["view", "week"],
-            ]
-      );
-      const weekViewHref =
-        `${baseHref}?${weekViewSearchParams.toString()}` as const;
-
       return (
         <div className={stack({ direction: "column" })}>
           <div
@@ -137,52 +94,10 @@ const Page: NextPage = (props) => {
               justifyContent: "center",
             })}
           >
-            <ToggleGroup.Root
-              type="single"
-              value={view}
-              className={stack({
-                direction: "row",
-                w: "full",
-                justify: "center",
-                align: "center",
-                bg: "gray.100",
-                borderRadius: "4px",
-                p: "4px",
-              })}
-            >
-              <ToggleGroup.Item
-                value="year"
-                className={css({
-                  w: "full",
-                  borderRadius: "4px",
-                })}
-              >
-                <Link href={yearViewHref}>
-                  <div>年</div>
-                </Link>
-              </ToggleGroup.Item>
-              <ToggleGroup.Item
-                value="month"
-                className={css({
-                  w: "full",
-                  borderRadius: "4px",
-                  bg: "white",
-                })}
-              >
-                <div>月</div>
-              </ToggleGroup.Item>
-              <ToggleGroup.Item
-                value="week"
-                className={css({
-                  w: "full",
-                  borderRadius: "4px",
-                })}
-              >
-                <Link href={weekViewHref}>
-                  <div>週</div>
-                </Link>
-              </ToggleGroup.Item>
-            </ToggleGroup.Root>
+            <TrainingCalendarToggleGroup
+              traineeId={traineeId}
+              calendar={monthCalendar}
+            />
           </div>
           <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
             <MonthlyView
@@ -197,48 +112,6 @@ const Page: NextPage = (props) => {
     case "week": {
       const weekCalendar = changeViewToWeek(calendar);
 
-      const baseHref = `/trainees/${traineeId}/trainings/` as const;
-
-      const yearViewSearchParams = new URLSearchParams(
-        weekCalendar.week === undefined
-          ? [
-              ["year", String(weekCalendar.year)],
-              ["month", String(weekCalendar.month)],
-              ["day", String(weekCalendar.day)],
-              ["view", "year"],
-            ]
-          : ((): string[][] => {
-              const date = getDateFromWeek(weekCalendar);
-              return [
-                ["year", String(getYear(date))],
-                ["month", String(getMonth(date))],
-                ["view", "year"],
-              ];
-            })()
-      );
-      const yearViewHref =
-        `${baseHref}?${yearViewSearchParams.toString()}` as const;
-
-      const monthViewSearchParams = new URLSearchParams(
-        weekCalendar.week === undefined
-          ? [
-              ["year", String(weekCalendar.year)],
-              ["month", String(weekCalendar.month)],
-              ["day", String(weekCalendar.day)],
-              ["view", "month"],
-            ]
-          : ((): string[][] => {
-              const date = getDateFromWeek(weekCalendar);
-              return [
-                ["year", String(getYear(date))],
-                ["month", String(getMonth(date))],
-                ["view", "month"],
-              ];
-            })()
-      );
-      const monthViewHref =
-        `${baseHref}?${monthViewSearchParams.toString()}` as const;
-
       return (
         <div className={stack({ direction: "column" })}>
           <div
@@ -248,52 +121,10 @@ const Page: NextPage = (props) => {
               justifyContent: "center",
             })}
           >
-            <ToggleGroup.Root
-              type="single"
-              value={view}
-              className={stack({
-                direction: "row",
-                w: "full",
-                justify: "center",
-                align: "center",
-                bg: "gray.100",
-                borderRadius: "4px",
-                p: "4px",
-              })}
-            >
-              <ToggleGroup.Item
-                value="year"
-                className={css({
-                  w: "full",
-                  borderRadius: "4px",
-                })}
-              >
-                <Link href={yearViewHref}>
-                  <div>年</div>
-                </Link>
-              </ToggleGroup.Item>
-              <ToggleGroup.Item
-                value="month"
-                className={css({
-                  w: "full",
-                  borderRadius: "4px",
-                })}
-              >
-                <Link href={monthViewHref}>
-                  <div>月</div>
-                </Link>
-              </ToggleGroup.Item>
-              <ToggleGroup.Item
-                value="week"
-                className={css({
-                  w: "full",
-                  borderRadius: "4px",
-                  bg: "white",
-                })}
-              >
-                <div>週</div>
-              </ToggleGroup.Item>
-            </ToggleGroup.Root>
+            <TrainingCalendarToggleGroup
+              traineeId={traineeId}
+              calendar={weekCalendar}
+            />
           </div>
           <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
             <WeeklyView
