@@ -44,7 +44,7 @@ export const Day: FC<DayProps> = (props) => {
       case "month":
         return !isSameMonth(
           props.date,
-          new Date(props.calendar.year, props.calendar.month)
+          new Date(props.calendar.year, props.calendar.month).getTime()
         );
       case "week": {
         const dateInMonth =
@@ -58,7 +58,7 @@ export const Day: FC<DayProps> = (props) => {
 
   const trainings = props.trainings.filter((training) => {
     const date = subMinutes(
-      new Date(training.date),
+      new Date(training.date).getTime(),
       props.timezoneOffset
     ).getTime();
 
@@ -72,7 +72,7 @@ export const Day: FC<DayProps> = (props) => {
   const isSelected =
     props.calendar.month !== undefined &&
     props.calendar.day !== undefined &&
-    isSameDay(props.date, getDateFromCalendar(props.calendar).getTime());
+    isSameDay(props.date, getDateFromCalendar(props.calendar));
 
   const commonStyle: SystemStyleObject = {
     borderRadius: "50%",
@@ -101,7 +101,7 @@ export const Day: FC<DayProps> = (props) => {
 
   const clickedCalendar =
     props.calendar.day !== undefined &&
-    isSameDay(props.date, getDateFromCalendar(props.calendar).getTime())
+    isSameDay(props.date, getDateFromCalendar(props.calendar))
       ? deselectDate(props.calendar)
       : selectDate(props.calendar)({ year, month, day });
 
@@ -158,8 +158,8 @@ type MonthProps = {
 export const Month: FC<MonthProps> = (props) => {
   const month = [0, 1, 2, 3, 4, 5].map((weekIndex) => {
     const topLeftDate = startOfWeek(
-      new Date(props.calendar.year, props.calendar.month)
-    );
+      new Date(props.calendar.year, props.calendar.month).getTime()
+    ).getTime();
     const startSunday = addWeeks(topLeftDate, weekIndex).getTime();
 
     return [0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
@@ -213,7 +213,7 @@ export const Week: FC<WeekProps> = (props) => {
     props.calendar.week !== undefined
       ? getDateFromWeek(props.calendar)
       : getDateFromCalendar(props.calendar)
-  );
+  ).getTime();
   const week = [0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
     const date = addDays(sunday, dayIndex).getTime();
 
