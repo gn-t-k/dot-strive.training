@@ -1,4 +1,12 @@
-import { getMonth, getWeek, getYear } from "date-fns";
+import {
+  addMonths,
+  addWeeks,
+  getMonth,
+  getWeek,
+  getYear,
+  subMonths,
+  subWeeks,
+} from "date-fns";
 import { z } from "zod";
 
 export const calendarSchema = z
@@ -192,7 +200,7 @@ export const changeViewToWeek: ChangeViewToWeek = (calendar) => {
             year: calendar.year,
             month: undefined,
             day: undefined,
-            week: getWeek(new Date(calendar.year, 0)),
+            week: getWeek(new Date(calendar.year, 0).getTime()),
           }
         : calendar.day === undefined
         ? {
@@ -200,7 +208,7 @@ export const changeViewToWeek: ChangeViewToWeek = (calendar) => {
             year: calendar.year,
             month: undefined,
             day: undefined,
-            week: getWeek(new Date(calendar.year, calendar.month)),
+            week: getWeek(new Date(calendar.year, calendar.month).getTime()),
           }
         : {
             view,
@@ -216,7 +224,7 @@ export const changeViewToWeek: ChangeViewToWeek = (calendar) => {
             year: calendar.year,
             month: undefined,
             day: undefined,
-            week: getWeek(new Date(calendar.year, calendar.month)),
+            week: getWeek(new Date(calendar.year, calendar.month).getTime()),
           }
         : {
             view,
@@ -270,20 +278,109 @@ export const deselectDate: DeselectDate = (calendar) => {
         day: undefined,
         week:
           calendar.month !== undefined && calendar.day !== undefined
-            ? getWeek(new Date(calendar.year, calendar.month, calendar.day))
+            ? getWeek(
+                new Date(calendar.year, calendar.month, calendar.day).getTime()
+              )
             : calendar.week,
       };
   }
 };
+type GetPrevMonth = (
+  calendar: Extract<Calendar, { view: "month" }>
+) => Extract<Calendar, { view: "month"; day?: undefined }>;
+export const getPrevMonth: GetPrevMonth = (calendar) => {
+  const date = new Date(calendar.year, calendar.month).getTime();
+  const prevMonthDate = subMonths(date, 1);
+  return {
+    view: calendar.view,
+    year: getYear(prevMonthDate),
+    month: getMonth(prevMonthDate),
+    day: undefined,
+    week: undefined,
+  };
+};
+
+type GetNextMonth = (
+  calendar: Extract<Calendar, { view: "month" }>
+) => Extract<Calendar, { view: "month"; day?: undefined }>;
+export const getNextMonth: GetNextMonth = (calendar) => {
+  const date = new Date(calendar.year, calendar.month).getTime();
+  const nextMonthDate = addMonths(date, 1);
+  return {
+    view: calendar.view,
+    year: getYear(nextMonthDate),
+    month: getMonth(nextMonthDate),
+    day: undefined,
+    week: undefined,
+  };
+};
+
+type GetPrevWeek = (
+  calendar: Extract<Calendar, { view: "week" }>
+) => Extract<Calendar, { view: "week"; week: number }>;
+export const getPrevWeek: GetPrevWeek = (calendar) => {
+  const date =
+    calendar.week === undefined
+      ? getDateFromCalendar(calendar)
+      : getDateFromWeek(calendar);
+  const prevWeekDate = subWeeks(date, 1);
+
+  return {
+    view: calendar.view,
+    year: getYear(prevWeekDate),
+    month: undefined,
+    day: undefined,
+    week: getWeek(prevWeekDate),
+  };
+};
+
+type GetNextWeek = (
+  calendar: Extract<Calendar, { view: "week" }>
+) => Extract<Calendar, { view: "week"; week: number }>;
+export const getNextWeek: GetNextWeek = (calendar) => {
+  const date =
+    calendar.week === undefined
+      ? getDateFromCalendar(calendar)
+      : getDateFromWeek(calendar);
+  const nextWeekDate = addWeeks(date, 1);
+
+  return {
+    view: calendar.view,
+    year: getYear(nextWeekDate),
+    month: undefined,
+    day: undefined,
+    week: getWeek(nextWeekDate),
+  };
+};
 
 type GetDateFromCalendar = (
   calendar: Extract<Calendar, { year: number; month: number; day: number }>
-) => Date;
+) => number;
 export const getDateFromCalendar: GetDateFromCalendar = (calendar) => {
-  return new Date(calendar.year, calendar.month, calendar.day);
+  return new Date(calendar.year, calendar.month, calendar.day).getTime();
 };
 
-type GetDateFromWeek = (calendar: Extract<Calendar, { week: number }>) => Date;
+type GetDateFromWeek = (
+  calendar: Extract<Calendar, { week: number }>
+) => number;
 export const getDateFromWeek: GetDateFromWeek = (calendar) => {
-  return new Date(calendar.year, 0, 1 + (calendar.week - 1) * 7);
+  return new Date(calendar.year, 0, 1 + (calendar.week - 1) * 7).getTime();
+};
+
+type GetSearchParams = (calendar: Calendar) => URLSearchParams;
+export const getSearchParams: GetSearchParams = (calendar) => {
+  const searchParams = new URLSearchParams([
+    ["view", String(calendar.view)],
+    ["year", String(calendar.year)],
+  ]);
+  if (calendar.month !== undefined) {
+    searchParams.append("month", String(calendar.month));
+  }
+  if (calendar.day !== undefined) {
+    searchParams.append("day", String(calendar.day));
+  }
+  if (calendar.week !== undefined) {
+    searchParams.append("week", String(calendar.week));
+  }
+  return searchParams;
 };

@@ -10,6 +10,7 @@ import {
   startOfWeek,
   subMinutes,
 } from "date-fns";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { z } from "zod";
@@ -17,7 +18,7 @@ import { z } from "zod";
 import { getTimezoneOffset } from "@/app/_actions/get-timezone-offset";
 import { getTrainingsByDateRange } from "@/app/_actions/get-trainings-by-date-range";
 import * as TrainingCalendar from "@/app/_components/training-calendar";
-import { TrainingCalendarToggleGroup } from "@/app/_components/training-calendar-toggle-group";
+import { TrainingCalendarViewSwitcher } from "@/app/_components/training-calendar-view-switcher";
 import { TrainingDetailView } from "@/app/_components/training-detail";
 import {
   calendarSchema,
@@ -25,6 +26,11 @@ import {
   changeViewToWeek,
   getDateFromCalendar,
   getDateFromWeek,
+  getNextMonth,
+  getNextWeek,
+  getPrevMonth,
+  getPrevWeek,
+  getSearchParams,
 } from "@/app/_schemas/calendar";
 import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
@@ -45,7 +51,7 @@ const Page: NextPage = (props) => {
   const dayParam = props.searchParams?.day;
   const weekParam = props.searchParams?.week;
 
-  const today = new Date();
+  const today = new Date().getTime();
 
   const timezoneOffset = getTimezoneOffset();
 
@@ -84,6 +90,17 @@ const Page: NextPage = (props) => {
       return <p>todo</p>;
     case "month": {
       const monthCalendar = changeViewToMonth(calendar);
+      const [prevMonthCalendar, nextMonthCalendar] = [
+        getPrevMonth(monthCalendar),
+        getNextMonth(monthCalendar),
+      ];
+      const baseHref = `/trainees/${traineeId}/trainings/` as const;
+      const prevMonthHref = `${baseHref}?${getSearchParams(
+        prevMonthCalendar
+      ).toString()}` as const;
+      const nextMonthHref = `${baseHref}?${getSearchParams(
+        nextMonthCalendar
+      ).toString()}` as const;
 
       return (
         <div className={stack({ direction: "column" })}>
@@ -94,10 +111,24 @@ const Page: NextPage = (props) => {
               justifyContent: "center",
             })}
           >
-            <TrainingCalendarToggleGroup
+            <TrainingCalendarViewSwitcher
               traineeId={traineeId}
               calendar={monthCalendar}
             />
+          </div>
+          <div
+            className={stack({ direction: "row", justify: "space-between" })}
+          >
+            <Link href={prevMonthHref}>
+              {"<"} {String(prevMonthCalendar.month + 1).padStart(2, "0")}
+            </Link>
+            <p>
+              {monthCalendar.year}.
+              {String(monthCalendar.month + 1).padStart(2, "0")}
+            </p>
+            <Link href={nextMonthHref}>
+              {String(nextMonthCalendar.month + 1).padStart(2, "0")} {">"}
+            </Link>
           </div>
           <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
             <MonthlyView
@@ -111,6 +142,34 @@ const Page: NextPage = (props) => {
     }
     case "week": {
       const weekCalendar = changeViewToWeek(calendar);
+      const [prevWeekCalendar, nextWeekCalendar] = [
+        getPrevWeek(weekCalendar),
+        getNextWeek(weekCalendar),
+      ];
+
+      const sunday =
+        weekCalendar.week === undefined
+          ? startOfWeek(getDateFromCalendar(weekCalendar)).getTime()
+          : getDateFromWeek(weekCalendar);
+      const [sundayYear, sundayMonth, sundayDay] = [
+        getYear(sunday),
+        getMonth(sunday),
+        getDate(sunday),
+      ];
+      const saturday = endOfWeek(sunday).getTime();
+      const [saturdayYear, saturdayMonth, saturdayDay] = [
+        getYear(saturday),
+        getMonth(saturday),
+        getDate(saturday),
+      ];
+
+      const baseHref = `/trainees/${traineeId}/trainings/` as const;
+      const prevWeekHref = `${baseHref}?${getSearchParams(
+        prevWeekCalendar
+      ).toString()}` as const;
+      const nextWeekHref = `${baseHref}?${getSearchParams(
+        nextWeekCalendar
+      ).toString()}` as const;
 
       return (
         <div className={stack({ direction: "column" })}>
@@ -121,10 +180,25 @@ const Page: NextPage = (props) => {
               justifyContent: "center",
             })}
           >
-            <TrainingCalendarToggleGroup
+            <TrainingCalendarViewSwitcher
               traineeId={traineeId}
               calendar={weekCalendar}
             />
+          </div>
+          <div
+            className={stack({ direction: "row", justify: "space-between" })}
+          >
+            <Link href={prevWeekHref}>{"<"}</Link>
+            <p>
+              {sundayYear}.{String(sundayMonth + 1).padStart(2, "0")}.
+              {String(sundayDay).padStart(2, "0")}~
+              {sundayYear === saturdayYear ? "" : `${saturdayYear}.`}
+              {sundayMonth === saturdayMonth
+                ? ""
+                : `${String(saturdayMonth + 1).padStart(2, "0")}.`}
+              {String(saturdayDay).padStart(2, "0")}
+            </p>
+            <Link href={nextWeekHref}>{">"}</Link>
           </div>
           <Suspense fallback={<p>トレーニングデータを取得しています</p>}>
             <WeeklyView
@@ -146,15 +220,18 @@ type MonthlyViewProps = {
   timezoneOffset: number;
 };
 const MonthlyView: FC<MonthlyViewProps> = async (props) => {
-  const firstDayOfMonth = new Date(props.calendar.year, props.calendar.month);
+  const firstDayOfMonth = new Date(
+    props.calendar.year,
+    props.calendar.month
+  ).getTime();
   const topLeftDate = addMinutes(
-    startOfWeek(firstDayOfMonth),
+    startOfWeek(firstDayOfMonth).getTime(),
     props.timezoneOffset
-  );
+  ).getTime();
   const bottomRightDate = addMinutes(
-    endOfWeek(endOfMonth(firstDayOfMonth)),
+    endOfWeek(endOfMonth(firstDayOfMonth)).getTime(),
     props.timezoneOffset
-  );
+  ).getTime();
   const getTrainingsResult = await getTrainingsByDateRange({
     traineeId: props.traineeId,
     from: topLeftDate,
@@ -167,23 +244,25 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
-  type IsTrainingInMonth = (date: Date) => (training: Training) => boolean;
+  type IsTrainingInMonth = (date: number) => (training: Training) => boolean;
   const isTrainingInMonth: IsTrainingInMonth = (date) => (training) => {
     const trainingMonth = subMinutes(
-      new Date(training.date),
+      new Date(training.date).getTime(),
       props.timezoneOffset
-    );
+    ).getTime();
 
     return isSameMonth(date, trainingMonth);
   };
   const trainingsInMonth = trainings.filter(
-    isTrainingInMonth(new Date(props.calendar.year, props.calendar.month))
+    isTrainingInMonth(
+      new Date(props.calendar.year, props.calendar.month).getTime()
+    )
   );
 
-  type IsTrainingInDay = (date: Date) => (training: Training) => boolean;
+  type IsTrainingInDay = (date: number) => (training: Training) => boolean;
   const isTrainingInDay: IsTrainingInDay = (date) => (training) => {
     const trainingDay = subMinutes(
-      new Date(training.date),
+      new Date(training.date).getTime(),
       props.timezoneOffset
     );
 
@@ -202,26 +281,38 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
         trainings={trainings}
         calendar={props.calendar}
       />
-      <p>
-        {props.calendar.day !== undefined
-          ? `${props.calendar.year}年${props.calendar.month + 1}月${
-              props.calendar.day
-            }日のトレーニング`
-          : `${props.calendar.year}年${
-              props.calendar.month + 1
-            }月のトレーニング`}
-      </p>
-      <ul>
-        {(props.calendar.day ? trainingsInDay : trainingsInMonth).map(
-          (training) => {
-            return (
-              <li key={training.id}>
-                <TrainingDetailView training={training} />
-              </li>
-            );
-          }
-        )}
-      </ul>
+      {props.calendar.day !== undefined ? (
+        <>
+          <p>
+            {props.calendar.year}年{props.calendar.month + 1}月
+            {props.calendar.day}日のトレーニング
+          </p>
+          <ul>
+            {trainingsInDay.map((training) => {
+              return (
+                <li key={training.id}>
+                  <TrainingDetailView training={training} />
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      ) : (
+        <>
+          <p>
+            {props.calendar.year}年{props.calendar.month + 1}月のトレーニング
+          </p>
+          <ul>
+            {trainingsInMonth.map((training) => {
+              return (
+                <li key={training.id}>
+                  <TrainingDetailView training={training} />
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
     </div>
   );
 };
@@ -237,8 +328,8 @@ const WeeklyView: FC<WeeklyViewProps> = async (props) => {
       ? getDateFromCalendar(props.calendar)
       : getDateFromWeek(props.calendar);
   const [startOfSunday, endOfSaturday] = [
-    addMinutes(startOfWeek(sunday), props.timezoneOffset),
-    addMinutes(endOfWeek(sunday), props.timezoneOffset),
+    addMinutes(startOfWeek(sunday).getTime(), props.timezoneOffset).getTime(),
+    addMinutes(endOfWeek(sunday).getTime(), props.timezoneOffset).getTime(),
   ];
   const getTrainingsResult = await getTrainingsByDateRange({
     traineeId: props.traineeId,
@@ -250,10 +341,10 @@ const WeeklyView: FC<WeeklyViewProps> = async (props) => {
   }
   const trainings = getTrainingsResult.value;
 
-  type IsTrainingInDay = (date: Date) => (training: Training) => boolean;
+  type IsTrainingInDay = (date: number) => (training: Training) => boolean;
   const isTrainingInDay: IsTrainingInDay = (date) => (training) => {
     const trainingDay = subMinutes(
-      new Date(training.date),
+      new Date(training.date).getTime(),
       props.timezoneOffset
     );
 

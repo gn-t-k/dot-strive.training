@@ -9,6 +9,7 @@ import {
   changeViewToMonth,
   changeViewToWeek,
   changeViewToYear,
+  getSearchParams,
 } from "../_schemas/calendar";
 
 import type { Calendar } from "../_schemas/calendar";
@@ -17,35 +18,17 @@ type Props = {
   traineeId: string;
   calendar: Calendar;
 };
-export const TrainingCalendarToggleGroup: FC<Props> = (props) => {
+export const TrainingCalendarViewSwitcher: FC<Props> = (props) => {
   const baseHref = `/trainees/${props.traineeId}/trainings/` as const;
 
-  type GetSearchParams = (calendar: Calendar) => URLSearchParams;
-  const getSearchParams: GetSearchParams = (calendar) => {
-    const searchParams = new URLSearchParams([
-      ["view", String(calendar.view)],
-      ["year", String(calendar.year)],
-    ]);
-    if (calendar.month !== undefined) {
-      searchParams.append("month", String(calendar.month));
-    }
-    if (calendar.day !== undefined) {
-      searchParams.append("day", String(calendar.day));
-    }
-    if (calendar.week !== undefined) {
-      searchParams.append("week", String(calendar.week));
-    }
-    return searchParams;
-  };
-
-  const yearViewHref = `${baseHref}?${getSearchParams(
-    changeViewToYear(props.calendar)
+  const weekViewHref = `${baseHref}?${getSearchParams(
+    changeViewToWeek(props.calendar)
   ).toString()}` as const;
   const monthViewHref = `${baseHref}?${getSearchParams(
     changeViewToMonth(props.calendar)
   ).toString()}` as const;
-  const weekViewHref = `${baseHref}?${getSearchParams(
-    changeViewToWeek(props.calendar)
+  const yearViewHref = `${baseHref}?${getSearchParams(
+    changeViewToYear(props.calendar)
   ).toString()}` as const;
 
   return (
@@ -63,12 +46,13 @@ export const TrainingCalendarToggleGroup: FC<Props> = (props) => {
       })}
     >
       <div className={css({ w: "full" })}>
-        <Link href={yearViewHref} passHref>
-          <ToggleGroup.Item value="year" className={css({ w: "full" })}>
-            <Label selected={props.calendar.view === "year"}>年</Label>
+        <Link href={weekViewHref} passHref>
+          <ToggleGroup.Item value="week" className={css({ w: "full" })}>
+            <Label selected={props.calendar.view === "week"}>週</Label>
           </ToggleGroup.Item>
         </Link>
       </div>
+
       <div className={css({ w: "full" })}>
         <Link href={monthViewHref} passHref>
           <ToggleGroup.Item value="month" className={css({ w: "full" })}>
@@ -77,9 +61,9 @@ export const TrainingCalendarToggleGroup: FC<Props> = (props) => {
         </Link>
       </div>
       <div className={css({ w: "full" })}>
-        <Link href={weekViewHref} passHref>
-          <ToggleGroup.Item value="week" className={css({ w: "full" })}>
-            <Label selected={props.calendar.view === "week"}>週</Label>
+        <Link href={yearViewHref} passHref>
+          <ToggleGroup.Item value="year" className={css({ w: "full" })}>
+            <Label selected={props.calendar.view === "year"}>年</Label>
           </ToggleGroup.Item>
         </Link>
       </div>
