@@ -1,7 +1,7 @@
 "use client";
 
 import { format, setDate, setMonth, setYear } from "date-fns";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ulid } from "ulid";
 
 import { registerOrUpdateTraining } from "@/app/_actions/register-or-update-training";
@@ -16,13 +16,12 @@ import type { ComponentProps, FC } from "react";
 
 type Props = {
   traineeId: string;
+  trainingDate: number;
   registeredExercises: Exercise[];
 };
 export const TrainingRegistrationForm: FC<Props> = (props) => {
   const router = useRouter();
   const { renderToast } = useToast();
-  const searchParams = useSearchParams();
-  const date = searchParams.get("date");
 
   const submitTraining: ComponentProps<
     typeof TrainingForm
@@ -94,24 +93,24 @@ export const TrainingRegistrationForm: FC<Props> = (props) => {
     );
     router.push(`/trainees/${props.traineeId}/trainings`);
   };
-  const defaultValues =
-    date && !isNaN(Date.parse(date))
-      ? ({
-          date: format(new Date(date), "yyyy-MM-dd"),
-          records: [
-            {
-              exerciseId: "",
-              sets: [
-                {
-                  weight: "",
-                  repetition: "",
-                },
-              ],
-              memo: "",
-            },
-          ],
-        } satisfies TrainingField)
-      : undefined;
+  const trainingDate = new Date(props.trainingDate).getTime();
+  const defaultValues = !isNaN(trainingDate)
+    ? ({
+        date: format(trainingDate, "yyyy-MM-dd"),
+        records: [
+          {
+            exerciseId: "",
+            sets: [
+              {
+                weight: "",
+                repetition: "",
+              },
+            ],
+            memo: "",
+          },
+        ],
+      } satisfies TrainingField)
+    : undefined;
 
   return (
     <TrainingForm

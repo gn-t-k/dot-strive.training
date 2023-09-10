@@ -51,9 +51,9 @@ const Page: NextPage = (props) => {
   const dayParam = props.searchParams?.day;
   const weekParam = props.searchParams?.week;
 
-  const today = new Date().getTime();
-
   const timezoneOffset = getTimezoneOffset();
+
+  const today = subMinutes(new Date(), timezoneOffset).getTime();
 
   const defaultView = "month" satisfies Calendar["view"];
   const defaultYear = getYear(today);
@@ -300,6 +300,15 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
               );
             })}
           </ul>
+          <Link
+            href={`/trainees/${
+              props.traineeId
+            }/trainings/register?training_date=${getDateFromCalendar(
+              props.calendar
+            )}`}
+          >
+            トレーニングを登録する
+          </Link>
         </>
       ) : (
         <>
@@ -388,6 +397,15 @@ const WeeklyView: FC<WeeklyViewProps> = async (props) => {
               );
             })}
           </ul>
+          <Link
+            href={`/trainees/${
+              props.traineeId
+            }/trainings/register?training_date=${getDateFromCalendar(
+              props.calendar
+            )}`}
+          >
+            トレーニングを登録する
+          </Link>
         </>
       ) : (
         <>

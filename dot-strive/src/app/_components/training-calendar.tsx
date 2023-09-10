@@ -2,10 +2,13 @@ import {
   addDays,
   addWeeks,
   getDate,
+  getDay,
+  getDaysInMonth,
   getMonth,
   getYear,
   isSameDay,
   isSameMonth,
+  startOfMonth,
   startOfWeek,
   subMinutes,
 } from "date-fns";
@@ -35,7 +38,10 @@ type DayProps = {
   timezoneOffset: number;
 };
 export const Day: FC<DayProps> = (props) => {
-  const isToday = isSameDay(props.date, new Date().getTime());
+  const isToday = isSameDay(
+    props.date,
+    subMinutes(new Date(), props.timezoneOffset).getTime()
+  );
 
   const isOutOfMonth = ((): boolean => {
     switch (props.calendar.view) {
@@ -76,9 +82,9 @@ export const Day: FC<DayProps> = (props) => {
 
   const commonStyle: SystemStyleObject = {
     borderRadius: "50%",
-    width: "40px",
-    height: "40px",
-    lineHeight: "40px",
+    width: "32px",
+    height: "32px",
+    lineHeight: "32px",
     textAlign: "center",
   } as const;
   const dayStyle = isToday
@@ -129,7 +135,7 @@ export const Day: FC<DayProps> = (props) => {
           className={stack({
             direction: "column",
             gap: 0,
-            height: "80px",
+            height: "72px",
             align: "center",
           })}
         >
@@ -156,22 +162,30 @@ type MonthProps = {
   calendar: Extract<Calendar, { view: "month" }>;
 };
 export const Month: FC<MonthProps> = (props) => {
-  const month = [0, 1, 2, 3, 4, 5].map((weekIndex) => {
-    const topLeftDate = startOfWeek(
-      new Date(props.calendar.year, props.calendar.month).getTime()
-    ).getTime();
-    const startSunday = addWeeks(topLeftDate, weekIndex).getTime();
+  const firstDate = new Date(
+    props.calendar.year,
+    props.calendar.month
+  ).getTime();
+  const month =
+    // その月のカレンダーの行数を計算し、その行数分の配列を作成する
+    Array.from({
+      length: Math.ceil(
+        (getDay(startOfMonth(firstDate)) + getDaysInMonth(firstDate)) / 7
+      ),
+    }).map((_, weekIndex) => {
+      const topLeftDate = startOfWeek(firstDate).getTime();
+      const startSunday = addWeeks(topLeftDate, weekIndex).getTime();
 
-    return [0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
-      const date = addDays(startSunday, dayIndex).getTime();
+      return Array.from({ length: 7 }).map((_, dayIndex) => {
+        const date = addDays(startSunday, dayIndex).getTime();
 
-      return date;
+        return date;
+      });
     });
-  });
 
   return (
     <div role="table">
-      <div role="rowgroup" className={stack({ direction: "column", gap: 4 })}>
+      <div role="rowgroup" className={stack({ direction: "column", gap: 0 })}>
         {month.map((week, index) => {
           return (
             <div
@@ -214,7 +228,7 @@ export const Week: FC<WeekProps> = (props) => {
       ? getDateFromWeek(props.calendar)
       : getDateFromCalendar(props.calendar)
   ).getTime();
-  const week = [0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
+  const week = Array.from({ length: 7 }).map((_, dayIndex) => {
     const date = addDays(sunday, dayIndex).getTime();
 
     return date;

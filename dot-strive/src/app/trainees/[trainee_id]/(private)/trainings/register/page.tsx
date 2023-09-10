@@ -17,11 +17,16 @@ const Page: NextPage = (props) => {
     redirect("/" satisfies Route);
   }
 
+  const trainingDateParams = props.searchParams?.["training_date"];
+  const trainingDate = trainingDateParams
+    ? Number(trainingDateParams)
+    : new Date().getTime();
+
   return (
     <section className={stack({ direction: "column" })}>
       <h1>トレーニングを登録</h1>
       <Suspense fallback={<p>種目データを取得しています</p>}>
-        <FetchExercises traineeId={traineeId} />
+        <FetchExercises traineeId={traineeId} trainingDate={trainingDate} />
       </Suspense>
       <Link href={`/trainees/${traineeId}/trainings`}>トレーニング一覧</Link>
     </section>
@@ -31,6 +36,7 @@ export default Page;
 
 type Props = {
   traineeId: string;
+  trainingDate: number;
 };
 const FetchExercises: FC<Props> = async (props) => {
   const getExercisesResult = await getAllExercises({
@@ -45,6 +51,7 @@ const FetchExercises: FC<Props> = async (props) => {
     <TrainingRegistrationForm
       traineeId={props.traineeId}
       registeredExercises={registeredExercises}
+      trainingDate={props.trainingDate}
     />
   );
 };
