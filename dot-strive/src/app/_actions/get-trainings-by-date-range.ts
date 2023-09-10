@@ -11,8 +11,8 @@ import type { Result } from "../_utils/result";
 
 type GetTrainingsByDateRange = (props: {
   traineeId: string;
-  from: Date;
-  to: Date;
+  from: number;
+  to: number;
 }) => Promise<Result<Training[], Error>>;
 export const getTrainingsByDateRange: GetTrainingsByDateRange = async (
   props
@@ -41,8 +41,8 @@ export const getTrainingsByDateRange: GetTrainingsByDateRange = async (
         trainings: {
           where: {
             date: {
-              gte: props.from,
-              lte: props.to,
+              gte: new Date(props.from),
+              lte: new Date(props.to),
             },
           },
           include: {

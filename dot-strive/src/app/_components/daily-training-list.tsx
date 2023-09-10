@@ -17,8 +17,11 @@ type Props = {
 export const DailyTrainingList: FC<Props> = async (props) => {
   const startOfDate = startOfDay(new Date(props.date));
   const endOfDate = endOfDay(startOfDate);
-  const offsetStartOfDate = addMinutes(startOfDate, props.timezoneOffset);
-  const offsetEndOfDate = addMinutes(endOfDate, props.timezoneOffset);
+  const offsetStartOfDate = addMinutes(
+    startOfDate,
+    props.timezoneOffset
+  ).getTime();
+  const offsetEndOfDate = addMinutes(endOfDate, props.timezoneOffset).getTime();
 
   const getTrainingsResult = await getTrainingsByDateRange({
     traineeId: props.traineeId,
