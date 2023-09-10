@@ -300,6 +300,15 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
               );
             })}
           </ul>
+          <Link
+            href={`/trainees/${
+              props.traineeId
+            }/trainings/register?training_date=${getDateFromCalendar(
+              props.calendar
+            )}`}
+          >
+            トレーニングを登録する
+          </Link>
         </>
       ) : (
         <>
@@ -388,6 +397,15 @@ const WeeklyView: FC<WeeklyViewProps> = async (props) => {
               );
             })}
           </ul>
+          <Link
+            href={`/trainees/${
+              props.traineeId
+            }/trainings/register?training_date=${getDateFromCalendar(
+              props.calendar
+            )}`}
+          >
+            トレーニングを登録する
+          </Link>
         </>
       ) : (
         <>
