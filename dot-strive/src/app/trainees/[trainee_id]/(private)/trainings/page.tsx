@@ -53,7 +53,7 @@ const Page: NextPage = (props) => {
 
   const timezoneOffset = getTimezoneOffset();
 
-  const today = addMinutes(new Date(), timezoneOffset).getTime();
+  const today = subMinutes(new Date(), timezoneOffset).getTime();
 
   const defaultView = "month" satisfies Calendar["view"];
   const defaultYear = getYear(today);
