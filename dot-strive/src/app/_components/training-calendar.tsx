@@ -38,7 +38,10 @@ type DayProps = {
   timezoneOffset: number;
 };
 export const Day: FC<DayProps> = (props) => {
-  const isToday = isSameDay(props.date, new Date().getTime());
+  const isToday = isSameDay(
+    props.date,
+    subMinutes(new Date(), props.timezoneOffset).getTime()
+  );
 
   const isOutOfMonth = ((): boolean => {
     switch (props.calendar.view) {
