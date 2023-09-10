@@ -51,9 +51,9 @@ const Page: NextPage = (props) => {
   const dayParam = props.searchParams?.day;
   const weekParam = props.searchParams?.week;
 
-  const today = new Date().getTime();
-
   const timezoneOffset = getTimezoneOffset();
+
+  const today = addMinutes(new Date(), timezoneOffset).getTime();
 
   const defaultView = "month" satisfies Calendar["view"];
   const defaultYear = getYear(today);
