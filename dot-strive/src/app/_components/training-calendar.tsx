@@ -13,7 +13,6 @@ import {
   subMinutes,
 } from "date-fns";
 import Link from "next/link";
-import { type FC } from "react";
 
 import { css } from "styled-system/css";
 import { grid, stack } from "styled-system/patterns";
@@ -28,6 +27,7 @@ import {
 
 import type { Calendar } from "../_schemas/calendar";
 import type { Training } from "../_schemas/training";
+import type { FC } from "react";
 import type { SystemStyleObject } from "styled-system/types";
 
 type DayProps = {

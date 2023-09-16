@@ -38,13 +38,12 @@ import { stack } from "styled-system/patterns";
 import type { Calendar } from "@/app/_schemas/calendar";
 import type { Training } from "@/app/_schemas/training";
 import type { NextPage } from "@/app/_types/page";
-import type { Route } from "next";
 import type { FC } from "react";
 
 const Page: NextPage = (props) => {
   const traineeId = props.params?.["trainee_id"];
   if (!traineeId) {
-    redirect("/" satisfies Route);
+    redirect("/");
   }
 
   const monthParam = props.searchParams?.month;
@@ -55,7 +54,7 @@ const Page: NextPage = (props) => {
 
   const today = subMinutes(new Date(), timezoneOffset).getTime();
 
-  const defaultView = "month" satisfies Calendar["view"];
+  const defaultView: Calendar["view"] = "month" as const;
   const defaultYear = getYear(today);
   const defaultMonth = getMonth(today);
   const defaultDay = getDate(today);
