@@ -17,7 +17,6 @@ import Link from "next/link";
 import { css } from "styled-system/css";
 import { grid, stack } from "styled-system/patterns";
 
-import { EmojiIcon } from "./emoji-icon";
 import {
   deselectDate,
   getDateFromCalendar,
@@ -87,23 +86,56 @@ export const Day: FC<DayProps> = (props) => {
     lineHeight: "32px",
     textAlign: "center",
   } as const;
-  const dayStyle = isToday
-    ? css({
-        ...commonStyle,
-        color: "white",
-        bgColor: "blue",
-      })
-    : !isSelected && isOutOfMonth
-    ? css({
-        ...commonStyle,
-        color: "gray.300",
-      })
-    : isSelected && !isOutOfMonth
-    ? css({
-        ...commonStyle,
-        bgColor: "blue.300",
-      })
-    : css(commonStyle);
+  const dayStyle =
+    props.calendar.day === undefined || isSelected
+      ? // 特定の日付が選択されていない もしくは この日が選択されているパターン
+        !isToday && !isTrainingDay && !isOutOfMonth
+        ? css(commonStyle)
+        : !isToday && !isTrainingDay && isOutOfMonth
+        ? css({ ...commonStyle, color: "gray.300" })
+        : !isToday && isTrainingDay && !isOutOfMonth
+        ? css({ ...commonStyle, bgColor: "green.300" })
+        : !isToday && isTrainingDay && isOutOfMonth
+        ? css({ ...commonStyle, bgColor: "green.300" })
+        : isToday && !isTrainingDay && !isOutOfMonth
+        ? css({ ...commonStyle, fontWeight: "extrabold" })
+        : isToday && !isTrainingDay && isOutOfMonth
+        ? css({ ...commonStyle, color: "gray.300", fontWeight: "extrabold" })
+        : isToday && isTrainingDay && !isOutOfMonth
+        ? css({ ...commonStyle, bgColor: "green.300", fontWeight: "extrabold" })
+        : // isToday && isTrainingDay && isOutOfMonth ?
+          css({
+            ...commonStyle,
+            bgColor: "green.300",
+            fontWeight: "extrabold",
+          })
+      : // この日以外の日付が選択されているパターン
+      !isToday && !isTrainingDay && !isOutOfMonth
+      ? css({ ...commonStyle, color: "gray.300" })
+      : !isToday && !isTrainingDay && isOutOfMonth
+      ? css({ ...commonStyle, color: "gray.300" })
+      : !isToday && isTrainingDay && !isOutOfMonth
+      ? css({ ...commonStyle, color: "gray.300", bgColor: "green.100" })
+      : !isToday && isTrainingDay && isOutOfMonth
+      ? css({ ...commonStyle, color: "gray.300", bgColor: "green.100" })
+      : isToday && !isTrainingDay && !isOutOfMonth
+      ? css({ ...commonStyle, color: "gray.300", fontWeight: "extrabold" })
+      : isToday && !isTrainingDay && isOutOfMonth
+      ? css({ ...commonStyle, color: "gray.300", fontWeight: "extrabold" })
+      : isToday && isTrainingDay && !isOutOfMonth
+      ? css({
+          ...commonStyle,
+          color: "gray.300",
+          bgColor: "green.100",
+          fontWeight: "extrabold",
+        })
+      : // isToday && isTrainingDay && isOutOfMonth ?
+        css({
+          ...commonStyle,
+          color: "gray.300",
+          bgColor: "green.100",
+          fontWeight: "extrabold",
+        });
 
   const clickedCalendar =
     props.calendar.day !== undefined &&
@@ -131,25 +163,7 @@ export const Day: FC<DayProps> = (props) => {
   return (
     <div role="cell">
       <Link href={href}>
-        <div
-          className={stack({
-            direction: "column",
-            gap: 0,
-            height: "72px",
-            align: "center",
-          })}
-        >
-          <div className={dayStyle}>{getDate(props.date)}</div>
-          {trainings.length > 0 && (
-            <EmojiIcon
-              emoji="🏋️"
-              label={`${year}/${month + 1}/${day}のトレーニングを${
-                isTrainingDay ? "確認" : "登録"
-              }`}
-              size="small"
-            />
-          )}
-        </div>
+        <div className={dayStyle}>{getDate(props.date)}</div>
       </Link>
     </div>
   );
@@ -185,7 +199,7 @@ export const Month: FC<MonthProps> = (props) => {
 
   return (
     <div role="table">
-      <div role="rowgroup" className={stack({ direction: "column", gap: 0 })}>
+      <div role="rowgroup" className={stack({ direction: "column", gap: 2 })}>
         {month.map((week, index) => {
           return (
             <div
