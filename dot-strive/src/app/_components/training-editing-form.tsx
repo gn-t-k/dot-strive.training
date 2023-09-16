@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { ulid } from "ulid";
 
 import { registerOrUpdateTraining } from "@/app/_actions/register-or-update-training";
-import { validateTraining, type Training } from "@/app/_schemas/training";
+import {
+  validateTraining,
+  type Training,
+  getEstimatedMaximumWeight,
+} from "@/app/_schemas/training";
 
 import { TrainingForm } from "./training-form";
 import { useToast } from "./use-toast";
@@ -46,6 +50,10 @@ export const TrainingEditingForm: FC<Props> = (props) => {
                 id: ulid(),
                 weight: Number(set.weight),
                 repetition: Number(set.repetition),
+                estimatedMaximumWeight: getEstimatedMaximumWeight({
+                  weight: Number(set.weight),
+                  repetition: Number(set.repetition),
+                }),
                 order: index + 1,
               };
             }),

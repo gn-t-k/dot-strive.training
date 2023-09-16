@@ -95,6 +95,7 @@ export const registerOrUpdateTraining: RegisterOrUpdateTraining = async (
               recordId: record.id,
               weight: set.weight,
               repetition: set.repetition,
+              estimatedMaximumWeight: set.estimatedMaximumWeight,
               order: set.order,
             }))
           ),
@@ -167,6 +168,7 @@ export const registerOrUpdateTraining: RegisterOrUpdateTraining = async (
               recordId: record.id,
               weight: set.weight,
               repetition: set.repetition,
+              estimatedMaximumWeight: set.estimatedMaximumWeight,
               order: set.order,
             }))
           ),
