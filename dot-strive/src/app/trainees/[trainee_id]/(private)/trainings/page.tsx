@@ -57,7 +57,6 @@ const Page: NextPage = (props) => {
   const defaultView: Calendar["view"] = "month" as const;
   const defaultYear = getYear(today);
   const defaultMonth = getMonth(today);
-  const defaultDay = getDate(today);
 
   const view = z
     .enum(["year", "month", "week"])
@@ -77,7 +76,6 @@ const Page: NextPage = (props) => {
     const searchParams = new URLSearchParams([
       ["year", String(defaultYear)],
       ["month", String(defaultMonth)],
-      ["day", String(defaultDay)],
       ["view", String(defaultView)],
     ]);
     redirect(`/trainees/${traineeId}/trainings/?${searchParams.toString()}`);
