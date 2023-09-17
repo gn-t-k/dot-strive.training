@@ -103,7 +103,7 @@ model Exercise {
 
 model Training {
   id        String   @id
-  date DateTime
+  date      DateTime
   createdAt DateTime
   updatedAt DateTime
   traineeId String
@@ -132,13 +132,14 @@ model Record {
 }
 
 model Set {
-  id         String @id
-  recordId   String
-  weight     Float
-  repetition Int
-  order      Int
+  id                     String @id
+  recordId               String
+  weight                 Float
+  repetition             Int
+  estimatedMaximumWeight Float
+  order                  Int
 
   record Record @relation(fields: [recordId], references: [id])
 
-  @@index([recordId])
+  @@index([recordId, estimatedMaximumWeight])
 }

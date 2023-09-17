@@ -3,7 +3,10 @@
 import { prisma } from "@/app/_libs/prisma/client";
 
 import { getTraineeBySession } from "./get-trainee-by-session";
-import { validateTraining } from "../_schemas/training";
+import {
+  getEstimatedMaximumWeight,
+  validateTraining,
+} from "../_schemas/training";
 import { err, ok } from "../_utils/result";
 
 import type { Training } from "../_schemas/training";
@@ -79,6 +82,10 @@ export const deleteTraining: DeleteTraining = async (props) => {
               id: set.id,
               weight: set.weight,
               repetition: set.repetition,
+              estimatedMaximumWeight: getEstimatedMaximumWeight({
+                weight: set.weight,
+                repetition: set.repetition,
+              }),
               order: set.order,
             };
           }),

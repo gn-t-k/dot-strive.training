@@ -6,7 +6,10 @@ import { ulid } from "ulid";
 
 import { registerOrUpdateTraining } from "@/app/_actions/register-or-update-training";
 import { TrainingForm } from "@/app/_components/training-form";
-import { validateTraining } from "@/app/_schemas/training";
+import {
+  getEstimatedMaximumWeight,
+  validateTraining,
+} from "@/app/_schemas/training";
 
 import { useToast } from "./use-toast";
 
@@ -57,6 +60,10 @@ export const TrainingRegistrationForm: FC<Props> = (props) => {
               id: ulid(),
               weight: Number(set.weight),
               repetition: Number(set.repetition),
+              estimatedMaximumWeight: getEstimatedMaximumWeight({
+                weight: Number(set.weight),
+                repetition: Number(set.repetition),
+              }),
               order: index + 1,
             })),
             memo: record.memo,

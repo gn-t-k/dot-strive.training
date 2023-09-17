@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { type FC, type PropsWithChildren } from "react";
 
 import * as ToggleGroup from "@/app/_components/toggle-group";
 import { css } from "styled-system/css";
@@ -13,6 +12,7 @@ import {
 } from "../_schemas/calendar";
 
 import type { Calendar } from "../_schemas/calendar";
+import type { FC, PropsWithChildren } from "react";
 
 type Props = {
   traineeId: string;
