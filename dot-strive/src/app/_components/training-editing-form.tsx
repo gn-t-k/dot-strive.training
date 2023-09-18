@@ -110,6 +110,8 @@ export const TrainingEditingForm: FC<Props> = (props) => {
                 repetition: set.repetition.toString(),
               };
             }),
+            copyWeight: false,
+            copyReps: false,
           };
         }),
       }}

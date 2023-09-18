@@ -114,6 +114,8 @@ export const TrainingRegistrationForm: FC<Props> = (props) => {
               },
             ],
             memo: "",
+            copyWeight: false,
+            copyReps: false,
           },
         ],
       } satisfies TrainingField)
