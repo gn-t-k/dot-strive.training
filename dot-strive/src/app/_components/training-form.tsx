@@ -63,6 +63,8 @@ export const TrainingForm: FC<Props> = (props) => {
         },
       ],
       memo: "",
+      copyWeight: false,
+      copyReps: false,
     });
   };
   const onClickRemoveRecordHOF =
@@ -151,13 +153,21 @@ const RecordForm: FC<RecordFormProps> = (props) => {
   const selectedExercise = props.registeredExercises.find(
     (exercise) => exercise.id === selectedExerciseId
   );
+  const previousWeight = props.watch(
+    `records.${props.recordIndex}.sets.${fields.length - 1}.weight`
+  );
+  const previousReps = props.watch(
+    `records.${props.recordIndex}.sets.${fields.length - 1}.repetition`
+  );
+  const copyWeight = props.watch(`records.${props.recordIndex}.copyWeight`);
+  const copyReps = props.watch(`records.${props.recordIndex}.copyReps`);
 
   const onClickAddSet: MouseEventHandler<HTMLButtonElement> = (event) => {
     event.preventDefault();
 
     append({
-      weight: "",
-      repetition: "",
+      weight: copyWeight ? previousWeight : "",
+      repetition: copyReps ? previousReps : "",
     });
   };
   const onClickRemoveSetHOF =
@@ -244,7 +254,27 @@ const RecordForm: FC<RecordFormProps> = (props) => {
             </div>
           );
         })}
-        <Button onClick={onClickAddSet}>セットを追加</Button>
+        <div className={stack({ direction: "column", gap: 2 })}>
+          <div className={stack({ direction: "row" })}>
+            <div className={stack({ direction: "row" })}>
+              <input
+                type="checkbox"
+                id="copy-weight"
+                {...props.register(`records.${props.recordIndex}.copyWeight`)}
+              />
+              <label htmlFor="copy-weight">同じ重量</label>
+            </div>
+            <div className={stack({ direction: "row" })}>
+              <input
+                type="checkbox"
+                id="copy-reps"
+                {...props.register(`records.${props.recordIndex}.copyReps`)}
+              />
+              <label htmlFor="copy-reps">同じ回数</label>
+            </div>
+          </div>
+          <Button onClick={onClickAddSet}>セットを追加</Button>
+        </div>
         {props.errors?.records?.[props.recordIndex]?.sets && (
           <p className={css({ color: "red" })}>
             {props.errors.records[props.recordIndex]?.sets?.message}
@@ -349,6 +379,8 @@ const trainingFieldSchema = z.object({
             })
           )
           .min(1, "重量・回数を入力してください"),
+        copyWeight: z.boolean().default(false),
+        copyReps: z.boolean().default(false),
       })
     )
     .min(1, "記録を入力してください"),
@@ -373,6 +405,8 @@ const useTrainingForm: UseTrainingForm = (defaultValues) => {
             },
           ],
           memo: "",
+          copyWeight: false,
+          copyReps: false,
         },
       ],
     },
