@@ -3,9 +3,11 @@
 import { prisma } from "@/app/_libs/prisma/client";
 
 import { getTraineeBySession } from "./get-trainee-by-session";
+import { validateTraining } from "../_schemas/training";
 import { none, some } from "../_utils/option";
 import { err, ok } from "../_utils/result";
 
+import type { Training } from "../_schemas/training";
 import type { Option } from "../_utils/option";
 import type { Result } from "../_utils/result";
 
@@ -18,7 +20,7 @@ type GetEstimatedMaximumWeight = (props: {
       estimatedMaximumWeight: number;
       weight: number;
       repetition: number;
-      date: number;
+      training: Training;
     }>,
     Error
   >
@@ -61,14 +63,38 @@ export const getEstimatedMaximumWeight: GetEstimatedMaximumWeight = async (
         record: {
           select: {
             training: {
-              select: {
-                date: true,
+              include: {
+                records: {
+                  include: {
+                    exercise: {
+                      include: {
+                        targets: true,
+                      },
+                    },
+                    sets: true,
+                  },
+                },
               },
             },
           },
         },
       },
     });
+
+    if (data === null) {
+      return ok(none());
+    }
+
+    const validateTrainingResult = validateTraining({
+      ...data.record.training,
+      date: data.record.training.date.toISOString(),
+    });
+    if (validateTrainingResult.isErr) {
+      throw new Error(
+        `トレーニングの取得に失敗しました: ${validateTrainingResult.error.message}`
+      );
+    }
+    const training = validateTrainingResult.value;
 
     return ok(
       data === null
@@ -77,7 +103,7 @@ export const getEstimatedMaximumWeight: GetEstimatedMaximumWeight = async (
             estimatedMaximumWeight: data.estimatedMaximumWeight,
             weight: data.weight,
             repetition: data.repetition,
-            date: data.record.training.date.getTime(),
+            training,
           })
     );
   } catch (error) {
