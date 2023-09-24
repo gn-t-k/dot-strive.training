@@ -86,3 +86,12 @@ export const getEstimatedMaximumWeight: GetEstimatedMaximumWeight = (set) => {
     (100 * weight) / (48.8 + 53.8 * Math.pow(Math.E, -0.075 * repetition))
   );
 };
+
+type GetVolume = (training: Training) => number;
+export const getVolume: GetVolume = (training) => {
+  return training.records
+    .flatMap((record) => record.sets)
+    .reduce((total, set) => {
+      return total + set.weight * set.repetition;
+    }, 0);
+};
