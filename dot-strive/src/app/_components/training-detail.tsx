@@ -1,8 +1,9 @@
 import { getTrainingById } from "@/app/_actions/get-training-by-id";
-import { LocalDate } from "@/app/_components/local-date";
+import { getVolume, type Training } from "@/app/_schemas/training";
 import { stack } from "styled-system/patterns";
 
-import type { Training } from "@/app/_schemas/training";
+import { LocalDate } from "./local-date";
+
 import type { FC } from "react";
 
 type Props = {
@@ -28,7 +29,10 @@ type TrainingDetailViewProps = {
 export const TrainingDetailView: FC<TrainingDetailViewProps> = (props) => {
   return (
     <div className={stack({ direction: "column", p: 4 })}>
-      <LocalDate utcDateString={props.training.date} />
+      <div className={stack({ direction: "row" })}>
+        <LocalDate utcDateString={props.training.date} />
+        <p>ボリューム: {getVolume(props.training)}kg</p>
+      </div>
       <ul className={stack({ direction: "column", gap: 8, p: 4 })}>
         {props.training.records.map((record) => {
           return (
