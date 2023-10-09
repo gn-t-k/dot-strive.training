@@ -38,7 +38,10 @@ export const TrainingPopover: FC<PropsWithChildren<Props>> = (props) => {
                     className={stack({ direction: "column" })}
                     key={training.id}
                   >
-                    <TrainingDetail training={training} />
+                    <TrainingDetail
+                      training={training}
+                      traineeId={props.traineeId}
+                    />
                     <Link
                       href={`/trainees/${props.traineeId}/trainings/${training.id}/edit`}
                     >

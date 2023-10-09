@@ -41,7 +41,7 @@ export const DailyTrainingList: FC<Props> = async (props) => {
             <Link
               href={`/trainees/${props.traineeId}/trainings/${training.id}`}
             >
-              <TrainingDetail training={training} />
+              <TrainingDetail training={training} traineeId={props.traineeId} />
             </Link>
           </li>
         );

@@ -291,7 +291,10 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
               return (
                 <Link href={`${baseHref}/${training.id}`} key={training.id}>
                   <li>
-                    <TrainingDetail training={training} />
+                    <TrainingDetail
+                      training={training}
+                      traineeId={props.traineeId}
+                    />
                   </li>
                 </Link>
               );
@@ -317,7 +320,10 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
               return (
                 <Link href={`${baseHref}/${training.id}`} key={training.id}>
                   <li>
-                    <TrainingDetail training={training} />
+                    <TrainingDetail
+                      training={training}
+                      traineeId={props.traineeId}
+                    />
                   </li>
                 </Link>
               );
@@ -388,7 +394,10 @@ const WeeklyView: FC<WeeklyViewProps> = async (props) => {
               return (
                 <Link href={`${baseHref}/${training.id}`} key={training.id}>
                   <li>
-                    <TrainingDetail training={training} />
+                    <TrainingDetail
+                      training={training}
+                      traineeId={props.traineeId}
+                    />
                   </li>
                 </Link>
               );
@@ -412,7 +421,10 @@ const WeeklyView: FC<WeeklyViewProps> = async (props) => {
               return (
                 <Link href={`${baseHref}/${training.id}`} key={training.id}>
                   <li>
-                    <TrainingDetail training={training} />
+                    <TrainingDetail
+                      training={training}
+                      traineeId={props.traineeId}
+                    />
                   </li>
                 </Link>
               );
