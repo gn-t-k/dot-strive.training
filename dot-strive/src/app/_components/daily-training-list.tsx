@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { stack } from "styled-system/patterns";
 
-import { TrainingDetailView } from "./training-detail";
+import { TrainingDetail } from "./training-detail";
 import { getTrainingsByDateRange } from "../_actions/get-trainings-by-date-range";
 
 import type { UTCDateString } from "../_schemas/utc-date-string";
@@ -41,7 +41,7 @@ export const DailyTrainingList: FC<Props> = async (props) => {
             <Link
               href={`/trainees/${props.traineeId}/trainings/${training.id}`}
             >
-              <TrainingDetailView training={training} />
+              <TrainingDetail training={training} traineeId={props.traineeId} />
             </Link>
           </li>
         );
