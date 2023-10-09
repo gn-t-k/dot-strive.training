@@ -7,7 +7,7 @@ import { css } from "styled-system/css";
 import { stack } from "styled-system/patterns";
 
 import { TrainingDeletionAndConfirm } from "./training-deletion-and-confirm";
-import { TrainingDetailView } from "./training-detail";
+import { TrainingDetail } from "./training-detail";
 
 import type { Training } from "../_schemas/training";
 import type { FC, PropsWithChildren } from "react";
@@ -38,7 +38,7 @@ export const TrainingPopover: FC<PropsWithChildren<Props>> = (props) => {
                     className={stack({ direction: "column" })}
                     key={training.id}
                   >
-                    <TrainingDetailView training={training} />
+                    <TrainingDetail training={training} />
                     <Link
                       href={`/trainees/${props.traineeId}/trainings/${training.id}/edit`}
                     >

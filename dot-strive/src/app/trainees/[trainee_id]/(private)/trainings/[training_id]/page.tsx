@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { getTrainingById } from "@/app/_actions/get-training-by-id";
 import { Loading } from "@/app/_components/loading";
 import { TrainingDeletionAndConfirm } from "@/app/_components/training-deletion-and-confirm";
-import { TrainingDetailView } from "@/app/_components/training-detail";
+import { TrainingDetail } from "@/app/_components/training-detail";
 import { stack } from "styled-system/patterns";
 
 import type { NextPage } from "@/app/_types/page";
@@ -54,7 +54,7 @@ const FetchTraining: FC<Props> = async (props) => {
 
   return (
     <div className={stack({ direction: "column" })}>
-      <TrainingDetailView training={training} />
+      <TrainingDetail training={training} traineeId={props.traineeId} />
       <Link
         href={`/trainees/${props.traineeId}/trainings/${props.trainingId}/edit`}
       >

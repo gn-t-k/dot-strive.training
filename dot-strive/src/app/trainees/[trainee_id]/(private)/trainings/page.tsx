@@ -19,7 +19,7 @@ import { getTimezoneOffset } from "@/app/_actions/get-timezone-offset";
 import { getTrainingsByDateRange } from "@/app/_actions/get-trainings-by-date-range";
 import * as TrainingCalendar from "@/app/_components/training-calendar";
 import { TrainingCalendarViewSwitcher } from "@/app/_components/training-calendar-view-switcher";
-import { TrainingDetailView } from "@/app/_components/training-detail";
+import { TrainingDetail } from "@/app/_components/training-detail";
 import {
   calendarSchema,
   changeViewToMonth,
@@ -291,7 +291,7 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
               return (
                 <Link href={`${baseHref}/${training.id}`} key={training.id}>
                   <li>
-                    <TrainingDetailView training={training} />
+                    <TrainingDetail training={training} />
                   </li>
                 </Link>
               );
@@ -317,7 +317,7 @@ const MonthlyView: FC<MonthlyViewProps> = async (props) => {
               return (
                 <Link href={`${baseHref}/${training.id}`} key={training.id}>
                   <li>
-                    <TrainingDetailView training={training} />
+                    <TrainingDetail training={training} />
                   </li>
                 </Link>
               );
@@ -388,7 +388,7 @@ const WeeklyView: FC<WeeklyViewProps> = async (props) => {
               return (
                 <Link href={`${baseHref}/${training.id}`} key={training.id}>
                   <li>
-                    <TrainingDetailView training={training} />
+                    <TrainingDetail training={training} />
                   </li>
                 </Link>
               );
@@ -412,7 +412,7 @@ const WeeklyView: FC<WeeklyViewProps> = async (props) => {
               return (
                 <Link href={`${baseHref}/${training.id}`} key={training.id}>
                   <li>
-                    <TrainingDetailView training={training} />
+                    <TrainingDetail training={training} />
                   </li>
                 </Link>
               );

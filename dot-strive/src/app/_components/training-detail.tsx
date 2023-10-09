@@ -1,4 +1,5 @@
-import { getTrainingById } from "@/app/_actions/get-training-by-id";
+import Link from "next/link";
+
 import { getVolume, type Training } from "@/app/_schemas/training";
 import { stack } from "styled-system/patterns";
 
@@ -6,27 +7,11 @@ import { LocalDate } from "./local-date";
 
 import type { FC } from "react";
 
-type Props = {
-  traineeId: string;
-  trainingId: string;
-};
-export const TrainingDetail: FC<Props> = async (props) => {
-  const getTrainingResult = await getTrainingById({
-    traineeId: props.traineeId,
-    trainingId: props.trainingId,
-  });
-  if (getTrainingResult.isErr) {
-    return <p>データの取得に失敗しました</p>;
-  }
-  const training = getTrainingResult.value;
-
-  return <TrainingDetailView training={training} />;
-};
-
-type TrainingDetailViewProps = {
+type TrainingDetailProps = {
   training: Training;
+  traineeId: string;
 };
-export const TrainingDetailView: FC<TrainingDetailViewProps> = (props) => {
+export const TrainingDetail: FC<TrainingDetailProps> = (props) => {
   return (
     <div className={stack({ direction: "column", p: 4 })}>
       <div className={stack({ direction: "row" })}>
@@ -37,7 +22,11 @@ export const TrainingDetailView: FC<TrainingDetailViewProps> = (props) => {
         {props.training.records.map((record) => {
           return (
             <li key={record.id} className={stack({ direction: "column" })}>
-              <p>{record.exercise.name}</p>
+              <Link
+                href={`/trainees/${props.traineeId}/exercises/${record.exercise.id}`}
+              >
+                {record.exercise.name}
+              </Link>
               <ul
                 className={stack({
                   direction: "column",
