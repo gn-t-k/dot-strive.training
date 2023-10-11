@@ -2,6 +2,8 @@ import { getRecordsByExerciseId } from "@/app/_actions/get-records-by-exercise-i
 import { LocalDate } from "@/app/_components/local-date";
 import { stack } from "styled-system/patterns";
 
+import { getEstimatedMaximumWeight } from "../_schemas/training";
+
 import type { FC } from "react";
 
 type Props = {
@@ -40,7 +42,12 @@ export const ExerciseRecords: FC<Props> = async (props) => {
                         className={stack({ direction: "column" })}
                       >
                         <p>
-                          {set.weight}kg {set.repetition}回
+                          {set.weight}kg {set.repetition}回（推定1RM:{" "}
+                          {getEstimatedMaximumWeight({
+                            weight: set.weight,
+                            repetition: set.repetition,
+                          })}
+                          ）
                         </p>
                       </li>
                     );
