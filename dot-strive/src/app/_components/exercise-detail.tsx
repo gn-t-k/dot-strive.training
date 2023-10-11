@@ -43,7 +43,7 @@ export const ExerciseDetail: FC<Props> = async (props) => {
       </ul>
       {get1RMResult.isOk && get1RMResult.value.hasSome && (
         <p>
-          推定1RM: {get1RMResult.value.value.estimatedMaximumWeight}kg（
+          推定最大1RM: {get1RMResult.value.value.estimatedMaximumWeight}kg（
           {
             <Link
               href={`/trainees/${props.traineeId}/trainings/${get1RMResult.value.value.training.id}`}
