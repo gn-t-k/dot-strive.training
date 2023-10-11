@@ -51,7 +51,14 @@ export const getRecordsByExerciseId: GetRecordsByExerciseId = async (props) => {
                 targets: true,
               },
             },
-            sets: true,
+            sets: {
+              orderBy: {
+                order: "asc",
+              },
+            },
+          },
+          orderBy: {
+            order: "asc",
           },
         },
       },
