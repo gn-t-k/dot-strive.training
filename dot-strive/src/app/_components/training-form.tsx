@@ -259,18 +259,20 @@ const RecordForm: FC<RecordFormProps> = (props) => {
             <div className={stack({ direction: "row" })}>
               <input
                 type="checkbox"
-                id="copy-weight"
+                id={`copy-weight-${props.recordIndex}`}
                 {...props.register(`records.${props.recordIndex}.copyWeight`)}
               />
-              <label htmlFor="copy-weight">同じ重量</label>
+              <label htmlFor={`copy-weight-${props.recordIndex}`}>
+                同じ重量
+              </label>
             </div>
             <div className={stack({ direction: "row" })}>
               <input
                 type="checkbox"
-                id="copy-reps"
+                id={`copy-reps-${props.recordIndex}`}
                 {...props.register(`records.${props.recordIndex}.copyReps`)}
               />
-              <label htmlFor="copy-reps">同じ回数</label>
+              <label htmlFor={`copy-reps-${props.recordIndex}`}>同じ回数</label>
             </div>
           </div>
           <Button onClick={onClickAddSet}>セットを追加</Button>
