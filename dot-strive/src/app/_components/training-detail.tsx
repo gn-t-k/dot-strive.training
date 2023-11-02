@@ -13,11 +13,11 @@ type TrainingDetailProps = {
 };
 export const TrainingDetail: FC<TrainingDetailProps> = (props) => {
   return (
-    <div className={stack({ direction: "column", p: 4 })}>
-      <div className={stack({ direction: "row" })}>
+    <section className={stack({ direction: "column", p: 4 })}>
+      <header className={stack({ direction: "row" })}>
         <LocalDate utcDateString={props.training.date} />
         <p>ボリューム: {getVolume(props.training)}kg</p>
-      </div>
+      </header>
       <ul className={stack({ direction: "column", gap: 8, p: 4 })}>
         {props.training.records.map((record) => {
           return (
@@ -46,6 +46,6 @@ export const TrainingDetail: FC<TrainingDetailProps> = (props) => {
           );
         })}
       </ul>
-    </div>
+    </section>
   );
 };
