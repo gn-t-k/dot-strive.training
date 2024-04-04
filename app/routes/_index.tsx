@@ -18,23 +18,27 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader = async ({ context }: LoaderFunctionArgs) => {
+export const loader = async ({ context, request }: LoaderFunctionArgs) => {
   const db = drizzle(context.cloudflare.env.DB);
   const trainees = await db
     .select({ id: traineesSchema.id })
     .from(traineesSchema)
     .all();
 
-  return json({ trainees });
+  const url = new URL(request.url);
+  const { origin } = url;
+
+  return json({ trainees, origin });
 };
 
 const Index: FC = () => {
-  const { trainees } = useLoaderData<typeof loader>();
+  const { trainees, origin } = useLoaderData<typeof loader>();
 
   return (
     <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
       <h1>Welcome to Remix (with Vite and Cloudflare)</h1>
       <p>trainees: {trainees.length}</p>
+      <p>origin: {origin}</p>
       <ul>
         <li>
           <a
