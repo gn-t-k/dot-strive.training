@@ -1,0 +1,24 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.6.3/schema.json",
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "all": true,
+      "style": {
+        // Remixのrouteで使うため
+        "noDefaultExport": "off"
+      },
+      "correctness": {
+        // CloudflareのEnvで使うため
+        "noUndeclaredVariables": "off"
+      }
+    }
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2
+  }
+}
