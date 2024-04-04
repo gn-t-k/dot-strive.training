@@ -31,6 +31,9 @@ d1_databases = [
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
 # id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+kv_namespaces = [
+  { binding = "dot_strive_session_kv", id = "f2cdb6ba2b0c44f28d6e8f291e37f28d" },
+]
 
 # Bind a Queue producer. Use this binding to schedule an arbitrary task that may be processed later by a Queue consumer.
 # Docs: https://developers.cloudflare.com/pages/functions/bindings/#queue-producers
