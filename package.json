@@ -25,7 +25,7 @@
     "drizzle-orm": "0.30.7",
     "isbot": "4.4.0",
     "lucide-react": "0.364.0",
-    "miniflare": "3.20231030.4",
+    "miniflare": "3.20240329.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "tailwind-merge": "2.2.2",
