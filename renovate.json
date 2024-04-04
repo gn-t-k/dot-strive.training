@@ -1,0 +1,17 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices",
+    ":automergeMinor",
+    ":semanticCommitScopeDisabled",
+    ":timezone(Asia/Tokyo)"
+  ],
+  "platformAutomerge": true,
+  "schedule": [
+    "after 6:00",
+    "before 11:00"
+  ],
+  "ignorePaths": [
+    "**/node_modules/**"
+  ]
+}
