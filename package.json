@@ -17,6 +17,10 @@
     "migrations:drop": "drizzle-kit drop --config=./database/drizzle.config.ts"
   },
   "dependencies": {
+    "@paralleldrive/cuid2": "2.2.2",
+    "@radix-ui/react-avatar": "1.0.4",
+    "@radix-ui/react-slot": "1.0.2",
+    "@radix-ui/react-tabs": "1.0.4",
     "@remix-run/cloudflare": "2.8.1",
     "@remix-run/cloudflare-pages": "2.8.1",
     "@remix-run/react": "2.8.1",
@@ -28,8 +32,11 @@
     "miniflare": "3.20240404.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "remix-auth": "3.6.0",
+    "remix-auth-google": "2.0.0",
     "tailwind-merge": "2.2.2",
-    "tailwindcss-animate": "1.0.7"
+    "tailwindcss-animate": "1.0.7",
+    "valibot": "0.27.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.6.4",

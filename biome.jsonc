@@ -9,7 +9,9 @@
       "all": true,
       "style": {
         // Remixのrouteで使うため
-        "noDefaultExport": "off"
+        "noDefaultExport": "off",
+        // asChildなど多用するため
+        "noImplicitBoolean": "off"
       },
       "correctness": {
         // CloudflareのEnvで使うため

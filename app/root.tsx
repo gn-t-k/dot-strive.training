@@ -15,11 +15,16 @@ export const Layout: FC<PropsWithChildren> = ({ children }) => {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* TODO: はずす */}
+        <meta name="robots" content="noindex" />
         <Meta />
         <Links />
       </head>
       <body>
-        {children}
+        <div className="mx-auto max-w-sm">
+          {/* モバイル画面のみ開発する */}
+          {children}
+        </div>
         <ScrollRestoration />
         <Scripts />
       </body>
