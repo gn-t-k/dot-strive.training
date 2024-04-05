@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.6.4",
-    "@cloudflare/workers-types": "4.20240404.0",
+    "@cloudflare/workers-types": "4.20240405.0",
     "@remix-run/dev": "2.8.1",
     "@types/react": "18.2.74",
     "@types/react-dom": "18.2.24",
