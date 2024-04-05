@@ -50,7 +50,7 @@ const PageWithNavigationHeader: FC = () => {
   return (
     <>
       <header className="sticky top-0">
-        <HeaderNavigation trainee={trainee} />
+        <HeaderNavigation traineeId={trainee.id} />
       </header>
       {location ? (
         <Tabs defaultValue={location} className="px-4">
