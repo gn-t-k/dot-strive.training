@@ -1,12 +1,14 @@
 import { Annotation } from "app/ui/annotation";
 import { Avatar, AvatarFallback, AvatarImage } from "app/ui/avatar";
 import { Heading } from "app/ui/heading";
-
-import type { Trainee } from "app/features/trainee/schema";
 import type { FC } from "react";
 
 type Props = {
-  trainee: Trainee;
+  trainee: {
+    id: string;
+    name: string;
+    image: string;
+  };
 };
 export const TraineeInfo: FC<Props> = ({ trainee }) => {
   return (
