@@ -22,8 +22,7 @@ export const loader = async ({
   request,
   params,
 }: LoaderFunctionArgs) => {
-  const { origin } = new URL(request.url);
-  const authenticator = getAuthenticator(context, origin);
+  const authenticator = getAuthenticator(context, request);
   const user = await authenticator.isAuthenticated(request);
 
   if (!user) {

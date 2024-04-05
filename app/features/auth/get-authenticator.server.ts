@@ -21,9 +21,9 @@ const authUserSchema = object({
 
 type GetAuthenticator = (
   context: AppLoadContext,
-  origin: URL["origin"],
+  request: Request,
 ) => Authenticator<AuthUser>;
-export const getAuthenticator: GetAuthenticator = (context, origin) => {
+export const getAuthenticator: GetAuthenticator = (context, request) => {
   if (authenticator) {
     return authenticator;
   }
@@ -45,6 +45,7 @@ export const getAuthenticator: GetAuthenticator = (context, origin) => {
 
   authenticator = new Authenticator<AuthUser>(sessionStorage);
 
+  const { origin } = new URL(request.url);
   const googleStrategy = new GoogleStrategy<AuthUser>(
     {
       // biome-ignore lint/style/useNamingConvention: ライブラリに指定されているため

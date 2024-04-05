@@ -7,8 +7,7 @@ import type { ActionFunction, LoaderFunction } from "@remix-run/cloudflare";
 export const loader: LoaderFunction = () => redirect("/login");
 
 export const action: ActionFunction = ({ request, context }) => {
-  const { origin } = new URL(request.url);
-  const authenticator = getAuthenticator(context, origin);
+  const authenticator = getAuthenticator(context, request);
 
   return authenticator.authenticate("google", request, {
     successRedirect: "/",

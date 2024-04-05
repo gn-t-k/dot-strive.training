@@ -10,8 +10,7 @@ import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import type { FC } from "react";
 
 export const loader = async ({ request, context }: LoaderFunctionArgs) => {
-  const { origin } = new URL(request.url);
-  const authenticator = getAuthenticator(context, origin);
+  const authenticator = getAuthenticator(context, request);
   const trainee = await authenticator.isAuthenticated(request);
 
   return trainee ? redirect(`/trainees/${trainee.id}/trainings`) : json({});
