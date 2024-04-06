@@ -8,6 +8,7 @@ import {
 import type { FC, PropsWithChildren } from "react";
 
 import "./globals.css";
+import { Toaster } from "./ui/toaster";
 
 export const Layout: FC<PropsWithChildren> = ({ children }) => {
   return (
@@ -27,6 +28,7 @@ export const Layout: FC<PropsWithChildren> = ({ children }) => {
         </div>
         <ScrollRestoration />
         <Scripts />
+        <Toaster />
       </body>
     </html>
   );
