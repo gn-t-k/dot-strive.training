@@ -46,6 +46,26 @@ export const updateAction: UpdateAction = async ({
     });
   }
 
+  const checkOwnMuscleResult = await checkOwnMuscle(context)({
+    traineeId: trainee.id,
+    muscleId,
+  });
+  if (checkOwnMuscleResult.result === "failure") {
+    return json({
+      action: "update",
+      success: false,
+      description: "check own muscle failed",
+    });
+  }
+  const isOwnMuscle = checkOwnMuscleResult.data;
+  if (!isOwnMuscle) {
+    return json({
+      action: "update",
+      success: false,
+      description: "not own muscle",
+    });
+  }
+
   const getMusclesResult = await getMusclesByTraineeId(context)(trainee.id);
   if (getMusclesResult.result === "failure") {
     return json({
@@ -68,26 +88,6 @@ export const updateAction: UpdateAction = async ({
       success: false,
       description: "form validation failed",
       submission: submission.reply(),
-    });
-  }
-
-  const checkOwnMuscleResult = await checkOwnMuscle(context)({
-    traineeId: trainee.id,
-    muscleId,
-  });
-  if (checkOwnMuscleResult.result === "failure") {
-    return json({
-      action: "update",
-      success: false,
-      description: "check own muscle failed",
-    });
-  }
-  const isOwnMuscle = checkOwnMuscleResult.data;
-  if (!isOwnMuscle) {
-    return json({
-      action: "update",
-      success: false,
-      description: "not own muscle",
     });
   }
 
