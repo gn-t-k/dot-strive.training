@@ -14,7 +14,8 @@ type CreateTraining = (context: AppLoadContext) => (props: {
   training: Training;
   traineeId: string;
 }) => Promise<
-  { result: "success"; data: { id: string } } | { result: "failure" }
+  | { result: "success"; data: { id: string } }
+  | { result: "failure"; error: string }
 >;
 export const createTraining: CreateTraining =
   (context) =>
@@ -37,24 +38,24 @@ export const createTraining: CreateTraining =
         database.insert(trainingSessions).values(sessions),
         // D1のvariablesの数の上限が100なので、それを回避するために生で書いている
         database.run(
-          sql.raw(
-            `INSERT INTO "training_sets"
-          ("id", "weight", "repetition", "rpe", "order", "estimated_maximum_weight", "session_id")
-        VALUES
-          ${sets
-            .map(
-              (set) =>
-                `('${set.id}', ${set.weight}, ${set.repetition}, ${set.rpe}, ${set.order}, ${set.estimatedMaximumWeight}, '${set.sessionId}')`,
-            )
-            .join(",")}
-        ;`,
-          ),
+          sql.raw(`
+            INSERT INTO "training_sets"
+              ("id", "weight", "repetition", "rpe", "order", "estimated_maximum_weight", "session_id")
+            VALUES
+              ${sets
+                .map(
+                  (set) =>
+                    `('${set.id}', ${set.weight}, ${set.repetition}, ${set.rpe}, ${set.order}, ${set.estimatedMaximumWeight}, '${set.sessionId}')`,
+                )
+                .join(",")}
+            ;
+          `),
         ),
       ]);
 
       return created
         ? { result: "success", data: created }
-        : { result: "failure" };
+        : { result: "failure", error: "Unknown error" };
     } catch (error) {
       return {
         result: "failure",
@@ -108,11 +109,10 @@ const flatTraining: FlatTraining = (training) => {
       }));
 
       accumulator.sessions.push(sessionData);
-      accumulator.sets.concat(setData);
 
       return {
         sessions: accumulator.sessions,
-        sets: accumulator.sets,
+        sets: [...accumulator.sets, ...setData],
       };
     },
     { sessions: [], sets: [] },
