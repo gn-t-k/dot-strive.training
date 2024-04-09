@@ -17,7 +17,7 @@
     "migrations:drop": "drizzle-kit drop --config=./database/drizzle.config.ts"
   },
   "dependencies": {
-    "@conform-to/react": "1.0.6",
+    "@conform-to/react": "1.1.0",
     "@paralleldrive/cuid2": "2.2.2",
     "@radix-ui/react-alert-dialog": "1.0.5",
     "@radix-ui/react-avatar": "1.0.4",
