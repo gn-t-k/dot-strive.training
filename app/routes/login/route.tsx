@@ -21,7 +21,7 @@ const Page: FC = () => {
     <Main className="h-screen items-center justify-center">
       <Logotype />
       <Form method="POST" action="/auth/google">
-        <Button>login with google</Button>
+        <Button>Googleアカウントでログインする</Button>
       </Form>
     </Main>
   );

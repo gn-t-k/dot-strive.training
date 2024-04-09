@@ -57,7 +57,7 @@ export const getAuthenticator: GetAuthenticator = (context, request) => {
     async (user) => {
       const database = drizzle(context.cloudflare.env.DB);
       const [trainee] = await database
-        .select()
+        .select({ id: trainees.id, name: trainees.name, image: trainees.image })
         .from(trainees)
         .where(eq(trainees.authUserId, user.profile.id));
 
