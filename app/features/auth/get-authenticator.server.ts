@@ -58,7 +58,7 @@ export const getAuthenticator: GetAuthenticator = (context, request) => {
       );
 
       switch (findTraineeResult.result) {
-        case "find": {
+        case "found": {
           const trainee = findTraineeResult.data;
           return {
             id: trainee.id,

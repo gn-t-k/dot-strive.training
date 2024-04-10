@@ -8,7 +8,7 @@ type FindTraineeByAuthUserId = (
 ) => (
   authUserId: string,
 ) => Promise<
-  | { result: "find"; data: { id: string; name: string; image: string } }
+  | { result: "found"; data: { id: string; name: string; image: string } }
   | { result: "not found" }
   | { result: "failure"; error: string }
 >;
@@ -26,7 +26,7 @@ export const findTraineeByAuthUserId: FindTraineeByAuthUserId =
         return { result: "not found" };
       }
 
-      return { result: "find", data: trainee };
+      return { result: "found", data: trainee };
     } catch (error) {
       return {
         result: "failure",
