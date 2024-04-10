@@ -1,15 +1,13 @@
-import { createId } from "@paralleldrive/cuid2";
 import {
   type AppLoadContext,
   createCookie,
   createWorkersKVSessionStorage,
 } from "@remix-run/cloudflare";
-import { trainees } from "database/tables/trainees";
-import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/d1";
 import { Authenticator } from "remix-auth";
 import { GoogleStrategy } from "remix-auth-google";
 import { type Input, object, string } from "valibot";
+import { findTraineeByAuthUserId } from "../trainee/find-trainee-by-auth-user-id";
+import { initializeTrainee } from "../trainee/initialize-trainee";
 
 let authenticator: Authenticator<AuthUser>;
 type AuthUser = Input<typeof authUserSchema>;
@@ -55,38 +53,41 @@ export const getAuthenticator: GetAuthenticator = (context, request) => {
       callbackURL: `${origin}/auth/google/callback`,
     },
     async (user) => {
-      const database = drizzle(context.cloudflare.env.DB);
-      const [trainee] = await database
-        .select({ id: trainees.id, name: trainees.name, image: trainees.image })
-        .from(trainees)
-        .where(eq(trainees.authUserId, user.profile.id));
+      const findTraineeResult = await findTraineeByAuthUserId(context)(
+        user.profile.id,
+      );
 
-      if (trainee) {
-        return {
-          id: trainee.id,
-          name: trainee.name,
-          image: trainee.image,
-        };
+      switch (findTraineeResult.result) {
+        case "found": {
+          const trainee = findTraineeResult.data;
+          return {
+            id: trainee.id,
+            name: trainee.name,
+            image: trainee.image,
+          };
+        }
+        case "not found": {
+          const initializeTraineeResult = await initializeTrainee(context)({
+            name: user.profile.displayName,
+            image: user.profile.photos[0].value,
+            authUserId: user.profile.id,
+          });
+
+          if (initializeTraineeResult.result !== "success") {
+            throw new Error(initializeTraineeResult.error);
+          }
+
+          const trainee = initializeTraineeResult.data;
+          return {
+            id: trainee.id,
+            name: trainee.name,
+            image: trainee.image,
+          };
+        }
+        case "failure": {
+          throw new Error(findTraineeResult.error);
+        }
       }
-
-      const newTrainee = await database
-        .insert(trainees)
-        .values({
-          id: createId(),
-          name: user.profile.displayName,
-          image: user.profile.photos[0].value,
-          authUserId: user.profile.id,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .returning()
-        .get();
-
-      return {
-        id: newTrainee.id,
-        name: newTrainee.name,
-        image: newTrainee.image,
-      };
     },
   );
 
