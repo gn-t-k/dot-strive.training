@@ -5,7 +5,7 @@ import type {
 } from "@remix-run/cloudflare";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
-import { TagForm } from "app/routes/trainees.$traineeId.tags._index/tag-form";
+import { TagForm } from "app/routes/trainees.$traineeId.tags/tag-form";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import {
   AlertDialog,
