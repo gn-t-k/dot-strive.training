@@ -5,12 +5,12 @@ import {
   type TypedResponse,
   json,
 } from "@remix-run/cloudflare";
-import { createMuscle } from "app/features/muscle/create-muscle";
-import { getMusclesByTraineeId } from "app/features/muscle/get-muscles-by-trainee-id";
-import { validateMuscle } from "app/features/muscle/schema";
+import { createTag } from "app/features/tag/create-tag";
+import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
+import { validateTag } from "app/features/tag/schema";
 import type { Trainee } from "app/features/trainee/schema";
 import { parseWithValibot } from "conform-to-valibot";
-import { getMuscleFormSchema } from "./muscle-form";
+import { getTagFormSchema } from "./tag-form";
 
 type CreateAction = (props: {
   formData: FormData;
@@ -37,18 +37,18 @@ export const createAction: CreateAction = async ({
   context,
   trainee,
 }) => {
-  const getMusclesResult = await getMusclesByTraineeId(context)(trainee.id);
-  if (getMusclesResult.result === "failure") {
+  const getTagsResult = await getTagsByTraineeId(context)(trainee.id);
+  if (getTagsResult.result === "failure") {
     return json({
       action: "create",
       success: false,
-      description: "get muscles failed",
+      description: "get tags failed",
     });
   }
-  const registeredMuscles = getMusclesResult.data;
+  const registeredTags = getTagsResult.data;
 
   const submission = parseWithValibot(formData, {
-    schema: getMuscleFormSchema({ registeredMuscles }),
+    schema: getTagFormSchema({ registeredTags }),
   });
   if (submission.status !== "success") {
     return json({
@@ -59,11 +59,11 @@ export const createAction: CreateAction = async ({
     });
   }
 
-  const muscle = validateMuscle({
+  const tag = validateTag({
     id: createId(),
     name: submission.value.name,
   });
-  if (!muscle) {
+  if (!tag) {
     return json({
       action: "create",
       success: false,
@@ -71,8 +71,8 @@ export const createAction: CreateAction = async ({
     });
   }
 
-  const createResult = await createMuscle(context)({
-    muscle,
+  const createResult = await createTag(context)({
+    tag,
     traineeId: trainee.id,
   });
   if (createResult.result === "failure") {

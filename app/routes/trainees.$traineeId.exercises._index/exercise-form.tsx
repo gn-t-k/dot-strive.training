@@ -26,11 +26,11 @@ import { Label } from "app/ui/label";
 import type { FC } from "react";
 
 export const getExerciseFormSchema = ({
-  registeredMuscles,
+  registeredTags,
   registeredExercises,
   beforeName,
 }: {
-  registeredMuscles: Muscle[];
+  registeredTags: Tag[];
   registeredExercises: Exercise[];
   beforeName: string | null;
 }) =>
@@ -47,32 +47,30 @@ export const getExerciseFormSchema = ({
       ]),
       "種目の名前を入力してください",
     ),
-    targets: array(
+    tags: array(
       string([
         minLength(1),
-        custom((value) =>
-          registeredMuscles.some((muscle) => muscle.id === value),
-        ),
+        custom((value) => registeredTags.some((tag) => tag.id === value)),
       ]),
       [minLength(1, "対象の部位を選択してください")],
     ),
     actionType: string(),
   });
 type Exercise = { id: string; name: string };
-type Muscle = { id: string; name: string };
+type Tag = { id: string; name: string };
 
 type Props = {
-  registeredMuscles: Muscle[];
+  registeredTags: Tag[];
   registeredExercises: Exercise[];
   actionType: string;
   defaultValues?: {
     id: string;
     name: string;
-    targets: string[];
+    tags: string[];
   };
 };
 export const ExerciseForm: FC<Props> = ({
-  registeredMuscles,
+  registeredTags,
   registeredExercises,
   actionType,
   defaultValues,
@@ -84,7 +82,7 @@ export const ExerciseForm: FC<Props> = ({
     onValidate: ({ formData }) => {
       return parseWithValibot(formData, {
         schema: getExerciseFormSchema({
-          registeredMuscles,
+          registeredTags,
           registeredExercises,
           beforeName,
         }),
@@ -107,25 +105,22 @@ export const ExerciseForm: FC<Props> = ({
           <FormErrorMessage key={error} message={error} />
         ))}
       </div>
-      <fieldset {...getFieldsetProps(fields.targets)} className="space-y-2">
+      <fieldset {...getFieldsetProps(fields.tags)} className="space-y-2">
         <Label asChild>
           <legend>対象の部位</legend>
         </Label>
-        {getCollectionProps(fields.targets, {
+        {getCollectionProps(fields.tags, {
           type: "checkbox",
-          options: registeredMuscles.map((muscle) => muscle.id),
+          options: registeredTags.map((tag) => tag.id),
         }).map((props) => (
           <div key={props.id} className="flex items-center space-x-1">
             <Checkbox {...props} type="button" />
             <Label htmlFor={props.id} className="font-medium">
-              {
-                registeredMuscles.find((muscle) => muscle.id === props.value)
-                  ?.name
-              }
+              {registeredTags.find((tag) => tag.id === props.value)?.name}
             </Label>
           </div>
         ))}
-        {fields.targets.errors?.map((error) => (
+        {fields.tags.errors?.map((error) => (
           <FormErrorMessage key={error} message={error} />
         ))}
       </fieldset>

@@ -1,7 +1,7 @@
 import { json } from "@remix-run/cloudflare";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
-import { getExercisesWithTargetsByTraineeId } from "app/features/exercise/get-exercises-with-targets-by-trainee-id";
-import { getMusclesByTraineeId } from "app/features/muscle/get-muscles-by-trainee-id";
+import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exercises-with-tags-by-trainee-id";
+import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import {
   AlertDialog,
@@ -56,28 +56,28 @@ export const loader = async ({
   const { trainee } = await traineeLoader({ context, request, params }).then(
     (response) => response.json(),
   );
-  const [getMusclesResult, getExercisesResult] = await Promise.all([
-    getMusclesByTraineeId(context)(trainee.id),
-    getExercisesWithTargetsByTraineeId(context)(trainee.id),
+  const [getTagsResult, getExercisesResult] = await Promise.all([
+    getTagsByTraineeId(context)(trainee.id),
+    getExercisesWithTagsByTraineeId(context)(trainee.id),
   ]);
   if (
     !(
-      getMusclesResult.result === "success" &&
+      getTagsResult.result === "success" &&
       getExercisesResult.result === "success"
     )
   ) {
     throw new Response("Internal Server Error", { status: 500 });
   }
-  const [muscles, exercisesWithTargets] = [
-    getMusclesResult.data,
+  const [tags, exercisesWithTags] = [
+    getTagsResult.data,
     getExercisesResult.data,
   ];
 
-  return json({ muscles, exercisesWithTargets });
+  return json({ tags, exercisesWithTags });
 };
 
 const Page: FC = () => {
-  const { muscles, exercisesWithTargets } = useLoaderData<typeof loader>();
+  const { tags, exercisesWithTags } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const { toast } = useToast();
 
@@ -113,13 +113,13 @@ const Page: FC = () => {
     }
   }, [actionData, toast]);
 
-  const exercises = exercisesWithTargets;
+  const exercises = exercisesWithTags;
 
   return (
     <Main>
       <Section>
         <ul className="flex flex-col gap-4">
-          {exercisesWithTargets.map((exercise) => {
+          {exercisesWithTags.map((exercise) => {
             return (
               <li key={exercise.id}>
                 <Card>
@@ -127,9 +127,7 @@ const Page: FC = () => {
                     <div className="grow">
                       <Heading level={2}>{exercise.name}</Heading>
                       <CardDescription>
-                        {exercise.targets
-                          .map((target) => target.name)
-                          .join("、")}
+                        {exercise.tags.map((tag) => tag.name).join("、")}
                       </CardDescription>
                     </div>
                     <div className="flex-none">
@@ -163,14 +161,12 @@ const Page: FC = () => {
                               <DialogTitle>種目の編集</DialogTitle>
                             </DialogHeader>
                             <ExerciseForm
-                              registeredMuscles={muscles}
+                              registeredTags={tags}
                               registeredExercises={exercises}
                               defaultValues={{
                                 id: exercise.id,
                                 name: exercise.name,
-                                targets: exercise.targets.map(
-                                  (target) => target.id,
-                                ),
+                                tags: exercise.tags.map((tag) => tag.id),
                               }}
                               actionType="update"
                             />
@@ -219,7 +215,7 @@ const Page: FC = () => {
           </CardHeader>
           <CardContent>
             <ExerciseForm
-              registeredMuscles={muscles}
+              registeredTags={tags}
               registeredExercises={exercises}
               actionType="create"
             />

@@ -1,8 +1,8 @@
 import type { AppLoadContext } from "@remix-run/cloudflare";
 import { isNonEmptyArray } from "app/utils/non-empty-array";
 import { exercises } from "database/tables/exercises";
-import { muscleExerciseMappings } from "database/tables/muscle-exercise-mappings";
-import { muscles } from "database/tables/muscles";
+import { tagExerciseMappings } from "database/tables/tag-exercise-mappings";
+import { tags } from "database/tables/tags";
 import { trainees } from "database/tables/trainees";
 import { trainingSessions } from "database/tables/training-sessions";
 import { trainingSets } from "database/tables/training-sets";
@@ -49,11 +49,11 @@ export const deleteTrainee: DeleteTrainee =
                   sessionIds.map(({ id }) => id),
                 ),
               );
-      const [muscleIds, exerciseIds] = await Promise.all([
+      const [tagIds, exerciseIds] = await Promise.all([
         database
-          .select({ id: muscles.id })
-          .from(muscles)
-          .where(eq(muscles.traineeId, id)),
+          .select({ id: tags.id })
+          .from(tags)
+          .where(eq(tags.traineeId, id)),
         database
           .select({ id: exercises.id })
           .from(exercises)
@@ -85,24 +85,24 @@ export const deleteTrainee: DeleteTrainee =
                 trainingIds.map(({ id }) => id),
               ),
             ),
-        muscleIds.length === 0
+        tagIds.length === 0
           ? null
-          : database.delete(muscleExerciseMappings).where(
+          : database.delete(tagExerciseMappings).where(
               inArray(
-                muscleExerciseMappings.muscleId,
-                muscleIds.map(({ id }) => id),
+                tagExerciseMappings.tagId,
+                tagIds.map(({ id }) => id),
               ),
             ),
         exerciseIds.length === 0
           ? null
-          : database.delete(muscleExerciseMappings).where(
+          : database.delete(tagExerciseMappings).where(
               inArray(
-                muscleExerciseMappings.exerciseId,
+                tagExerciseMappings.exerciseId,
                 exerciseIds.map(({ id }) => id),
               ),
             ),
         database.delete(exercises).where(eq(exercises.traineeId, id)),
-        database.delete(muscles).where(eq(muscles.traineeId, id)),
+        database.delete(tags).where(eq(tags.traineeId, id)),
         database
           .delete(trainees)
           .where(eq(trainees.id, id))

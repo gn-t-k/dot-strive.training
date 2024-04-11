@@ -4,13 +4,13 @@ import {
   type TypedResponse,
   json,
 } from "@remix-run/cloudflare";
-import { checkOwnMuscle } from "app/features/muscle/check-own-muscle";
-import { getMusclesByTraineeId } from "app/features/muscle/get-muscles-by-trainee-id";
-import { validateMuscle } from "app/features/muscle/schema";
-import { updateMuscle } from "app/features/muscle/update-muscle";
+import { checkOwnTag } from "app/features/tag/check-own-tag";
+import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
+import { validateTag } from "app/features/tag/schema";
+import { updateTag } from "app/features/tag/update-tag";
 import type { Trainee } from "app/features/trainee/schema";
 import { parseWithValibot } from "conform-to-valibot";
-import { getMuscleFormSchema } from "./muscle-form";
+import { getTagFormSchema } from "./tag-form";
 
 type UpdateAction = (props: {
   formData: FormData;
@@ -37,8 +37,8 @@ export const updateAction: UpdateAction = async ({
   context,
   trainee,
 }) => {
-  const muscleId = formData.get("id")?.toString();
-  if (!muscleId) {
+  const tagId = formData.get("id")?.toString();
+  if (!tagId) {
     return json({
       action: "update",
       success: false,
@@ -46,41 +46,39 @@ export const updateAction: UpdateAction = async ({
     });
   }
 
-  const checkOwnMuscleResult = await checkOwnMuscle(context)({
+  const checkOwnTagResult = await checkOwnTag(context)({
     traineeId: trainee.id,
-    muscleId,
+    tagId,
   });
-  if (checkOwnMuscleResult.result === "failure") {
+  if (checkOwnTagResult.result === "failure") {
     return json({
       action: "update",
       success: false,
-      description: "check own muscle failed",
+      description: "check own tag failed",
     });
   }
-  const isOwnMuscle = checkOwnMuscleResult.data;
-  if (!isOwnMuscle) {
+  const isOwnTag = checkOwnTagResult.data;
+  if (!isOwnTag) {
     return json({
       action: "update",
       success: false,
-      description: "not own muscle",
+      description: "not own tag",
     });
   }
 
-  const getMusclesResult = await getMusclesByTraineeId(context)(trainee.id);
-  if (getMusclesResult.result === "failure") {
+  const getTagsResult = await getTagsByTraineeId(context)(trainee.id);
+  if (getTagsResult.result === "failure") {
     return json({
       action: "update",
       success: false,
-      description: "get muscles failed",
+      description: "get tags failed",
     });
   }
-  const registeredMuscles = getMusclesResult.data;
+  const registeredTags = getTagsResult.data;
 
-  const beforeName = registeredMuscles.find(
-    (muscle) => muscle.id === muscleId,
-  )?.name;
+  const beforeName = registeredTags.find((tag) => tag.id === tagId)?.name;
   const submission = parseWithValibot(formData, {
-    schema: getMuscleFormSchema({ registeredMuscles, beforeName }),
+    schema: getTagFormSchema({ registeredTags, beforeName }),
   });
   if (submission.status !== "success") {
     return json({
@@ -91,11 +89,11 @@ export const updateAction: UpdateAction = async ({
     });
   }
 
-  const muscle = validateMuscle({
-    id: muscleId,
+  const tag = validateTag({
+    id: tagId,
     name: submission.value.name,
   });
-  if (!muscle) {
+  if (!tag) {
     return json({
       action: "update",
       success: false,
@@ -103,7 +101,7 @@ export const updateAction: UpdateAction = async ({
     });
   }
 
-  const updateResult = await updateMuscle(context)(muscle);
+  const updateResult = await updateTag(context)(tag);
   if (updateResult.result === "failure") {
     return json({
       action: "update",

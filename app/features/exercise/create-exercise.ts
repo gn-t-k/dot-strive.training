@@ -1,5 +1,5 @@
 import { exercises as exercisesSchema } from "database/tables/exercises";
-import { muscleExerciseMappings } from "database/tables/muscle-exercise-mappings";
+import { tagExerciseMappings } from "database/tables/tag-exercise-mappings";
 
 import type { AppLoadContext } from "@remix-run/cloudflare";
 import { drizzle } from "drizzle-orm/d1";
@@ -29,11 +29,11 @@ export const createExercise: CreateExercise =
           })
           .returning({ id: exercisesSchema.id, name: exercisesSchema.name }),
         database
-          .insert(muscleExerciseMappings)
+          .insert(tagExerciseMappings)
           .values(
-            exercise.targets.map((target) => ({
+            exercise.tags.map((tag) => ({
               exerciseId: exercise.id,
-              muscleId: target.id,
+              tagId: tag.id,
             })),
           )
           .onConflictDoNothing(),

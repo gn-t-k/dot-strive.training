@@ -8,6 +8,13 @@
       "when": 1712185589510,
       "tag": "0000_boring_roulette",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1712806278180,
+      "tag": "0001_melted_iron_fist",
+      "breakpoints": true
     }
   ]
 }

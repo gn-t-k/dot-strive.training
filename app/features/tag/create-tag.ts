@@ -1,31 +1,31 @@
-import { muscles as musclesSchema } from "database/tables/muscles";
+import { tags as tagsSchema } from "database/tables/tags";
 
 import type { AppLoadContext } from "@remix-run/cloudflare";
 import { drizzle } from "drizzle-orm/d1";
-import type { Muscle } from "./schema";
+import type { Tag } from "./schema";
 
-type CreateMuscle = (context: AppLoadContext) => (props: {
-  muscle: Muscle;
+type CreateTag = (context: AppLoadContext) => (props: {
+  tag: Tag;
   traineeId: string;
 }) => Promise<
   | { result: "success"; data: { id: string; name: string } }
   | { result: "failure" }
 >;
-export const createMuscle: CreateMuscle =
+export const createTag: CreateTag =
   (context) =>
-  async ({ muscle, traineeId }) => {
+  async ({ tag, traineeId }) => {
     try {
       const database = drizzle(context.cloudflare.env.DB);
       const created = await database
-        .insert(musclesSchema)
+        .insert(tagsSchema)
         .values({
-          id: muscle.id,
-          name: muscle.name,
+          id: tag.id,
+          name: tag.name,
           traineeId,
           createdAt: new Date(),
           updatedAt: new Date(),
         })
-        .returning({ id: musclesSchema.id, name: musclesSchema.name })
+        .returning({ id: tagsSchema.id, name: tagsSchema.name })
         .get();
 
       return created

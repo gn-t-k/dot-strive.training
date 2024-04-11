@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 
 import type { AppLoadContext } from "@remix-run/cloudflare";
 import { exercises as exercisesSchema } from "database/tables/exercises";
-import { muscleExerciseMappings as muscleExerciseMappingsSchema } from "database/tables/muscle-exercise-mappings";
+import { tagExerciseMappings as tagExerciseMappingsSchema } from "database/tables/tag-exercise-mappings";
 import { drizzle } from "drizzle-orm/d1";
 
 type DeleteExercise = (
@@ -18,8 +18,8 @@ export const deleteExercise: DeleteExercise =
       const database = drizzle(context.cloudflare.env.DB);
       const [_, [deleted]] = await database.batch([
         database
-          .delete(muscleExerciseMappingsSchema)
-          .where(eq(muscleExerciseMappingsSchema.exerciseId, id)),
+          .delete(tagExerciseMappingsSchema)
+          .where(eq(tagExerciseMappingsSchema.exerciseId, id)),
         database
           .delete(exercisesSchema)
           .where(eq(exercisesSchema.id, id))

@@ -8,11 +8,11 @@ import {
   text,
   unique,
 } from "drizzle-orm/sqlite-core";
-import { muscleExerciseMappings } from "./muscle-exercise-mappings";
+import { tagExerciseMappings } from "./tag-exercise-mappings";
 import { trainees } from "./trainees";
 
-export const muscles = sqliteTable(
-  "muscles",
+export const tags = sqliteTable(
+  "tags",
   {
     id: text("id").notNull(),
     name: text("name").notNull(),
@@ -27,14 +27,14 @@ export const muscles = sqliteTable(
       columns: [columns.traineeId],
       foreignColumns: [trainees.id],
     }),
-    idx: index("muscles_trainee_index").on(columns.traineeId),
+    idx: index("tags_trainee_index").on(columns.traineeId),
   }),
 );
 
-export const musclesRelations = relations(muscles, ({ one, many }) => ({
+export const tagsRelations = relations(tags, ({ one, many }) => ({
   trainee: one(trainees, {
-    fields: [muscles.traineeId],
+    fields: [tags.traineeId],
     references: [trainees.id],
   }),
-  exercises: many(muscleExerciseMappings),
+  exercises: many(tagExerciseMappings),
 }));

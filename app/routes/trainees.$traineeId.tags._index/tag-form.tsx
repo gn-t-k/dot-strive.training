@@ -11,17 +11,17 @@ import { Label } from "app/ui/label";
 
 import type { FC } from "react";
 
-export const getMuscleFormSchema = ({
-  registeredMuscles,
+export const getTagFormSchema = ({
+  registeredTags,
   beforeName,
-}: { registeredMuscles: Muscle[]; beforeName?: string }) =>
+}: { registeredTags: Tag[]; beforeName?: string }) =>
   object({
     id: optional(string()),
     name: nonOptional(
       string([
         custom(
           (value) =>
-            registeredMuscles.every((muscle) => muscle.name !== value) ||
+            registeredTags.every((tag) => tag.name !== value) ||
             value === beforeName,
           "部位の名前が重複しています",
         ),
@@ -32,16 +32,16 @@ export const getMuscleFormSchema = ({
   });
 
 type Props = {
-  registeredMuscles: Muscle[];
+  registeredTags: Tag[];
   actionType: string;
   defaultValues?: {
     id: string;
     name: string;
   };
 };
-type Muscle = { id: string; name: string };
-export const MuscleForm: FC<Props> = ({
-  registeredMuscles,
+type Tag = { id: string; name: string };
+export const TagForm: FC<Props> = ({
+  registeredTags,
   actionType,
   defaultValues,
 }) => {
@@ -51,7 +51,7 @@ export const MuscleForm: FC<Props> = ({
     shouldRevalidate: "onInput",
     onValidate: ({ formData }) =>
       parseWithValibot(formData, {
-        schema: getMuscleFormSchema({ registeredMuscles, beforeName }),
+        schema: getTagFormSchema({ registeredTags, beforeName }),
       }),
     defaultValue: defaultValues,
   });

@@ -11,18 +11,18 @@ import {
 
 import type { AppLoadContext } from "@remix-run/cloudflare";
 import { exercises } from "database/tables/exercises";
-import { muscleExerciseMappings } from "database/tables/muscle-exercise-mappings";
-import { muscles as musclesSchema } from "database/tables/muscles";
+import { tagExerciseMappings } from "database/tables/tag-exercise-mappings";
+import { tags as tagsSchema } from "database/tables/tags";
 import { drizzle } from "drizzle-orm/d1";
 import type { Input } from "valibot";
 
-type GetExercisesWithTargetsByTraineeId = (
+type GetExercisesWithTagsByTraineeId = (
   context: AppLoadContext,
 ) => (
   traineeId: string,
 ) => Promise<{ result: "success"; data: Payload } | { result: "failure" }>;
 type Payload = Input<typeof payloadSchema>;
-const targetSchema = object({
+const tagSchema = object({
   id: string([cuid2()]),
   name: string([minLength(1)]),
 });
@@ -34,11 +34,11 @@ const payloadSchema = array(
   merge([
     exerciseSchema,
     object({
-      targets: array(targetSchema),
+      tags: array(tagSchema),
     }),
   ]),
 );
-export const getExercisesWithTargetsByTraineeId: GetExercisesWithTargetsByTraineeId =
+export const getExercisesWithTagsByTraineeId: GetExercisesWithTagsByTraineeId =
   (context) => async (traineeId) => {
     try {
       const database = drizzle(context.cloudflare.env.DB);
@@ -46,33 +46,30 @@ export const getExercisesWithTargetsByTraineeId: GetExercisesWithTargetsByTraine
         .select({
           exerciseId: sql`${exercises.id}`.as("exerciseId"),
           exerciseName: sql`${exercises.name}`.as("exerciseName"),
-          muscleId: sql`${musclesSchema.id}`.as("muscleId"),
-          muscleName: sql`${musclesSchema.name}`.as("muscleName"),
+          tagId: sql`${tagsSchema.id}`.as("tagId"),
+          tagName: sql`${tagsSchema.name}`.as("tagName"),
         })
         .from(exercises)
         .leftJoin(
-          muscleExerciseMappings,
-          eq(exercises.id, muscleExerciseMappings.exerciseId),
+          tagExerciseMappings,
+          eq(exercises.id, tagExerciseMappings.exerciseId),
         )
-        .leftJoin(
-          musclesSchema,
-          eq(muscleExerciseMappings.muscleId, musclesSchema.id),
-        )
+        .leftJoin(tagsSchema, eq(tagExerciseMappings.tagId, tagsSchema.id))
         .where(eq(exercises.traineeId, traineeId))
         .orderBy(desc(exercises.createdAt));
 
       const payload = data.reduce<Payload>(
-        (accumulator, { exerciseId, exerciseName, muscleId, muscleName }) => {
-          const [parseTargetResult, parseExerciseResult] = [
-            safeParse(targetSchema, { id: muscleId, name: muscleName }),
+        (accumulator, { exerciseId, exerciseName, tagId, tagName }) => {
+          const [parseTagResult, parseExerciseResult] = [
+            safeParse(tagSchema, { id: tagId, name: tagName }),
             safeParse(exerciseSchema, { id: exerciseId, name: exerciseName }),
           ];
-          if (!(parseTargetResult.success && parseExerciseResult.success)) {
+          if (!(parseTagResult.success && parseExerciseResult.success)) {
             return accumulator;
           }
-          const [exercise, target] = [
+          const [exercise, tag] = [
             parseExerciseResult.output,
-            parseTargetResult.output,
+            parseTagResult.output,
           ];
 
           const index = accumulator.findIndex(
@@ -82,7 +79,7 @@ export const getExercisesWithTargetsByTraineeId: GetExercisesWithTargetsByTraine
             accumulator.push({
               id: exercise.id,
               name: exercise.name,
-              targets: [target],
+              tags: [tag],
             });
             return accumulator;
           }
@@ -95,7 +92,7 @@ export const getExercisesWithTargetsByTraineeId: GetExercisesWithTargetsByTraine
           return accumulator.with(index, {
             id: current.id,
             name: current.name,
-            targets: [...current.targets, target],
+            tags: [...current.tags, tag],
           });
         },
         [],
