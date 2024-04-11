@@ -8,8 +8,8 @@ CREATE TABLE `tags` (
 	`updated_at` integer NOT NULL,
 	FOREIGN KEY (`trainee_id`) REFERENCES `trainees`(`id`) ON UPDATE no action ON DELETE no action
 );
+--> statement-breakpoint
 INSERT INTO `tags` SELECT * FROM `old_muscles`;--> statement-breakpoint
-DROP TABLE `old_muscles`;--> statement-breakpoint
 CREATE TABLE `tag_exercise_mappings` (
 	`tag_id` text NOT NULL,
 	`exercise_id` text NOT NULL,
@@ -25,6 +25,7 @@ SELECT
 FROM `old_muscle_exercise_mappings`;
 --> statement-breakpoint
 DROP TABLE `old_muscle_exercise_mappings`;--> statement-breakpoint
+DROP TABLE `old_muscles`;--> statement-breakpoint
 DROP INDEX IF EXISTS `muscles_trainee_index`;--> statement-breakpoint
 DROP INDEX IF EXISTS `muscles_trainee_id_name_unique`;--> statement-breakpoint
 CREATE INDEX `tags_trainee_index` ON `tags` (`trainee_id`);--> statement-breakpoint
