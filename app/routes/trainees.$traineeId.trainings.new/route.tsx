@@ -5,7 +5,7 @@ import { parseWithValibot } from "conform-to-valibot";
 import { useEffect } from "react";
 
 import { getExercisesByTraineeId } from "app/features/exercise/get-exercises-by-trainee-id";
-import { getExercisesWithTargetsByTraineeId } from "app/features/exercise/get-exercises-with-targets-by-trainee-id";
+import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exercises-with-tags-by-trainee-id";
 import { validateExercise } from "app/features/exercise/schema";
 import { createTraining } from "app/features/training/create-training";
 import { validateTraining } from "app/features/training/schema";
@@ -84,7 +84,7 @@ export const action = async ({
     request.formData(),
   ]);
 
-  const getExercisesResult = await getExercisesWithTargetsByTraineeId(context)(
+  const getExercisesResult = await getExercisesWithTagsByTraineeId(context)(
     trainee.id,
   );
   if (getExercisesResult.result !== "success") {

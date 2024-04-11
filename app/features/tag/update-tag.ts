@@ -1,32 +1,32 @@
 import { eq } from "drizzle-orm";
 
-import { muscles as musclesSchema } from "database/tables/muscles";
+import { tags as tagsSchema } from "database/tables/tags";
 
 import type { AppLoadContext } from "@remix-run/cloudflare";
 import { drizzle } from "drizzle-orm/d1";
-import type { Muscle } from "./schema";
+import type { Tag } from "./schema";
 
-type UpdateMuscle = (
+type UpdateTag = (
   context: AppLoadContext,
 ) => (
-  props: Muscle,
+  props: Tag,
 ) => Promise<
   | { result: "success"; data: { id: string; name: string } }
   | { result: "failure" }
 >;
-export const updateMuscle: UpdateMuscle =
+export const updateTag: UpdateTag =
   (context) =>
   async ({ id, name }) => {
     try {
       const database = drizzle(context.cloudflare.env.DB);
       const updated = await database
-        .update(musclesSchema)
+        .update(tagsSchema)
         .set({
           name,
           updatedAt: new Date(),
         })
-        .where(eq(musclesSchema.id, id))
-        .returning({ id: musclesSchema.id, name: musclesSchema.name })
+        .where(eq(tagsSchema.id, id))
+        .returning({ id: tagsSchema.id, name: tagsSchema.name })
         .get();
 
       return updated

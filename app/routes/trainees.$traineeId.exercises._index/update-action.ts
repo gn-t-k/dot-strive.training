@@ -4,7 +4,7 @@ import type { AppLoadContext, TypedResponse } from "@remix-run/cloudflare";
 import { getExercisesByTraineeId } from "app/features/exercise/get-exercises-by-trainee-id";
 import { validateExercise } from "app/features/exercise/schema";
 import { updateExercise } from "app/features/exercise/update-exercise";
-import { getMusclesByTraineeId } from "app/features/muscle/get-muscles-by-trainee-id";
+import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import type { Trainee } from "app/features/trainee/schema";
 import { parseWithValibot } from "conform-to-valibot";
 import { checkOwnExercise } from "./check-own-exercise";
@@ -64,24 +64,24 @@ export const updateAction: UpdateAction = async ({
     });
   }
 
-  const [getMusclesResult, getExercisesResult] = await Promise.all([
-    getMusclesByTraineeId(context)(trainee.id),
+  const [getTagsResult, getExercisesResult] = await Promise.all([
+    getTagsByTraineeId(context)(trainee.id),
     getExercisesByTraineeId(context)(trainee.id),
   ]);
   if (
     !(
-      getMusclesResult.result === "success" &&
+      getTagsResult.result === "success" &&
       getExercisesResult.result === "success"
     )
   ) {
     return json({
       action: "update",
       success: false,
-      description: "get muscles and exercises failed.",
+      description: "get tags and exercises failed.",
     });
   }
-  const [registeredMuscles, registeredExercises] = [
-    getMusclesResult.data,
+  const [registeredTags, registeredExercises] = [
+    getTagsResult.data,
     getExercisesResult.data,
   ];
 
@@ -90,7 +90,7 @@ export const updateAction: UpdateAction = async ({
     null;
   const submission = parseWithValibot(formData, {
     schema: getExerciseFormSchema({
-      registeredMuscles,
+      registeredTags,
       registeredExercises,
       beforeName,
     }),
@@ -108,9 +108,9 @@ export const updateAction: UpdateAction = async ({
     id: exerciseId,
     name: submission.value.name,
     // TODO: 二重ループなくせる？
-    targets: submission.value.targets.flatMap((target) => {
-      const muscle = registeredMuscles.find((muscle) => muscle.id === target);
-      return muscle ? [{ id: muscle.id, name: muscle.name }] : [];
+    tags: submission.value.tags.flatMap((tagId) => {
+      const tag = registeredTags.find((tag) => tag.id === tagId);
+      return tag ? [{ id: tag.id, name: tag.name }] : [];
     }),
   });
   if (!exercise) {

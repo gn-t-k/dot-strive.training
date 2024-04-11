@@ -8,7 +8,7 @@ import {
   string,
 } from "valibot";
 
-import { muscle } from "../muscle/schema";
+import { tag } from "../tag/schema";
 
 import type { Output } from "valibot";
 
@@ -16,7 +16,7 @@ export const exercise = brand(
   object({
     id: string([cuid2("exercise cuid")]),
     name: string([minLength(1, "exercise name min length")]),
-    targets: array(muscle),
+    tags: array(tag),
   }),
   "exercise",
 );

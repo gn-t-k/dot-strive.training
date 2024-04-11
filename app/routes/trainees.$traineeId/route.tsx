@@ -65,8 +65,8 @@ const PageWithNavigationHeader: FC = () => {
                 種目
               </Link>
             </TabsTrigger>
-            <TabsTrigger value="muscles" asChild>
-              <Link to={`/trainees/${trainee.id}/muscles`} className="w-full">
+            <TabsTrigger value="tags" asChild>
+              <Link to={`/trainees/${trainee.id}/tags`} className="w-full">
                 部位
               </Link>
             </TabsTrigger>

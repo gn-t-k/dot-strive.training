@@ -1,22 +1,22 @@
 import type { AppLoadContext } from "@remix-run/cloudflare";
-import { muscles } from "database/tables/muscles";
+import { tags } from "database/tables/tags";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 
-type CheckOwnMuscle = (
+type CheckOwnTag = (
   context: AppLoadContext,
-) => (props: { traineeId: string; muscleId: string }) => Promise<
+) => (props: { traineeId: string; tagId: string }) => Promise<
   { result: "success"; data: boolean } | { result: "failure" }
 >;
-export const checkOwnMuscle: CheckOwnMuscle =
+export const checkOwnTag: CheckOwnTag =
   (context) =>
-  async ({ traineeId, muscleId }) => {
+  async ({ traineeId, tagId }) => {
     try {
       const database = drizzle(context.cloudflare.env.DB);
       const data = await database
-        .select({ id: muscles.id })
-        .from(muscles)
-        .where(and(eq(muscles.traineeId, traineeId), eq(muscles.id, muscleId)));
+        .select({ id: tags.id })
+        .from(tags)
+        .where(and(eq(tags.traineeId, traineeId), eq(tags.id, tagId)));
 
       return {
         result: "success",

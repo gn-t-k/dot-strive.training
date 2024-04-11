@@ -4,8 +4,8 @@ import type {
   LoaderFunctionArgs,
 } from "@remix-run/cloudflare";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
-import { getMusclesByTraineeId } from "app/features/muscle/get-muscles-by-trainee-id";
-import { MuscleForm } from "app/routes/trainees.$traineeId.muscles._index/muscle-form";
+import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
+import { TagForm } from "app/routes/trainees.$traineeId.tags._index/tag-form";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import {
   AlertDialog,
@@ -46,16 +46,16 @@ export const loader = async ({
   const { trainee } = await traineeLoader({ context, request, params }).then(
     (response) => response.json(),
   );
-  const getMusclesResult = await getMusclesByTraineeId(context)(trainee.id);
-  if (getMusclesResult.result === "failure") {
+  const getTagsResult = await getTagsByTraineeId(context)(trainee.id);
+  if (getTagsResult.result === "failure") {
     throw new Response("Internal Server Error", { status: 500 });
   }
 
-  return json({ muscles: getMusclesResult.data });
+  return json({ tags: getTagsResult.data });
 };
 
 const Page: FC = () => {
-  const { muscles } = useLoaderData<typeof loader>();
+  const { tags } = useLoaderData<typeof loader>();
   const [editing, setEditing] = useState<string | undefined>();
   const actionData = useActionData<typeof action>();
   const { toast } = useToast();
@@ -109,23 +109,23 @@ const Page: FC = () => {
     <Main>
       <Section>
         <ul className="flex flex-col gap-4">
-          {muscles.map((muscle) => {
-            const isEditing = editing === muscle.id;
+          {tags.map((tag) => {
+            const isEditing = editing === tag.id;
 
             return (
-              <li key={muscle.id}>
+              <li key={tag.id}>
                 <Card>
                   <CardHeader className="flex w-full space-x-2">
                     <div className="grow">
                       {isEditing ? (
-                        <MuscleForm
-                          registeredMuscles={muscles}
+                        <TagForm
+                          registeredTags={tags}
                           actionType="update"
-                          defaultValues={{ id: muscle.id, name: muscle.name }}
+                          defaultValues={{ id: tag.id, name: tag.name }}
                         />
                       ) : (
                         <Heading level={2} className="break-all">
-                          {muscle.name}
+                          {tag.name}
                         </Heading>
                       )}
                     </div>
@@ -148,9 +148,7 @@ const Page: FC = () => {
                           <AlertDialog>
                             <DropdownMenuContent align="end">
                               <DropdownMenuGroup>
-                                <DropdownMenuItem
-                                  onClick={onClickEdit(muscle.id)}
-                                >
+                                <DropdownMenuItem onClick={onClickEdit(tag.id)}>
                                   <Edit className="mr-2 size-4" />
                                   編集
                                 </DropdownMenuItem>
@@ -177,7 +175,7 @@ const Page: FC = () => {
                                   <input
                                     type="hidden"
                                     name="id"
-                                    value={muscle.id}
+                                    value={tag.id}
                                   />
                                   <AlertDialogAction
                                     type="submit"
@@ -208,9 +206,9 @@ const Page: FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <MuscleForm
+            <TagForm
               key={Math.random().toString()}
-              registeredMuscles={muscles}
+              registeredTags={tags}
               actionType="create"
             />
           </CardContent>

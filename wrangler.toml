@@ -15,7 +15,7 @@ compatibility_date = "2024-04-02"
 # Bind a D1 database. D1 is Cloudflare’s native serverless SQL database.
 # Docs: https://developers.cloudflare.com/pages/functions/bindings/#d1-databases
 d1_databases = [
-  { binding = "DB", database_name = "dot-strive-db", database_id = "d3eeab85-0f09-4656-80e7-195ad0fee1a7", migrations_dir = "database/migrations", preview_database_id = "d3eeab85-0f09-4656-80e7-195ad0fee1a7" },
+  { binding = "DB", database_name = "dot-strive-db", database_id = "d3eeab85-0f09-4656-80e7-195ad0fee1a7", migrations_dir = "database/migrations", preview_database_id = "cf1f47a9-8065-438e-8c76-ebde41b9032e" },
 ]
 
 # Bind a Durable Object. Durable objects are a scale-to-zero compute primitive based on the actor model.

@@ -8,7 +8,7 @@ import {
   text,
   unique,
 } from "drizzle-orm/sqlite-core";
-import { muscleExerciseMappings } from "./muscle-exercise-mappings";
+import { tagExerciseMappings } from "./tag-exercise-mappings";
 import { trainees } from "./trainees";
 
 export const exercises = sqliteTable(
@@ -36,5 +36,5 @@ export const exercisesRelations = relations(exercises, ({ one, many }) => ({
     fields: [exercises.traineeId],
     references: [trainees.id],
   }),
-  muscles: many(muscleExerciseMappings),
+  tags: many(tagExerciseMappings),
 }));

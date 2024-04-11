@@ -3,8 +3,8 @@ import {
   type TypedResponse,
   json,
 } from "@remix-run/cloudflare";
-import { checkOwnMuscle } from "app/features/muscle/check-own-muscle";
-import { deleteMuscle } from "app/features/muscle/delete-muscle";
+import { checkOwnTag } from "app/features/tag/check-own-tag";
+import { deleteTag } from "app/features/tag/delete-tag";
 import type { Trainee } from "app/features/trainee/schema";
 
 type DeleteAction = (props: {
@@ -30,8 +30,8 @@ export const deleteAction: DeleteAction = async ({
   context,
   trainee,
 }) => {
-  const muscleId = formData.get("id")?.toString();
-  if (!muscleId) {
+  const tagId = formData.get("id")?.toString();
+  if (!tagId) {
     return json({
       action: "delete",
       success: false,
@@ -39,27 +39,27 @@ export const deleteAction: DeleteAction = async ({
     });
   }
 
-  const checkOwnMuscleResult = await checkOwnMuscle(context)({
+  const checkOwnTagResult = await checkOwnTag(context)({
     traineeId: trainee.id,
-    muscleId,
+    tagId,
   });
-  if (checkOwnMuscleResult.result === "failure") {
+  if (checkOwnTagResult.result === "failure") {
     return json({
       action: "delete",
       success: false,
-      description: "check own muscle failed",
+      description: "check own tag failed",
     });
   }
-  const isOwnMuscle = checkOwnMuscleResult.data;
-  if (!isOwnMuscle) {
+  const isOwnTag = checkOwnTagResult.data;
+  if (!isOwnTag) {
     return json({
       action: "delete",
       success: false,
-      description: "not own muscle",
+      description: "not own tag",
     });
   }
 
-  const deleteResult = await deleteMuscle(context)({ id: muscleId });
+  const deleteResult = await deleteTag(context)({ id: tagId });
   if (deleteResult.result === "failure") {
     return json({
       action: "delete",
