@@ -12,7 +12,10 @@ import { validateTraining } from "app/features/training/schema";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import { useToast } from "app/ui/use-toast";
 
-import { TrainingForm, getTrainingFormSchema } from "./training-form";
+import {
+  TrainingForm,
+  getTrainingFormSchema,
+} from "../../features/training/training-form";
 
 import type {
   ActionFunctionArgs,
@@ -110,7 +113,7 @@ export const action = async ({
 
   const training = validateTraining({
     id: createId(),
-    date: submission.value.date,
+    date: new Date(submission.value.date),
     sessions: submission.value.sessions.flatMap((session) => {
       const exercise = validateExercise(
         registeredExercises.find(

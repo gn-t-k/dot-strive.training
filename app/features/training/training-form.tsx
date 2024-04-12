@@ -15,7 +15,6 @@ import { useCallback, useEffect, useState } from "react";
 import {
   array,
   custom,
-  date,
   maxLength,
   maxValue,
   minLength,
@@ -56,7 +55,11 @@ import type { Input as Infer } from "valibot";
 
 export const getTrainingFormSchema = (registeredExercises: Exercise[]) =>
   object({
-    date: nonOptional(date(), "日付を選択してください"),
+    id: optional(string()),
+    date: nonOptional(
+      string([custom((value) => !Number.isNaN(new Date(value).getTime()))]),
+      "日付を選択してください",
+    ),
     sessions: array(getSessionSchema(registeredExercises), [
       minLength(1, "セッションの情報を入力してください"),
     ]),
@@ -103,6 +106,7 @@ type Props = {
   registeredExercises: Exercise[];
   actionType: string;
   defaultValues?: {
+    id: string;
     date: string;
     sessions: {
       exerciseId: string;
@@ -143,6 +147,7 @@ export const TrainingForm: FC<Props> = ({
 
   return (
     <Form method="post" className="flex flex-col gap-8" {...getFormProps(form)}>
+      <input {...getInputProps(fields.id, { type: "hidden" })} />
       <DateField dateField={fields.date} />
       <SessionsFieldset
         removeIntent={form.remove}
@@ -161,7 +166,14 @@ type DateFieldProps = {
   dateField: FieldMetadata<TrainingFormType["date"]>;
 };
 const DateField: FC<DateFieldProps> = ({ dateField }) => {
-  const { value, change } = useInputControl(dateField);
+  const { value, change } = useInputControl({
+    ...dateField,
+    name: dateField.name,
+    formId: dateField.formId,
+    initialValue: dateField.initialValue,
+  });
+
+  // サーバーでのレンダリングとクライアントでのレンダリングの結果が異なることによるハイドレーションエラーを避けるため
   const [isClient, setIsClient] = useState(false);
   useEffect(() => setIsClient(true), []);
 
@@ -311,7 +323,10 @@ const ExerciseField: FC<ExerciseFieldProps> = ({
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor={exerciseField.id}>種目</Label>
-      <Select {...getSelectProps(exerciseField)} defaultValue="">
+      <Select
+        {...getSelectProps(exerciseField)}
+        defaultValue={exerciseField.initialValue}
+      >
         <SelectTrigger id={exerciseField.id}>
           <SelectValue placeholder="種目を選択する" />
         </SelectTrigger>
@@ -443,7 +458,8 @@ type WeightFieldProps = {
 const WeightField: FC<WeightFieldProps> = ({ weightField, lastValue }) => {
   const { value: value_, change } = useInputControl({
     ...weightField,
-    initialValue: lastValue,
+    initialValue: weightField.initialValue ?? lastValue,
+    formId: weightField.formId,
   });
   const value = value_ ?? "";
   const decrease = useCallback(() => {
@@ -518,7 +534,8 @@ type RepsFieldProps = {
 const RepsField: FC<RepsFieldProps> = ({ repsField, lastValue }) => {
   const { value: value_, change } = useInputControl({
     ...repsField,
-    initialValue: lastValue,
+    initialValue: repsField.initialValue ?? lastValue,
+    formId: repsField.formId,
   });
   const value = value_ ?? "";
   const decrease = useCallback(() => {
@@ -602,6 +619,7 @@ const RPEField: FC<RPEFieldProps> = ({ rpeField }) => {
           min={0}
           max={10}
           onValueChange={(value) => change(value[0]?.toString())}
+          defaultValue={[Number(rpeField.initialValue)]}
           className="col-span-3"
         />
       </div>
