@@ -10,13 +10,7 @@ export const Main: FC<PropsWithChildren<Props>> = ({
   ...props
 }) => {
   return (
-    <main
-      className={cn(
-        "inline-flex w-full flex-col justify-start gap-4",
-        className,
-      )}
-      {...props}
-    >
+    <main className={cn("flex w-full flex-col gap-8", className)} {...props}>
       {children}
     </main>
   );

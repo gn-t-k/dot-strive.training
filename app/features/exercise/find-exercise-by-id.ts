@@ -1,88 +1,87 @@
-import { desc, eq, sql } from "drizzle-orm";
-import { array, merge, object, safeParse, string } from "valibot";
-
 import type { AppLoadContext } from "@remix-run/cloudflare";
 import { exercises } from "database/tables/exercises";
 import { tagExerciseMappings } from "database/tables/tag-exercise-mappings";
-import { tags as tagsSchema } from "database/tables/tags";
+import { tags } from "database/tables/tags";
+import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
-import type { Input } from "valibot";
+import { type Input, array, merge, object, safeParse, string } from "valibot";
 
-type GetExercisesWithTagsByTraineeId = (
+type FindExerciseById = (
   context: AppLoadContext,
 ) => (
-  traineeId: string,
-) => Promise<{ result: "success"; data: Payload } | { result: "failure" }>;
+  exerciseId: string,
+) => Promise<
+  | { result: "found"; data: Payload }
+  | { result: "not-found" }
+  | { result: "failure" }
+>;
 type Payload = Input<typeof payloadSchema>;
 const tagSchema = object({
   id: string(),
-  name: string(),
 });
 const exerciseSchema = object({
   id: string(),
   name: string(),
 });
-const payloadSchema = array(
-  merge([
-    exerciseSchema,
-    object({
-      tags: array(tagSchema),
-    }),
-  ]),
-);
-export const getExercisesWithTagsByTraineeId: GetExercisesWithTagsByTraineeId =
-  (context) => async (traineeId) => {
+const payloadSchema = merge([
+  exerciseSchema,
+  object({
+    tags: array(tagSchema),
+  }),
+]);
+export const findExerciseById: FindExerciseById =
+  (context) => async (exerciseId) => {
     try {
       const database = drizzle(context.cloudflare.env.DB);
       const data = await database
         .select({
           exerciseId: sql`${exercises.id}`.as("exerciseId"),
-          exerciseName: sql`${exercises.name}`.as("exerciseName"),
-          tagId: sql`${tagsSchema.id}`.as("tagId"),
-          tagName: sql`${tagsSchema.name}`.as("tagName"),
+          exerciseName: exercises.name,
+          tagId: sql`${tags.id}`.as("tagId"),
         })
         .from(exercises)
         .leftJoin(
           tagExerciseMappings,
           eq(exercises.id, tagExerciseMappings.exerciseId),
         )
-        .leftJoin(tagsSchema, eq(tagExerciseMappings.tagId, tagsSchema.id))
-        .where(eq(exercises.traineeId, traineeId))
-        .orderBy(desc(exercises.createdAt));
+        .leftJoin(tags, eq(tagExerciseMappings.tagId, tags.id))
+        .where(eq(exercises.id, exerciseId));
 
-      const payload = data.reduce<Payload>(
-        (accumulator, { exerciseId, exerciseName, tagId, tagName }) => {
+      if (data.length === 0) {
+        return { result: "not-found" };
+      }
+
+      const [payload] = data.reduce<Payload[]>(
+        (acc, { exerciseId, exerciseName, tagId }) => {
           const [parseTagResult, parseExerciseResult] = [
-            safeParse(tagSchema, { id: tagId, name: tagName }),
+            safeParse(tagSchema, { id: tagId }),
             safeParse(exerciseSchema, { id: exerciseId, name: exerciseName }),
           ];
           if (!(parseTagResult.success && parseExerciseResult.success)) {
-            return accumulator;
+            return acc;
           }
           const [exercise, tag] = [
             parseExerciseResult.output,
             parseTagResult.output,
           ];
 
-          const index = accumulator.findIndex(
-            (exercise) => exercise.id === exerciseId,
-          );
+          const index = acc.findIndex((exercise) => exercise.id === exerciseId);
           if (index === -1) {
-            accumulator.push({
+            acc.push({
               id: exercise.id,
               name: exercise.name,
               tags: [tag],
             });
-            return accumulator;
+            return acc;
           }
 
-          const current = accumulator[index];
+          const current = acc[index];
           if (!current) {
-            return accumulator;
+            return acc;
           }
 
           current.tags.push(tag);
-          return accumulator.with(index, {
+          return acc.with(index, {
             id: current.id,
             name: current.name,
             tags: current.tags,
@@ -91,7 +90,7 @@ export const getExercisesWithTagsByTraineeId: GetExercisesWithTagsByTraineeId =
         [],
       );
 
-      return { result: "success", data: payload };
+      return { result: "found", data: payload };
     } catch (error) {
       return {
         result: "failure",
