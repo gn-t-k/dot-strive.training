@@ -606,6 +606,7 @@ type RPEFieldProps = {
 // biome-ignore lint/style/useNamingConvention: RPEはRPEなので
 const RPEField: FC<RPEFieldProps> = ({ rpeField }) => {
   const { value, change } = useInputControl(rpeField);
+  const defaultValue = Number(rpeField.initialValue);
 
   return (
     <div className="flex flex-col gap-2 pl-2">
@@ -619,7 +620,7 @@ const RPEField: FC<RPEFieldProps> = ({ rpeField }) => {
           min={0}
           max={10}
           onValueChange={(value) => change(value[0]?.toString())}
-          defaultValue={[Number(rpeField.initialValue)]}
+          defaultValue={Number.isNaN(defaultValue) ? [0] : [defaultValue]}
           className="col-span-3"
         />
       </div>
