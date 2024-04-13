@@ -1,41 +1,18 @@
 import { json } from "@remix-run/cloudflare";
-import { Form, useActionData, useLoaderData } from "@remix-run/react";
-import { format, parseISO } from "date-fns";
-import { Edit, MoreHorizontal, Trash2 } from "lucide-react";
-import { useEffect } from "react";
-
-import { deleteTraining } from "app/features/training/delete-training";
+import { Link, useLoaderData } from "@remix-run/react";
 import { getTrainingsByTraineeId } from "app/features/training/get-trainings-by-trainee-id";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "app/ui/alert-dialog";
+import {} from "app/ui/alert-dialog";
 import { Button } from "app/ui/button";
 import { Card, CardContent, CardHeader } from "app/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "app/ui/dropdown-menu";
+import {} from "app/ui/dropdown-menu";
 import { Heading } from "app/ui/heading";
 import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
-import { useToast } from "app/ui/use-toast";
+import { format, parseISO } from "date-fns";
+import {} from "lucide-react";
 
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-} from "@remix-run/cloudflare";
+import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import type { FC } from "react";
 
 export const loader = async ({
@@ -58,20 +35,6 @@ export const loader = async ({
 
 const Page: FC = () => {
   const { trainee, trainings } = useLoaderData<typeof loader>();
-  const actionData = useActionData<typeof action>();
-  const { toast } = useToast();
-
-  useEffect(() => {
-    if (!actionData) {
-      return;
-    }
-    toast({
-      title: actionData.success
-        ? "トレーニングを削除しました"
-        : "トレーニングの削除に失敗しました",
-      variant: actionData.success ? "default" : "destructive",
-    });
-  }, [actionData, toast]);
 
   return (
     <Main>
@@ -89,65 +52,16 @@ const Page: FC = () => {
             );
             return (
               <li key={training.id}>
-                <Card>
-                  <CardHeader className="flex items-center justify-between">
-                    <Heading level={2}>{dateString}</Heading>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button size="icon" variant="ghost">
-                          <MoreHorizontal className="size-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <AlertDialog>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuGroup>
-                            <DropdownMenuItem>
-                              <Edit className="mr-2 size-4" />
-                              編集
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <AlertDialogTrigger className="flex w-full">
-                                <Trash2 className="mr-2 size-4" />
-                                削除
-                              </AlertDialogTrigger>
-                            </DropdownMenuItem>
-                          </DropdownMenuGroup>
-                        </DropdownMenuContent>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              トレーニングの削除
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              {dateString}のトレーニングを削除しますか？
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>キャンセル</AlertDialogCancel>
-                            <Form method="post">
-                              <input
-                                type="hidden"
-                                name="id"
-                                value={training.id}
-                              />
-                              <AlertDialogAction
-                                type="submit"
-                                name="actionType"
-                                value="delete"
-                                className="w-full"
-                              >
-                                削除
-                              </AlertDialogAction>
-                            </Form>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </DropdownMenu>
-                  </CardHeader>
-                  <CardContent>
-                    <TrainingSessionList sessions={training.sessions} />
-                  </CardContent>
-                </Card>
+                <Link to={`/trainees/${trainee.id}/trainings/${training.id}`}>
+                  <Card>
+                    <CardHeader>
+                      <Heading level={2}>{dateString}</Heading>
+                    </CardHeader>
+                    <CardContent>
+                      <TrainingSessionList sessions={training.sessions} />
+                    </CardContent>
+                  </Card>
+                </Link>
               </li>
             );
           })}
@@ -217,29 +131,4 @@ const TrainingSessionList: FC<TrainingSessionListProps> = ({ sessions }) => {
       })}
     </ol>
   );
-};
-
-export const action = async ({ request, context }: ActionFunctionArgs) => {
-  const formData = await request.formData();
-
-  const trainingId = formData.get("id")?.toString();
-  if (!trainingId) {
-    return json({
-      success: false,
-      description: 'get formData "id" failed',
-    });
-  }
-
-  const deleteResult = await deleteTraining(context)({ id: trainingId });
-  if (deleteResult.result === "failure") {
-    return json({
-      success: false,
-      description: "delete data failed",
-    });
-  }
-
-  return json({
-    success: true,
-    description: "success",
-  });
 };
