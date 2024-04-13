@@ -2,7 +2,7 @@ import { json } from "@remix-run/cloudflare";
 import type { AppLoadContext, TypedResponse } from "@remix-run/cloudflare";
 import { deleteExercise } from "app/features/exercise/delete-exercise";
 import type { Trainee } from "app/features/trainee/schema";
-import { checkOwnExercise } from "./check-own-exercise";
+import { checkOwnExercise } from "../../features/exercise/check-own-exercise";
 
 type DeleteAction = (props: {
   formData: FormData;

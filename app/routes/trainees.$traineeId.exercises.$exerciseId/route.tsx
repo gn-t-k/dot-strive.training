@@ -1,18 +1,18 @@
-import {
-  type ActionFunctionArgs,
-  type LoaderFunctionArgs,
-  json,
-  redirect,
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
 } from "@remix-run/cloudflare";
+import { json, redirect } from "@remix-run/cloudflare";
 import {
   Form,
   useActionData,
   useLoaderData,
   useNavigate,
 } from "@remix-run/react";
-import { getExercisesByTraineeId } from "app/features/exercise/get-exercises-by-trainee-id";
-import { findTrainingById } from "app/features/training/find-training-by-id";
-import { TrainingForm } from "app/features/training/training-form";
+import { ExerciseForm } from "app/features/exercise/exercise-form";
+import { findExerciseById } from "app/features/exercise/find-exercise-by-id";
+import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exercises-with-tags-by-trainee-id";
+import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import {
   AlertDialog,
@@ -28,7 +28,6 @@ import {
 import { Button } from "app/ui/button";
 import { Main } from "app/ui/main";
 import { useToast } from "app/ui/use-toast";
-import { format, parseISO } from "date-fns";
 import { type FC, useEffect } from "react";
 import { deleteAction } from "./delete-action";
 import { updateAction } from "./update-action";
@@ -42,29 +41,40 @@ export const loader = async ({
     (response) => response.json(),
   );
 
-  const { trainingId } = params;
-  if (!trainingId) {
-    return redirect(`/trainees/${trainee.id}/trainings`);
+  const { exerciseId } = params;
+  if (!exerciseId) {
+    return redirect(`/trainees/${trainee.id}/exercises`);
   }
 
-  const findTrainingResult = await findTrainingById(context)(trainingId);
-  switch (findTrainingResult.result) {
+  const findExerciseResult = await findExerciseById(context)(exerciseId);
+  switch (findExerciseResult.result) {
     case "found": {
-      const getExercisesResult = await getExercisesByTraineeId(context)(
-        trainee.id,
-      );
-      if (getExercisesResult.result !== "success") {
+      const [getTagsResult, getExercisesResult] = await Promise.all([
+        getTagsByTraineeId(context)(trainee.id),
+        getExercisesWithTagsByTraineeId(context)(trainee.id),
+      ]);
+      if (
+        !(
+          getTagsResult.result === "success" &&
+          getExercisesResult.result === "success"
+        )
+      ) {
         throw new Response("Internal Server Error", { status: 500 });
       }
+      const [registeredTags, registeredExercises] = [
+        getTagsResult.data,
+        getExercisesResult.data,
+      ];
 
       return json({
         trainee,
-        training: findTrainingResult.data,
-        registeredExercises: getExercisesResult.data,
+        exercise: findExerciseResult.data,
+        registeredTags,
+        registeredExercises,
       });
     }
     case "not-found": {
-      return json({ trainee, training: null });
+      return json({ trainee, exercise: null });
     }
     case "failure": {
       throw new Response("Sorry, something went wrong.", { status: 500 });
@@ -78,7 +88,7 @@ const Page: FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const { trainee, training } = loaderData;
+  const { exercise, trainee } = loaderData;
   useEffect(() => {
     if (!actionData) {
       return;
@@ -87,77 +97,58 @@ const Page: FC = () => {
     switch (actionData.action) {
       case "update": {
         if (actionData.success) {
-          toast({ title: "トレーニングを更新しました" });
+          toast({ title: "種目を更新しました" });
         } else {
-          toast({
-            title: "トレーニングの更新に失敗しました",
-            variant: "destructive",
-            description: actionData.description,
-          });
+          toast({ title: "種目の更新に失敗しました", variant: "destructive" });
         }
         break;
       }
       case "delete": {
         if (actionData.success) {
-          toast({ title: "トレーニングを削除しました" });
-          navigate(`/trainees/${trainee.id}/trainings`);
+          toast({ title: "種目を削除しました" });
+          navigate(`/trainees/${trainee.id}/exercises`);
         } else {
-          toast({
-            title: "トレーニングの削除に失敗しました",
-            variant: "destructive",
-          });
+          toast({ title: "種目の削除に失敗しました", variant: "destructive" });
         }
         break;
       }
     }
   }, [actionData, trainee.id, navigate, toast]);
 
-  if (!training) {
-    // 削除のactionをした直後はloaderData.training === nullになり、useEffectでリダイレクトされる
+  if (!exercise) {
+    // 削除のactionをした直後はexerciseがnullになり、useEffectでリダイレクトされる
     return null;
   }
 
-  const { registeredExercises } = loaderData;
-
-  const dateString = format(
-    parseISO(loaderData.training.date),
-    "yyyy年MM月dd日",
-  );
+  const { registeredExercises, registeredTags } = loaderData;
 
   return (
     <Main>
-      <TrainingForm
-        actionType="update"
+      <ExerciseForm
+        registeredTags={registeredTags}
         registeredExercises={registeredExercises}
         defaultValues={{
-          id: training.id,
-          date: format(training.date, "yyyy-MM-dd"),
-          sessions: training.sessions.map((session) => ({
-            exerciseId: session.exercise.id,
-            memo: session.memo,
-            sets: session.sets.map((set) => ({
-              weight: String(set.weight),
-              reps: String(set.repetition),
-              rpe: String(set.rpe),
-            })),
-          })),
+          id: exercise.id,
+          name: exercise.name,
+          tags: exercise.tags.map((tag) => tag.id),
         }}
+        actionType="update"
       />
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="destructive">トレーニングを削除する</Button>
+          <Button variant="destructive">種目を削除する</Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>トレーニングの削除</AlertDialogTitle>
+            <AlertDialogTitle>種目の削除</AlertDialogTitle>
             <AlertDialogDescription>
-              {dateString}のトレーニングを削除しますか？
+              {exercise.name}を削除しますか？
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>キャンセル</AlertDialogCancel>
             <Form method="post">
-              <input type="hidden" name="id" value={training.id} />
+              <input type="hidden" name="id" value={exercise.id} />
               <AlertDialogAction
                 type="submit"
                 name="actionType"
@@ -189,10 +180,10 @@ export const action = async ({
 
   switch (formData.get("actionType")) {
     case "update": {
-      return await updateAction({ formData, context, trainee });
+      return updateAction({ formData, context, trainee });
     }
     case "delete": {
-      return await deleteAction({ formData, context, trainee });
+      return deleteAction({ formData, context, trainee });
     }
     default: {
       throw new Response("Bad Request", { status: 400 });
