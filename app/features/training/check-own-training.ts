@@ -12,7 +12,7 @@ export const checkOwnTraining: CheckOwnTraining =
   (context) =>
   async ({ traineeId, trainingId }) => {
     try {
-      const database = drizzle(context.cloudflare.env.DB);
+      const database = drizzle(context.cloudflare["env"].DB);
       const data = await database
         .select({ id: trainings.id })
         .from(trainings)

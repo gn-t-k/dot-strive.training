@@ -32,7 +32,7 @@ const payloadSchema = merge([
 export const findExerciseById: FindExerciseById =
   (context) => async (exerciseId) => {
     try {
-      const database = drizzle(context.cloudflare.env.DB);
+      const database = drizzle(context.cloudflare["env"].DB);
       const data = await database
         .select({
           exerciseId: sql`${exercises.id}`.as("exerciseId"),
@@ -89,6 +89,10 @@ export const findExerciseById: FindExerciseById =
         },
         [],
       );
+
+      if (!payload) {
+        return { result: "not-found" };
+      }
 
       return { result: "found", data: payload };
     } catch (error) {

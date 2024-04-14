@@ -16,7 +16,7 @@ type GetTagsByTraineeId = (
 export const getTagsByTraineeId: GetTagsByTraineeId =
   (context) => async (traineeId) => {
     try {
-      const database = drizzle(context.cloudflare.env.DB);
+      const database = drizzle(context.cloudflare["env"].DB);
       const data = await database
         .select({ id: tagsSchema.id, name: tagsSchema.name })
         .from(tagsSchema)

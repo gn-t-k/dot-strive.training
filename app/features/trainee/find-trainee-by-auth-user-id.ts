@@ -15,7 +15,7 @@ type FindTraineeByAuthUserId = (
 export const findTraineeByAuthUserId: FindTraineeByAuthUserId =
   (context) => async (authUserId) => {
     try {
-      const database = drizzle(context.cloudflare.env.DB);
+      const database = drizzle(context.cloudflare["env"].DB);
       const trainee = await database
         .select({ id: trainees.id, name: trainees.name, image: trainees.image })
         .from(trainees)

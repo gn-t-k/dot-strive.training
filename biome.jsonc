@@ -16,6 +16,10 @@
       "correctness": {
         // CloudflareのEnvで使うため
         "noUndeclaredVariables": "off"
+      },
+      "complexity": {
+        // typescriptのnoPropertyAccessFromIndexSignatureを優先
+        "useLiteralKeys": "off"
       }
     }
   },

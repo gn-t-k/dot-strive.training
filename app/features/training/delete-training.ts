@@ -16,7 +16,7 @@ export const deleteTraining: DeleteTraining =
   (context) =>
   async ({ id }) => {
     try {
-      const database = drizzle(context.cloudflare.env.DB);
+      const database = drizzle(context.cloudflare["env"].DB);
       const sessionIds = await database
         .select({ id: trainingSessions.id })
         .from(trainingSessions)

@@ -16,7 +16,7 @@ export const createExercise: CreateExercise =
   (context) =>
   async ({ exercise, traineeId }) => {
     try {
-      const database = drizzle(context.cloudflare.env.DB);
+      const database = drizzle(context.cloudflare["env"].DB);
       const [[created]] = await database.batch([
         database
           .insert(exercisesSchema)

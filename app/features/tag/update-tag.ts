@@ -18,7 +18,7 @@ export const updateTag: UpdateTag =
   (context) =>
   async ({ id, name }) => {
     try {
-      const database = drizzle(context.cloudflare.env.DB);
+      const database = drizzle(context.cloudflare["env"].DB);
       const updated = await database
         .update(tagsSchema)
         .set({

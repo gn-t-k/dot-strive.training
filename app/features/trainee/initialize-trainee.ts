@@ -23,7 +23,7 @@ export const initializeTrainee: InitializeTrainee =
       const now = new Date();
       const [createdAt, updatedAt] = [now, now];
 
-      const database = drizzle(context.cloudflare.env.DB);
+      const database = drizzle(context.cloudflare["env"].DB);
       const [[trainee]] = await database.batch([
         database
           .insert(traineesSchema)
@@ -67,6 +67,10 @@ export const initializeTrainee: InitializeTrainee =
           ),
         ),
       ]);
+
+      if (!trainee) {
+        return { result: "failure", error: "Failed to create trainee" };
+      }
 
       return { result: "success", data: trainee };
     } catch (error) {

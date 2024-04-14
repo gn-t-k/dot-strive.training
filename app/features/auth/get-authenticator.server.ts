@@ -34,7 +34,7 @@ export const getAuthenticator: GetAuthenticator = (context, request) => {
     sameSite: "lax",
     httpOnly: true,
     maxAge: 60 * 60 * 24 * 30, // 30日間
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env["NODE_ENV"] === "production",
   });
   const sessionStorage = createWorkersKVSessionStorage({
     kv: env.dot_strive_session_kv,
