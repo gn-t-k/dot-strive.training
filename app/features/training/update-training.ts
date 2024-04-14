@@ -19,7 +19,7 @@ export const updateTraining: UpdateTraining =
     try {
       const { sessions, sets } = flatTraining(training);
 
-      const database = drizzle(context.cloudflare.env.DB);
+      const database = drizzle(context.cloudflare["env"].DB);
 
       const sessionIds = await database
         .select({ id: trainingSessions.id })
@@ -61,6 +61,10 @@ export const updateTraining: UpdateTraining =
           `),
         ),
       ]);
+
+      if (!updated) {
+        return { result: "failure", error: "Failed to update training" };
+      }
 
       return { result: "success", data: updated };
     } catch (error) {

@@ -21,7 +21,7 @@ export const createTraining: CreateTraining =
     try {
       const { sessions, sets } = flatTraining(training);
 
-      const database = drizzle(context.cloudflare.env.DB);
+      const database = drizzle(context.cloudflare["env"].DB);
       const [[created]] = await database.batch([
         database
           .insert(trainings)

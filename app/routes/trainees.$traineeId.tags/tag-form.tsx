@@ -14,7 +14,7 @@ import type { FC } from "react";
 export const getTagFormSchema = ({
   registeredTags,
   beforeName,
-}: { registeredTags: Tag[]; beforeName?: string }) =>
+}: { registeredTags: Tag[]; beforeName?: string | undefined }) =>
   object({
     id: optional(string()),
     name: nonOptional(

@@ -15,7 +15,7 @@ export const createTag: CreateTag =
   (context) =>
   async ({ tag, traineeId }) => {
     try {
-      const database = drizzle(context.cloudflare.env.DB);
+      const database = drizzle(context.cloudflare["env"].DB);
       const created = await database
         .insert(tagsSchema)
         .values({

@@ -28,7 +28,7 @@ export const loader = async ({
     return redirect("/login");
   }
 
-  if (params.traineeId !== user.id) {
+  if (params["traineeId"] !== user.id) {
     throw new Response("Not found.", { status: 404 });
   }
 

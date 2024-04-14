@@ -15,7 +15,7 @@ export const deleteExercise: DeleteExercise =
   (context) =>
   async ({ id }) => {
     try {
-      const database = drizzle(context.cloudflare.env.DB);
+      const database = drizzle(context.cloudflare["env"].DB);
       const [_, [deleted]] = await database.batch([
         database
           .delete(tagExerciseMappingsSchema)

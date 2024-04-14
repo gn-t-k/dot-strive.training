@@ -17,7 +17,7 @@ export const deleteTrainee: DeleteTrainee =
   (context) =>
   async ({ id }) => {
     try {
-      const database = drizzle(context.cloudflare.env.DB);
+      const database = drizzle(context.cloudflare["env"].DB);
 
       // データの削除にパフォーマンスは求めないので、DBに負荷をかけすぎないようにjoinせず削除する
 

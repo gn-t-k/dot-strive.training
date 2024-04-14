@@ -15,7 +15,7 @@ type GetExercisesByTraineeId = (
 export const getExercisesByTraineeId: GetExercisesByTraineeId =
   (context) => async (traineeId) => {
     try {
-      const database = drizzle(context.cloudflare.env.DB);
+      const database = drizzle(context.cloudflare["env"].DB);
       const data = await database
         .select({ id: exercisesSchema.id, name: exercisesSchema.name })
         .from(exercisesSchema)

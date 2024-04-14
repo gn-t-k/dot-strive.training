@@ -54,7 +54,7 @@ const payloadSchema = array(
 export const getTrainingsByTraineeId: GetTrainingsByTraineeId =
   (context) => async (traineeId) => {
     try {
-      const database = drizzle(context.cloudflare.env.DB);
+      const database = drizzle(context.cloudflare["env"].DB);
       const data = await database
         .select({
           trainingId: sql`${trainings.id}`.as("trainingId"),

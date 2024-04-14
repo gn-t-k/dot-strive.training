@@ -325,7 +325,7 @@ const ExerciseField: FC<ExerciseFieldProps> = ({
       <Label htmlFor={exerciseField.id}>種目</Label>
       <Select
         {...getSelectProps(exerciseField)}
-        defaultValue={exerciseField.initialValue}
+        defaultValue={exerciseField.initialValue ?? ""}
       >
         <SelectTrigger id={exerciseField.id}>
           <SelectValue placeholder="種目を選択する" />

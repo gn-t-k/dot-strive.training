@@ -12,7 +12,7 @@ export const checkOwnTag: CheckOwnTag =
   (context) =>
   async ({ traineeId, tagId }) => {
     try {
-      const database = drizzle(context.cloudflare.env.DB);
+      const database = drizzle(context.cloudflare["env"].DB);
       const data = await database
         .select({ id: tags.id })
         .from(tags)

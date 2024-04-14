@@ -19,7 +19,7 @@ export const updateExercise: UpdateExercise =
   (context) =>
   async ({ id, name, tags }) => {
     try {
-      const database = drizzle(context.cloudflare.env.DB);
+      const database = drizzle(context.cloudflare["env"].DB);
       const [[updated]] = await database.batch([
         database
           .update(exercisesSchema)
