@@ -1,6 +1,5 @@
 import { json, redirect } from "@remix-run/cloudflare";
 import {
-  Link,
   Outlet,
   useLoaderData,
   useLocation,
@@ -9,7 +8,7 @@ import {
 
 import { getAuthenticator } from "app/features/auth/get-authenticator.server";
 import { validateTrainee } from "app/features/trainee/schema";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "app/ui/tabs";
+import {} from "app/ui/tabs";
 
 import { HeaderNavigation } from "./header-navigation";
 import { MainContentSkeleton } from "./main-content-skeleton";
@@ -44,45 +43,20 @@ export const loader = async ({
 const PageWithNavigationHeader: FC = () => {
   const { trainee } = useLoaderData<typeof loader>();
   const { pathname } = useLocation();
-  const location = pathname.split("/")[3];
+  const location = pathname.split("/")[3] ?? "";
   const navigation = useNavigation();
 
   return (
     <>
       <header className="sticky top-0">
-        <HeaderNavigation traineeId={trainee.id} />
+        <HeaderNavigation traineeId={trainee.id} location={location} />
       </header>
-      {location ? (
-        <Tabs defaultValue={location} className="px-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="trainings" asChild>
-              <Link to={`/trainees/${trainee.id}/trainings`} className="w-full">
-                トレーニング
-              </Link>
-            </TabsTrigger>
-            <TabsTrigger value="exercises" asChild>
-              <Link to={`/trainees/${trainee.id}/exercises`} className="w-full">
-                種目
-              </Link>
-            </TabsTrigger>
-            <TabsTrigger value="tags" asChild>
-              <Link to={`/trainees/${trainee.id}/tags`} className="w-full">
-                部位
-              </Link>
-            </TabsTrigger>
-          </TabsList>
-          {navigation.state === "idle" ? (
-            <TabsContent value={location}>
-              <Outlet />
-            </TabsContent>
-          ) : (
-            <div className="mt-2">
-              <MainContentSkeleton />
-            </div>
-          )}
-        </Tabs>
-      ) : (
+      {navigation.state === "idle" ? (
         <Outlet />
+      ) : (
+        <div className="mt-2">
+          <MainContentSkeleton />
+        </div>
       )}
       <footer className="mt-8 flex h-24 items-center justify-center border-t px-4">
         <p className="text-muted-foreground">.STRIVE</p>
