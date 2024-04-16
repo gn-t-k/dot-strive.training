@@ -1,5 +1,10 @@
 import { json } from "@remix-run/cloudflare";
-import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
+import {
+  Link,
+  useLoaderData,
+  useNavigation,
+  useSearchParams,
+} from "@remix-run/react";
 import { getTrainingsByTraineeId } from "app/features/training/get-trainings-by-trainee-id";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import { Button } from "app/ui/button";
@@ -23,6 +28,7 @@ import { type FC, useCallback, useMemo, useState } from "react";
 import type { MonthChangeEventHandler } from "react-day-picker";
 
 import { headers as mergeHeaders } from "app/utils/merge-headers.server";
+import { MainContentSkeleton } from "../trainees.$traineeId/main-content-skeleton";
 
 export const headers = mergeHeaders;
 
@@ -64,6 +70,7 @@ const Page: FC = () => {
   const { trainee, trainings } = useLoaderData<typeof loader>();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigation = useNavigation();
 
   const defaultMonth = useMemo<Date>(() => {
     const month = searchParams.get("month");
@@ -92,6 +99,17 @@ const Page: FC = () => {
     },
     [searchParams, setSearchParams],
   );
+
+  if (navigation.state !== "idle") {
+    <Main>
+      <Section>
+        <Calendar />
+      </Section>
+      <Section>
+        <MainContentSkeleton />
+      </Section>
+    </Main>;
+  }
 
   return (
     <Main>

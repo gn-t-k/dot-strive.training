@@ -10,10 +10,8 @@ import { getAuthenticator } from "app/features/auth/get-authenticator.server";
 import { validateTrainee } from "app/features/trainee/schema";
 
 import { HeaderNavigation } from "./header-navigation";
-import { MainContentSkeleton } from "./main-content-skeleton";
 
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { Main } from "app/ui/main";
 import type { FC } from "react";
 
 export const loader = async ({
@@ -51,13 +49,14 @@ const PageWithNavigationHeader: FC = () => {
       <header className="sticky top-0">
         <HeaderNavigation traineeId={trainee.id} location={location} />
       </header>
-      {navigation.state === "idle" ? (
+      <Outlet />
+      {/* {navigation.state === "idle" ? (
         <Outlet />
       ) : (
         <Main className="mt-2">
           <MainContentSkeleton />
         </Main>
-      )}
+      )} */}
       <footer className="mt-8 flex h-24 items-center justify-center border-t px-4">
         <p className="text-muted-foreground">.STRIVE</p>
       </footer>
