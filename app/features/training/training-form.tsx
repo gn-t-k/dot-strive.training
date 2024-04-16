@@ -105,8 +105,8 @@ type SetFieldsType = Infer<typeof setSchema>;
 type Props = {
   registeredExercises: Exercise[];
   actionType: string;
-  defaultValues?: {
-    id: string;
+  defaultValue: {
+    id?: string;
     date: string;
     sessions: {
       exerciseId: string;
@@ -123,7 +123,7 @@ type Exercise = { id: string; name: string };
 export const TrainingForm: FC<Props> = ({
   registeredExercises,
   actionType,
-  defaultValues,
+  defaultValue,
 }) => {
   const [form, fields] = useForm<TrainingFormType>({
     shouldValidate: "onBlur",
@@ -133,16 +133,7 @@ export const TrainingForm: FC<Props> = ({
         schema: getTrainingFormSchema(registeredExercises),
       });
     },
-    defaultValue: defaultValues ?? {
-      date: format(new Date(), "yyyy-MM-dd"),
-      sessions: [
-        {
-          exerciseId: "",
-          memo: "",
-          sets: [{ weight: "", reps: "", rpe: "" }],
-        },
-      ],
-    },
+    defaultValue,
   });
 
   return (

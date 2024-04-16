@@ -129,7 +129,7 @@ const Page: FC = () => {
       <TrainingForm
         actionType="update"
         registeredExercises={registeredExercises}
-        defaultValues={{
+        defaultValue={{
           id: training.id,
           date: format(training.date, "yyyy-MM-dd"),
           sessions: training.sessions.map((session) => ({
