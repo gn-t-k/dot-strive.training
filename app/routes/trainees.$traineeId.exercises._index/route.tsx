@@ -3,15 +3,11 @@ import { Link, useActionData, useLoaderData } from "@remix-run/react";
 import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exercises-with-tags-by-trainee-id";
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
-import {} from "app/ui/alert-dialog";
 import { Card, CardContent, CardDescription, CardHeader } from "app/ui/card";
-import {} from "app/ui/dialog";
-import {} from "app/ui/dropdown-menu";
 import { Heading } from "app/ui/heading";
 import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
 import { useToast } from "app/ui/use-toast";
-import {} from "lucide-react";
 import { useEffect } from "react";
 
 import { ExerciseForm } from "../../features/exercise/exercise-form";

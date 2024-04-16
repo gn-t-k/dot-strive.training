@@ -19,7 +19,6 @@ import {
 
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { Calendar } from "app/ui/calendar";
-import { getServerTiming } from "app/utils/timing.server";
 import { type FC, useCallback, useMemo, useState } from "react";
 import type { MonthChangeEventHandler } from "react-day-picker";
 
@@ -32,7 +31,7 @@ export const loader = async ({
   request,
   params,
 }: LoaderFunctionArgs) => {
-  const { time, getServerTimingHeader } = getServerTiming();
+  const { time, getServerTimingHeader } = context.serverTiming;
 
   const { trainee } = await time("traineeLoader", async () => {
     return await traineeLoader({ context, request, params }).then((response) =>
