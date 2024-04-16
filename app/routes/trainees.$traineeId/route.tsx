@@ -14,6 +14,7 @@ import { HeaderNavigation } from "./header-navigation";
 import { MainContentSkeleton } from "./main-content-skeleton";
 
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { Main } from "app/ui/main";
 import type { FC } from "react";
 
 export const loader = async ({
@@ -54,9 +55,9 @@ const PageWithNavigationHeader: FC = () => {
       {navigation.state === "idle" ? (
         <Outlet />
       ) : (
-        <div className="mt-2">
+        <Main className="mt-2">
           <MainContentSkeleton />
-        </div>
+        </Main>
       )}
       <footer className="mt-8 flex h-24 items-center justify-center border-t px-4">
         <p className="text-muted-foreground">.STRIVE</p>

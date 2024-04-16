@@ -1,4 +1,4 @@
-import { asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { array, date, merge, number, object, safeParse, string } from "valibot";
 
 import { exercises } from "database/tables/exercises";
@@ -14,6 +14,7 @@ type GetTrainingsByTraineeId = (
   context: AppLoadContext,
 ) => (
   traineeId: string,
+  dateRange: { from: Date; to: Date },
 ) => Promise<{ result: "success"; data: Payload } | { result: "failure" }>;
 type Payload = Input<typeof payloadSchema>;
 const exerciseSchema = object({
@@ -52,7 +53,8 @@ const payloadSchema = array(
   ]),
 );
 export const getTrainingsByTraineeId: GetTrainingsByTraineeId =
-  (context) => async (traineeId) => {
+  (context) =>
+  async (traineeId, { from, to }) => {
     try {
       const database = drizzle(context.cloudflare["env"].DB);
       const data = await database
@@ -78,7 +80,13 @@ export const getTrainingsByTraineeId: GetTrainingsByTraineeId =
         )
         .leftJoin(trainingSets, eq(trainingSessions.id, trainingSets.sessionId))
         .leftJoin(exercises, eq(trainingSessions.exerciseId, exercises.id))
-        .where(eq(trainings.traineeId, traineeId))
+        .where(
+          and(
+            eq(trainings.traineeId, traineeId),
+            gte(trainings.date, from),
+            lte(trainings.date, to),
+          ),
+        )
         .orderBy(
           desc(trainings.date),
           asc(trainingSessions.order),
