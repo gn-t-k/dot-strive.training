@@ -1,3 +1,4 @@
+import { ja } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type * as React from "react";
 import { DayPicker } from "react-day-picker";
@@ -16,10 +17,11 @@ const Calendar = ({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
+      locale={ja}
       className={cn("p-3", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-        month: "space-y-4",
+        month: "w-full space-y-4",
         caption: "flex justify-center pt-1 relative items-center",
         // biome-ignore lint/style/useNamingConvention: ライブラリ指定のため
         caption_label: "text-sm font-medium",
@@ -35,15 +37,15 @@ const Calendar = ({
         nav_button_next: "absolute right-1",
         table: "w-full border-collapse space-y-1",
         // biome-ignore lint/style/useNamingConvention: ライブラリ指定のため
-        head_row: "flex",
+        head_row: "flex justify-between",
         // biome-ignore lint/style/useNamingConvention: ライブラリ指定のため
         head_cell:
           "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
-        row: "flex w-full mt-2",
+        row: "flex w-full mt-2 justify-between",
         cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100",
+          "h-9 w-9 p-0 pb-3 font-normal aria-selected:opacity-100",
         ),
         // biome-ignore lint/style/useNamingConvention: ライブラリ指定のため
         day_range_end: "day-range-end",
