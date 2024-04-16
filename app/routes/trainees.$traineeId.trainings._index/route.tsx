@@ -94,6 +94,7 @@ const Page: FC = () => {
   );
   const onMonthChange = useCallback<MonthChangeEventHandler>(
     (month) => {
+      setSelectedDate(undefined);
       searchParams.set("month", format(month, "yyyy-MM"));
       setSearchParams(searchParams, { preventScrollReset: true });
     },
@@ -101,14 +102,22 @@ const Page: FC = () => {
   );
 
   if (navigation.state !== "idle") {
-    <Main>
-      <Section>
-        <Calendar />
-      </Section>
-      <Section>
-        <MainContentSkeleton />
-      </Section>
-    </Main>;
+    return (
+      <Main>
+        <Section>
+          <Calendar
+            defaultMonth={defaultMonth}
+            modifiersClassNames={{
+              today: "border-2 border-primary",
+            }}
+            showOutsideDays={false}
+          />
+        </Section>
+        <Section>
+          <MainContentSkeleton />
+        </Section>
+      </Main>
+    );
   }
 
   return (
