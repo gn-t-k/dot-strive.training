@@ -22,30 +22,42 @@ import { Calendar } from "app/ui/calendar";
 import { type FC, useCallback, useMemo, useState } from "react";
 import type { MonthChangeEventHandler } from "react-day-picker";
 
+import { headers as mergeHeaders } from "app/utils/merge-headers.server";
+
+export const headers = mergeHeaders;
+
 export const loader = async ({
   context,
   request,
   params,
 }: LoaderFunctionArgs) => {
-  const { trainee } = await traineeLoader({ context, request, params }).then(
-    (response) => response.json(),
-  );
+  const { time, getServerTimingHeader } = context.serverTiming;
+
+  const { trainee } = await time("traineeLoader", async () => {
+    return await traineeLoader({ context, request, params }).then((response) =>
+      response.json(),
+    );
+  });
   const dateRange = ((month: string | null) => {
     const date = month ? parseISO(month) : new Date();
 
     return { from: startOfMonth(date), to: endOfMonth(date) };
   })(new URL(request.url).searchParams.get("month"));
 
-  const getTrainingsResult = await getTrainingsByTraineeId(context)(
-    trainee.id,
-    dateRange,
-  );
+  const getTrainingsResult = await time("getTrainingsByTraineeId", async () => {
+    return await getTrainingsByTraineeId(context)(trainee.id, dateRange);
+  });
   if (getTrainingsResult.result === "failure") {
     throw new Response("Internal Server Error", { status: 500 });
   }
   const trainings = getTrainingsResult.data;
 
-  return json({ trainee, trainings });
+  return json(
+    { trainee, trainings },
+    {
+      headers: getServerTimingHeader(),
+    },
+  );
 };
 
 const Page: FC = () => {

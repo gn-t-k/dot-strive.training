@@ -8,7 +8,6 @@ import {
 
 import { getAuthenticator } from "app/features/auth/get-authenticator.server";
 import { validateTrainee } from "app/features/trainee/schema";
-import {} from "app/ui/tabs";
 
 import { HeaderNavigation } from "./header-navigation";
 import { MainContentSkeleton } from "./main-content-skeleton";
