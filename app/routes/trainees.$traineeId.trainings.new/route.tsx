@@ -10,6 +10,7 @@ import { validateExercise } from "app/features/exercise/schema";
 import { createTraining } from "app/features/training/create-training";
 import { validateTraining } from "app/features/training/schema";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
+import { Main } from "app/ui/main";
 import { useToast } from "app/ui/use-toast";
 
 import {
@@ -21,6 +22,7 @@ import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
 } from "@remix-run/cloudflare";
+import { format } from "date-fns";
 import type { FC } from "react";
 
 export const loader = async ({
@@ -32,16 +34,19 @@ export const loader = async ({
     (response) => response.json(),
   );
 
+  const url = new URL(request.url);
+  const date = url.searchParams.get("date");
+
   const getExercisesResult = await getExercisesByTraineeId(context)(trainee.id);
   if (getExercisesResult.result !== "success") {
     throw new Response("Internal Server Error", { status: 500 });
   }
 
-  return json({ trainee, registeredExercises: getExercisesResult.data });
+  return json({ trainee, registeredExercises: getExercisesResult.data, date });
 };
 
 const Page: FC = () => {
-  const { trainee, registeredExercises } = useLoaderData<typeof loader>();
+  const { trainee, registeredExercises, date } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -67,10 +72,22 @@ const Page: FC = () => {
   }, [actionData, navigate, toast, trainee.id]);
 
   return (
-    <TrainingForm
-      actionType="create"
-      registeredExercises={registeredExercises}
-    />
+    <Main>
+      <TrainingForm
+        actionType="create"
+        registeredExercises={registeredExercises}
+        defaultValue={{
+          date: date ?? format(new Date(), "yyyy-MM-dd"),
+          sessions: [
+            {
+              exerciseId: "",
+              memo: "",
+              sets: [{ weight: "", reps: "", rpe: "" }],
+            },
+          ],
+        }}
+      />
+    </Main>
   );
 };
 export default Page;

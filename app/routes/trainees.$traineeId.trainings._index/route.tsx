@@ -2,10 +2,8 @@ import { json } from "@remix-run/cloudflare";
 import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
 import { getTrainingsByTraineeId } from "app/features/training/get-trainings-by-trainee-id";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
-import {} from "app/ui/alert-dialog";
 import { Button } from "app/ui/button";
 import { Card, CardContent, CardHeader } from "app/ui/card";
-import {} from "app/ui/dropdown-menu";
 import { Heading } from "app/ui/heading";
 import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
@@ -22,7 +20,7 @@ import {
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { Calendar } from "app/ui/calendar";
 import { type FC, useCallback, useMemo, useState } from "react";
-import type { DateRange, MonthChangeEventHandler } from "react-day-picker";
+import type { MonthChangeEventHandler } from "react-day-picker";
 
 export const loader = async ({
   context,
@@ -52,7 +50,7 @@ export const loader = async ({
 
 const Page: FC = () => {
   const { trainee, trainings } = useLoaderData<typeof loader>();
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const defaultMonth = useMemo<Date>(() => {
@@ -60,16 +58,16 @@ const Page: FC = () => {
     return month ? new Date(month) : new Date();
   }, [searchParams.get]);
   const filteredTrainings = useMemo(() => {
-    if (!dateRange?.from) {
+    if (!selectedDate) {
       return trainings;
     }
-    const from = startOfDay(dateRange.from);
-    const to = dateRange.to ? endOfDay(dateRange.to) : endOfDay(from);
+    const from = startOfDay(selectedDate);
+    const to = endOfDay(selectedDate);
     return trainings.filter((training) => {
       const date = parseISO(training.date);
       return from <= date && date <= to;
     });
-  }, [dateRange, trainings]);
+  }, [selectedDate, trainings]);
 
   const hasTrainings = useCallback<(date: Date) => boolean>(
     (date) => trainings.some((training) => isSameDay(date, training.date)),
@@ -87,9 +85,9 @@ const Page: FC = () => {
     <Main>
       <Section>
         <Calendar
-          mode="range"
-          selected={dateRange}
-          onSelect={setDateRange}
+          mode="single"
+          selected={selectedDate}
+          onSelect={setSelectedDate}
           defaultMonth={defaultMonth}
           onMonthChange={onMonthChange}
           modifiers={{ hasTrainings }}
@@ -102,11 +100,18 @@ const Page: FC = () => {
         />
       </Section>
       <Section>
-        <Button size="lg" asChild>
-          <Link to={`/trainees/${trainee.id}/trainings/new`}>
-            トレーニングを登録する
-          </Link>
-        </Button>
+        {!selectedDate && (
+          <Button size="lg" asChild>
+            <Link
+              to={`/trainees/${trainee.id}/trainings/new?date=${format(
+                new Date(),
+                "yyyy-MM-dd",
+              )}`}
+            >
+              今日のトレーニングを登録する
+            </Link>
+          </Button>
+        )}
         <ol className="flex flex-col gap-8">
           {filteredTrainings.map((training) => {
             const dateString = format(
@@ -129,6 +134,18 @@ const Page: FC = () => {
             );
           })}
         </ol>
+        {selectedDate && (
+          <Button size="lg" asChild>
+            <Link
+              to={`/trainees/${trainee.id}/trainings/new?date=${format(
+                selectedDate,
+                "yyyy-MM-dd",
+              )}`}
+            >
+              {format(selectedDate, "yyyy年MM月dd日")}のトレーニングを登録する
+            </Link>
+          </Button>
+        )}
       </Section>
     </Main>
   );
