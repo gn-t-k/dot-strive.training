@@ -13,6 +13,7 @@ import { HeaderNavigation } from "./header-navigation";
 
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import type { FC } from "react";
+import { TraineeRouteLoading } from "./loading";
 
 export const loader = async ({
   context,
@@ -49,14 +50,11 @@ const PageWithNavigationHeader: FC = () => {
       <header className="sticky top-0">
         <HeaderNavigation traineeId={trainee.id} location={location} />
       </header>
-      <Outlet />
-      {/* {navigation.state === "idle" ? (
+      {navigation.state === "idle" ? (
         <Outlet />
       ) : (
-        <Main className="mt-2">
-          <MainContentSkeleton />
-        </Main>
-      )} */}
+        <TraineeRouteLoading traineeId={trainee.id} />
+      )}
       <footer className="mt-8 flex h-24 items-center justify-center border-t px-4">
         <p className="text-muted-foreground">.STRIVE</p>
       </footer>
