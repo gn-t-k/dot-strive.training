@@ -1,16 +1,12 @@
-import { Link, useNavigation } from "@remix-run/react";
+import { useNavigation } from "@remix-run/react";
 import { Button } from "app/ui/button";
 import { Calendar } from "app/ui/calendar";
 import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
-import { format } from "date-fns";
 import { type FC, useMemo } from "react";
-import { MainContentSkeleton } from "../trainees.$traineeId/main-content-skeleton";
+import { GenericSkeleton } from "../trainees.$traineeId/generic-content-skeleton";
 
-type Props = {
-  traineeId: string;
-};
-export const TrainingsPageLoading: FC<Props> = ({ traineeId }) => {
+export const TrainingsPageLoading: FC = () => {
   const navigation = useNavigation();
   const today = new Date();
   const searchParams = new URLSearchParams(navigation.location?.search);
@@ -25,17 +21,8 @@ export const TrainingsPageLoading: FC<Props> = ({ traineeId }) => {
         <Calendar defaultMonth={defaultMonth} showOutsideDays={false} />
       </Section>
       <Section>
-        <Button size="lg" asChild>
-          <Link
-            to={`/trainees/${traineeId}/trainings/new?date=${format(
-              today,
-              "yyyy-MM-dd",
-            )}`}
-          >
-            今日のトレーニングを登録する
-          </Link>
-        </Button>
-        <MainContentSkeleton />
+        <Button size="lg">今日のトレーニングを登録する</Button>
+        <GenericSkeleton />
       </Section>
     </Main>
   );

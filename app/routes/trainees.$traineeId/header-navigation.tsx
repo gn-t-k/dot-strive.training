@@ -1,14 +1,17 @@
-import { CircleUserRound, Dumbbell, History, Tag } from "lucide-react";
+import { CalendarDays, CircleUserRound, Dumbbell, Tag } from "lucide-react";
 
-import { Link } from "@remix-run/react";
+import { Link, useLocation, useNavigation } from "@remix-run/react";
 import { Logotype } from "app/ui/logotype";
 import type { FC } from "react";
 
 type Props = {
   traineeId: string;
-  location: string;
 };
-export const HeaderNavigation: FC<Props> = ({ traineeId, location }) => {
+export const HeaderNavigation: FC<Props> = ({ traineeId }) => {
+  const { state } = useNavigation();
+  const { pathname } = useLocation();
+  const location = pathname.split("/")[3] ?? "";
+
   return (
     <nav className="flex w-full items-center justify-between bg-white py-2 px-4">
       <div>
@@ -16,12 +19,12 @@ export const HeaderNavigation: FC<Props> = ({ traineeId, location }) => {
       </div>
       <div className="flex w-full items-center justify-end">
         <Link to={`/trainees/${traineeId}/trainings`} className="p-2">
-          <History
+          <CalendarDays
             size="20px"
             className={
-              location === "trainings"
+              location === "trainings" && state === "idle"
                 ? "text-primary"
-                : "text-muted-foreground"
+                : "text-muted-foreground/50"
             }
           />
         </Link>
@@ -29,9 +32,9 @@ export const HeaderNavigation: FC<Props> = ({ traineeId, location }) => {
           <Dumbbell
             size="20px"
             className={
-              location === "exercises"
+              location === "exercises" && state === "idle"
                 ? "text-primary"
-                : "text-muted-foreground"
+                : "text-muted-foreground/50"
             }
           />
         </Link>
@@ -39,7 +42,9 @@ export const HeaderNavigation: FC<Props> = ({ traineeId, location }) => {
           <Tag
             size="20px"
             className={
-              location === "tags" ? "text-primary" : "text-muted-foreground"
+              location === "tags" && state === "idle"
+                ? "text-primary"
+                : "text-muted-foreground/50"
             }
           />
         </Link>
@@ -47,7 +52,9 @@ export const HeaderNavigation: FC<Props> = ({ traineeId, location }) => {
           <CircleUserRound
             size="20px"
             className={
-              location === "" ? "text-primary" : "text-muted-foreground"
+              location === "" && state === "idle"
+                ? "text-primary"
+                : "text-muted-foreground/50"
             }
           />
         </Link>
