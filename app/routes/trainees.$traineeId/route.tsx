@@ -1,10 +1,5 @@
 import { json, redirect } from "@remix-run/cloudflare";
-import {
-  Outlet,
-  useLoaderData,
-  useLocation,
-  useNavigation,
-} from "@remix-run/react";
+import { Outlet, useLoaderData, useNavigation } from "@remix-run/react";
 
 import { getAuthenticator } from "app/features/auth/get-authenticator.server";
 import { validateTrainee } from "app/features/trainee/schema";
@@ -13,7 +8,7 @@ import { HeaderNavigation } from "./header-navigation";
 
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import type { FC } from "react";
-import { TraineeRouteLoading } from "./loading";
+import { TraineesRouteLoading } from "./trainees-route-loading";
 
 export const loader = async ({
   context,
@@ -41,20 +36,14 @@ export const loader = async ({
 
 const PageWithNavigationHeader: FC = () => {
   const { trainee } = useLoaderData<typeof loader>();
-  const { pathname } = useLocation();
-  const location = pathname.split("/")[3] ?? "";
   const navigation = useNavigation();
 
   return (
     <>
       <header className="sticky top-0">
-        <HeaderNavigation traineeId={trainee.id} location={location} />
+        <HeaderNavigation traineeId={trainee.id} />
       </header>
-      {navigation.state === "idle" ? (
-        <Outlet />
-      ) : (
-        <TraineeRouteLoading traineeId={trainee.id} />
-      )}
+      {navigation.state === "idle" ? <Outlet /> : <TraineesRouteLoading />}
       <footer className="mt-8 flex h-24 items-center justify-center border-t px-4">
         <p className="text-muted-foreground">.STRIVE</p>
       </footer>
