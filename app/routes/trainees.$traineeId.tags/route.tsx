@@ -67,26 +67,26 @@ const Page: FC = () => {
     switch (actionData.action) {
       case "create": {
         if (actionData.success) {
-          toast({ title: "部位を登録しました" });
+          toast({ title: "タグを登録しました" });
         } else {
-          toast({ title: "部位の登録に失敗しました", variant: "destructive" });
+          toast({ title: "タグの登録に失敗しました", variant: "destructive" });
         }
         break;
       }
       case "update": {
         setEditing(undefined);
         if (actionData.success) {
-          toast({ title: "部位を更新しました" });
+          toast({ title: "タグを更新しました" });
         } else {
-          toast({ title: "部位の更新に失敗しました", variant: "destructive" });
+          toast({ title: "タグの更新に失敗しました", variant: "destructive" });
         }
         break;
       }
       case "delete": {
         if (actionData.success) {
-          toast({ title: "部位を削除しました" });
+          toast({ title: "タグを削除しました" });
         } else {
-          toast({ title: "部位の削除に失敗しました", variant: "destructive" });
+          toast({ title: "タグの削除に失敗しました", variant: "destructive" });
         }
         break;
       }
@@ -162,9 +162,9 @@ const Page: FC = () => {
                             </DropdownMenuContent>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>部位の削除</AlertDialogTitle>
+                                <AlertDialogTitle>タグの削除</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  部位を削除しますか？
+                                  タグを削除しますか？
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
@@ -200,9 +200,9 @@ const Page: FC = () => {
         </ul>
         <Card>
           <CardHeader>
-            <Heading level={2}>部位を登録する</Heading>
+            <Heading level={2}>タグを登録する</Heading>
             <CardDescription>
-              .STRIVEでは、部位に名前をつけて各種目に割り当てることが出来ます。
+              .STRIVEでは、種目を名前とタグ付けで管理できます。
             </CardDescription>
           </CardHeader>
           <CardContent>

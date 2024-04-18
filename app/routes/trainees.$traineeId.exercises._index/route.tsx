@@ -16,6 +16,7 @@ import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
 } from "@remix-run/cloudflare";
+import { Badge } from "app/ui/badge";
 import type { FC } from "react";
 import { createAction } from "./create-action";
 
@@ -81,9 +82,15 @@ const Page: FC = () => {
                   <Card>
                     <CardHeader className="flex flex-col gap-2">
                       <Heading level={2}>{exercise.name}</Heading>
-                      <CardDescription>
-                        {exercise.tags.map((tag) => tag.name).join("、")}
-                      </CardDescription>
+                      <ul className="inline leading-relaxed">
+                        {exercise.tags.map((tag, index) => {
+                          return (
+                            <li className="inline mr-1" key={`${index}_${tag}`}>
+                              <Badge variant="outline">#{tag.name}</Badge>
+                            </li>
+                          );
+                        })}
+                      </ul>
                     </CardHeader>
                   </Card>
                 </Link>
@@ -95,7 +102,7 @@ const Page: FC = () => {
           <CardHeader>
             <Heading level={2}>種目を登録する</Heading>
             <CardDescription>
-              .STRIVEでは、種目に名前と対象の部位を設定することが出来ます。
+              .STRIVEでは、種目を名前とタグ付けで管理できます。
             </CardDescription>
           </CardHeader>
           <CardContent>
