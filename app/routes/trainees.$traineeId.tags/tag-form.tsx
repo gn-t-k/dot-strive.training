@@ -1,5 +1,5 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
-import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Form } from "@remix-run/react";
 import { parseWithValibot } from "conform-to-valibot";
 import { custom, nonOptional, object, optional, string } from "valibot";
@@ -23,10 +23,10 @@ export const getTagFormSchema = ({
           (value) =>
             registeredTags.every((tag) => tag.name !== value) ||
             value === beforeName,
-          "部位の名前が重複しています",
+          "タグの名前が重複しています",
         ),
       ]),
-      "部位の名前を入力してください",
+      "タグの名前を入力してください",
     ),
     actionType: string(),
   });
@@ -60,9 +60,9 @@ export const TagForm: FC<Props> = ({
     <Form method="post" className="flex space-x-1" {...getFormProps(form)}>
       <input {...getInputProps(fields.id, { type: "hidden" })} />
       <fieldset className="w-full grow">
-        <VisuallyHidden.Root>
+        <VisuallyHidden>
           <Label htmlFor={fields.name.id}>名前</Label>
-        </VisuallyHidden.Root>
+        </VisuallyHidden>
         <Input
           {...getInputProps(fields.name, { type: "text" })}
           placeholder="例: 大胸筋"

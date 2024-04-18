@@ -52,7 +52,7 @@ export const getExerciseFormSchema = ({
         minLength(1),
         custom((value) => registeredTags.some((tag) => tag.id === value)),
       ]),
-      [minLength(1, "対象の部位を選択してください")],
+      [minLength(1, "種目に紐付けるタグを選択してください")],
     ),
     actionType: string(),
   });
@@ -107,7 +107,7 @@ export const ExerciseForm: FC<Props> = ({
       </div>
       <fieldset {...getFieldsetProps(fields.tags)} className="space-y-2">
         <Label asChild>
-          <legend>対象の部位</legend>
+          <legend>タグ</legend>
         </Label>
         {getCollectionProps(fields.tags, {
           type: "checkbox",
