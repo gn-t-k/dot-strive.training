@@ -54,7 +54,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.7.0",
-    "@cloudflare/workers-types": "4.20240405.0",
+    "@cloudflare/workers-types": "4.20240419.0",
     "@remix-run/dev": "2.8.1",
     "@tsconfig/strictest": "2.0.5",
     "@types/react": "18.2.79",
