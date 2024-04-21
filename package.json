@@ -39,7 +39,7 @@
     "clsx": "2.1.0",
     "conform-to-valibot": "1.7.0",
     "date-fns": "3.6.0",
-    "drizzle-orm": "0.30.8",
+    "drizzle-orm": "0.30.9",
     "isbot": "5.1.4",
     "lucide-react": "0.372.0",
     "miniflare": "3.20240405.2",
