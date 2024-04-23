@@ -1,5 +1,5 @@
-import { json } from "@remix-run/cloudflare";
-import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
+import { defer } from "@remix-run/cloudflare";
+import { Await, Link, useLoaderData, useSearchParams } from "@remix-run/react";
 import { getTrainingsByTraineeId } from "app/features/training/get-trainings-by-trainee-id";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import { Button } from "app/ui/button";
@@ -19,51 +19,67 @@ import {
 
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { Calendar } from "app/ui/calendar";
-import { type FC, useCallback, useMemo, useState } from "react";
+import { type FC, Suspense, useCallback, useMemo, useState } from "react";
 import type { MonthChangeEventHandler } from "react-day-picker";
-
-import { headers as mergeHeaders } from "app/utils/merge-headers.server";
+import { TrainingsPageLoading } from "./trainings-page-loading";
 import { TrainingSessionList } from "./trainingt-session-list";
-
-export const headers = mergeHeaders;
 
 export const loader = async ({
   context,
   request,
   params,
 }: LoaderFunctionArgs) => {
-  const { time, getServerTimingHeader } = context.serverTiming;
-
-  const { trainee } = await time("traineeLoader", async () => {
-    return await traineeLoader({ context, request, params }).then((response) =>
-      response.json(),
+  const loaderData = (async () => {
+    const { trainee } = await traineeLoader({ context, request, params }).then(
+      (response) => response.json(),
     );
-  });
-  const today = new Date();
-  const dateRange = ((month: string | null) => {
-    const date = month ? parseISO(month) : today;
+    const today = new Date();
+    const dateRange = ((month: string | null) => {
+      const date = month ? parseISO(month) : today;
 
-    return { from: startOfMonth(date), to: endOfMonth(date) };
-  })(new URL(request.url).searchParams.get("month"));
+      return { from: startOfMonth(date), to: endOfMonth(date) };
+    })(new URL(request.url).searchParams.get("month"));
 
-  const getTrainingsResult = await time("getTrainingsByTraineeId", async () => {
-    return await getTrainingsByTraineeId(context)(trainee.id, dateRange);
-  });
-  if (getTrainingsResult.result === "failure") {
-    throw new Response("Internal Server Error", { status: 500 });
-  }
-  const trainings = getTrainingsResult.data;
+    const getTrainingsResult = await getTrainingsByTraineeId(context)(
+      trainee.id,
+      dateRange,
+    );
+    if (getTrainingsResult.result === "failure") {
+      throw new Response("Internal Server Error", { status: 500 });
+    }
+    const trainings = getTrainingsResult.data;
 
-  return json(
-    { trainee, trainings },
-    {
-      headers: getServerTimingHeader(),
-    },
-  );
+    return { trainee, trainings };
+  })();
+
+  return defer({ loaderData });
 };
 
 const Page: FC = () => {
-  const { trainee, trainings } = useLoaderData<typeof loader>();
+  const { loaderData } = useLoaderData<typeof loader>();
+
+  return (
+    <Suspense fallback={<TrainingsPageLoading />}>
+      <Await resolve={loaderData}>
+        {({ trainee, trainings }) => (
+          <TrainingsPage
+            trainee={trainee}
+            trainings={trainings.map((training) => ({
+              ...training,
+              date: new Date(training.date),
+            }))}
+          />
+        )}
+      </Await>
+    </Suspense>
+  );
+};
+export default Page;
+
+type TrainingsPageProps = Awaited<
+  Awaited<ReturnType<typeof loader>>["data"]["loaderData"]
+>;
+const TrainingsPage: FC<TrainingsPageProps> = ({ trainee, trainings }) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -80,7 +96,7 @@ const Page: FC = () => {
     const from = startOfDay(selectedDate);
     const to = endOfDay(selectedDate);
     return trainings.filter((training) => {
-      const date = parseISO(training.date);
+      const { date } = training;
       return from <= date && date <= to;
     });
   }, [selectedDate, trainings]);
@@ -145,10 +161,7 @@ const Page: FC = () => {
         {filteredTrainings.length > 0 && (
           <ol className="flex flex-col gap-8">
             {filteredTrainings.map((training) => {
-              const dateString = format(
-                parseISO(training.date),
-                "yyyy年MM月dd日",
-              );
+              const dateString = format(training.date, "yyyy年MM月dd日");
               return (
                 <li key={training.id}>
                   <Link to={`/trainees/${trainee.id}/trainings/${training.id}`}>
@@ -170,4 +183,3 @@ const Page: FC = () => {
     </Main>
   );
 };
-export default Page;
