@@ -24,7 +24,6 @@ type Props = DetailedHTMLProps<
 > &
   VariantProps<typeof headingVariants> & { level: 1 | 2 | 3 | 4 | 5 | 6 };
 export const Heading: FC<Props> = ({ className, size, ...props }) => {
-  // biome-ignore lint/style/useNamingConvention: コンポーネントはアッパーキャメルケース
   const Comp = `h${props.level}` as const;
 
   return (

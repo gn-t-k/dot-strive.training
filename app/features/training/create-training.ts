@@ -5,8 +5,8 @@ import { trainings } from "database/tables/trainings";
 import type { AppLoadContext } from "@remix-run/cloudflare";
 import { trainingSessions } from "database/tables/training-sessions";
 import { drizzle } from "drizzle-orm/d1";
-import { flatTraining } from "./flat-training";
 import type { Training } from "./schema";
+import { serializeTraining } from "./serialize-training";
 
 type CreateTraining = (context: AppLoadContext) => (props: {
   training: Training;
@@ -19,7 +19,7 @@ export const createTraining: CreateTraining =
   (context) =>
   async ({ training, traineeId }) => {
     try {
-      const { sessions, sets } = flatTraining(training);
+      const { sessions, sets } = serializeTraining(training);
 
       const database = drizzle(context.cloudflare["env"].DB);
       const [[created]] = await database.batch([

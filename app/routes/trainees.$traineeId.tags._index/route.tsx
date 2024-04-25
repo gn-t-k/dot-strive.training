@@ -8,7 +8,7 @@ import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { TagForm } from "app/features/tag/tag-form";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import {} from "app/ui/alert-dialog";
-import { Card, CardContent, CardDescription, CardHeader } from "app/ui/card";
+import { Card, CardHeader } from "app/ui/card";
 import {} from "app/ui/dropdown-menu";
 import { Heading } from "app/ui/heading";
 import { Main } from "app/ui/main";
@@ -58,7 +58,24 @@ const Page: FC = () => {
 
   return (
     <Main>
+      <header>
+        <Heading level={1} size="lg">
+          タグ
+        </Heading>
+        <p className="text-muted-foreground">
+          .STRIVEでは、種目に対してタグをつけることができます。
+        </p>
+        <p className="text-muted-foreground">
+          部位や動作パターンなどのタグを登録、種目にタグ付けすることで、タグごとにトレーニングの量・強度・頻度を管理することができます。
+        </p>
+      </header>
+      <TagForm
+        key={Math.random().toString()}
+        registeredTags={tags}
+        actionType="create"
+      />
       <Section>
+        <Heading level={2}>登録されているタグ</Heading>
         <ul className="flex flex-col gap-4">
           {tags.map((tag) => {
             return (
@@ -76,21 +93,6 @@ const Page: FC = () => {
             );
           })}
         </ul>
-        <Card>
-          <CardHeader>
-            <Heading level={2}>タグを登録する</Heading>
-            <CardDescription>
-              .STRIVEでは、種目を名前とタグ付けで管理できます。
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TagForm
-              key={Math.random().toString()}
-              registeredTags={tags}
-              actionType="create"
-            />
-          </CardContent>
-        </Card>
       </Section>
     </Main>
   );

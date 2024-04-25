@@ -1,20 +1,27 @@
-import { and, asc, desc, eq, gte, lte, sql } from "drizzle-orm";
-import { array, date, merge, number, object, string } from "valibot";
-
+import type { AppLoadContext } from "@remix-run/cloudflare";
 import { exercises } from "database/tables/exercises";
+import { tagExerciseMappings } from "database/tables/tag-exercise-mappings";
+import { tags } from "database/tables/tags";
 import { trainingSessions } from "database/tables/training-sessions";
 import { trainingSets } from "database/tables/training-sets";
 import { trainings } from "database/tables/trainings";
-
-import type { AppLoadContext } from "@remix-run/cloudflare";
+import { and, asc, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
-import type { Input } from "valibot";
+import {
+  type Input,
+  array,
+  date,
+  merge,
+  number,
+  object,
+  string,
+} from "valibot";
 import { deserializeTraining } from "./deserialize-training";
 
-type GetTrainingsByTraineeId = (
+type GetTrainingsByTagId = (
   context: AppLoadContext,
 ) => (
-  traineeId: string,
+  tagId: string,
   dateRange: { from: Date; to: Date },
 ) => Promise<{ result: "success"; data: Payload } | { result: "failure" }>;
 type Payload = Input<typeof payloadSchema>;
@@ -53,9 +60,9 @@ const payloadSchema = array(
     }),
   ]),
 );
-export const getTrainingsByTraineeId: GetTrainingsByTraineeId =
+export const getTrainingsByTagId: GetTrainingsByTagId =
   (context) =>
-  async (traineeId, { from, to }) => {
+  async (tagId, { from, to }) => {
     try {
       const database = drizzle(context.cloudflare["env"].DB);
       const data = await database
@@ -81,9 +88,14 @@ export const getTrainingsByTraineeId: GetTrainingsByTraineeId =
         )
         .leftJoin(trainingSets, eq(trainingSessions.id, trainingSets.sessionId))
         .leftJoin(exercises, eq(trainingSessions.exerciseId, exercises.id))
+        .leftJoin(
+          tagExerciseMappings,
+          eq(exercises.id, tagExerciseMappings.exerciseId),
+        )
+        .leftJoin(tags, eq(tagExerciseMappings.tagId, tags.id))
         .where(
           and(
-            eq(trainings.traineeId, traineeId),
+            eq(tags.id, tagId),
             gte(trainings.date, from),
             lte(trainings.date, to),
           ),

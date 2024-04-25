@@ -6,12 +6,16 @@ import {
 } from "@remix-run/cloudflare";
 import {
   Form,
+  Link,
   useActionData,
   useLoaderData,
   useNavigate,
+  useSearchParams,
 } from "@remix-run/react";
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { TagForm } from "app/features/tag/tag-form";
+import { getTrainingsByTagId } from "app/features/training/get-trainings-by-tag-id";
+import { TrainingSessionList } from "app/features/training/training-session-list";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import {
   AlertDialog,
@@ -25,18 +29,31 @@ import {
   AlertDialogTrigger,
 } from "app/ui/alert-dialog";
 import { Button } from "app/ui/button";
+import { Calendar } from "app/ui/calendar";
+import { Card, CardContent, CardHeader } from "app/ui/card";
 import { Heading } from "app/ui/heading";
 import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
 import { useToast } from "app/ui/use-toast";
+import {
+  endOfDay,
+  endOfMonth,
+  format,
+  isSameDay,
+  parseISO,
+  startOfDay,
+  startOfMonth,
+} from "date-fns";
 import { Pencil, X } from "lucide-react";
 import {
   type FC,
   type MouseEventHandler,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from "react";
+import type { MonthChangeEventHandler } from "react-day-picker";
 import { deleteAction } from "./delete-action";
 import { updateAction } from "./update-action";
 
@@ -54,17 +71,35 @@ export const loader = async ({
     return redirect(`/trainees/${trainee.id}/tags`);
   }
 
-  const getTagsResult = await getTagsByTraineeId(context)(trainee.id);
-  if (getTagsResult.result !== "success") {
+  const today = new Date();
+  const dateRange = ((month: string | null) => {
+    const date = month ? parseISO(month) : today;
+
+    return { from: startOfMonth(date), to: endOfMonth(date) };
+  })(new URL(request.url).searchParams.get("month"));
+
+  const [getTagsResult, getTrainingsResult] = await Promise.all([
+    getTagsByTraineeId(context)(trainee.id),
+    getTrainingsByTagId(context)(tagId, dateRange),
+  ]);
+  if (
+    !(
+      getTagsResult.result === "success" &&
+      getTrainingsResult.result === "success"
+    )
+  ) {
     throw new Response("Sorry, something went wrong", { status: 500 });
   }
+
   const registeredTags = getTagsResult.data;
   const tag = registeredTags.find((tag) => tag.id === tagId);
   if (!tag) {
     return json({ trainee, tag: null });
   }
 
-  return json({ trainee, tag, registeredTags });
+  const trainings = getTrainingsResult.data;
+
+  return json({ trainee, tag, registeredTags, trainings });
 };
 
 const Page: FC = () => {
@@ -72,16 +107,6 @@ const Page: FC = () => {
   const actionData = useActionData<typeof action>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isEditing, setIsEditing] = useState(false);
-  const onClickEdit = useCallback<MouseEventHandler<HTMLButtonElement>>((_) => {
-    setIsEditing(true);
-  }, []);
-  const onClickCancel = useCallback<MouseEventHandler<HTMLButtonElement>>(
-    (_) => {
-      setIsEditing(false);
-    },
-    [],
-  );
 
   const { trainee, tag } = loaderData;
 
@@ -115,7 +140,95 @@ const Page: FC = () => {
     // 削除のactionをした直後はtagがnullになり、useEffectでリダイレクトされる
     return null;
   }
-  const { registeredTags } = loaderData;
+  const { registeredTags, trainings } = loaderData;
+
+  return (
+    <TagPage
+      traineeId={trainee.id}
+      tag={tag}
+      registeredTags={registeredTags}
+      trainings={trainings}
+    />
+  );
+};
+export default Page;
+
+type TagPageProps = {
+  traineeId: string;
+  tag: Tag;
+  registeredTags: Tag[];
+  trainings: Training[];
+};
+type Tag = { id: string; name: string };
+type Training = {
+  id: string;
+  date: string;
+  sessions: {
+    id: string;
+    memo: string;
+    exercise: {
+      id: string;
+      name: string;
+    };
+    sets: {
+      id: string;
+      weight: number;
+      repetition: number;
+      rpe: number;
+      estimatedMaximumWeight: number;
+    }[];
+  }[];
+};
+const TagPage: FC<TagPageProps> = ({
+  traineeId,
+  tag,
+  registeredTags,
+  trainings,
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+
+  const today = new Date();
+
+  const defaultMonth = useMemo<Date>(() => {
+    const month = searchParams.get("month");
+    return month ? new Date(month) : today;
+  }, [searchParams.get, today]);
+  const filteredTrainings = useMemo(() => {
+    if (!selectedDate) {
+      return trainings;
+    }
+    const from = startOfDay(selectedDate);
+    const to = endOfDay(selectedDate);
+    return trainings.filter((training) => {
+      const date = new Date(training.date);
+      return from <= date && date <= to;
+    });
+  }, [selectedDate, trainings]);
+
+  const hasTrainings = useCallback(
+    (date: Date) =>
+      trainings.some((training) => isSameDay(date, training.date)),
+    [trainings.some],
+  );
+  const onClickEdit = useCallback<MouseEventHandler<HTMLButtonElement>>((_) => {
+    setIsEditing(true);
+  }, []);
+  const onClickCancel = useCallback<MouseEventHandler<HTMLButtonElement>>(
+    (_) => {
+      setIsEditing(false);
+    },
+    [],
+  );
+  const onMonthChange = useCallback<MonthChangeEventHandler>(
+    (month) => {
+      setSelectedDate(undefined);
+      searchParams.set("month", format(month, "yyyy-MM"));
+      setSearchParams(searchParams, { preventScrollReset: true });
+    },
+    [searchParams, setSearchParams],
+  );
 
   return (
     <Main>
@@ -133,13 +246,46 @@ const Page: FC = () => {
           </header>
         ) : (
           <header className="flex items-center justify-between">
-            <Heading level={1} className="break-all">
+            <Heading level={1} size="lg" className="break-all">
               #{tag.name}
             </Heading>
             <Button size="icon" variant="ghost" onClick={onClickEdit}>
               <Pencil className="size=4" />
             </Button>
           </header>
+        )}
+      </Section>
+      <Section>
+        <Heading level={2}>記録</Heading>
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={setSelectedDate}
+          defaultMonth={defaultMonth}
+          onMonthChange={onMonthChange}
+          modifiers={{ events: hasTrainings }}
+          showOutsideDays={false}
+        />
+        {filteredTrainings.length > 0 && (
+          <ol className="flex flex-col gap-8">
+            {filteredTrainings.map((training) => {
+              const dateString = format(training.date, "yyyy年MM月dd日");
+              return (
+                <li key={training.id}>
+                  <Link to={`/trainees/${traineeId}/trainings/${training.id}`}>
+                    <Card>
+                      <CardHeader>
+                        <Heading level={3}>{dateString}</Heading>
+                      </CardHeader>
+                      <CardContent>
+                        <TrainingSessionList sessions={training.sessions} />
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
         )}
       </Section>
       <Section>
@@ -174,7 +320,6 @@ const Page: FC = () => {
     </Main>
   );
 };
-export default Page;
 
 export const action = async ({
   request,

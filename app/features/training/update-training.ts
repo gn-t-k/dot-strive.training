@@ -4,8 +4,8 @@ import { trainingSets } from "database/tables/training-sets";
 import { trainings } from "database/tables/trainings";
 import { eq, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
-import { flatTraining } from "./flat-training";
 import type { Training } from "./schema";
+import { serializeTraining } from "./serialize-training";
 
 type UpdateTraining = (context: AppLoadContext) => (props: {
   training: Training;
@@ -17,7 +17,7 @@ export const updateTraining: UpdateTraining =
   (context) =>
   async ({ training }) => {
     try {
-      const { sessions, sets } = flatTraining(training);
+      const { sessions, sets } = serializeTraining(training);
 
       const database = drizzle(context.cloudflare["env"].DB);
 

@@ -2,7 +2,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { getEstimatedMaximumWeight } from "./get-estimated-maximum-weight";
 import type { Training } from "./schema";
 
-type FlatTraining = (training: Training) => Payload;
+type SerializeTraining = (training: Training) => Payload;
 type Payload = {
   sessions: Session[];
   sets: Set[];
@@ -23,7 +23,7 @@ type Set = {
   estimatedMaximumWeight: number;
   sessionId: string;
 };
-export const flatTraining: FlatTraining = (training) => {
+export const serializeTraining: SerializeTraining = (training) => {
   return training.sessions.reduce<Payload>(
     (accumulator, session, index) => {
       const sessionData = {
