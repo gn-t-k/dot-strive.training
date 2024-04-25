@@ -21,8 +21,8 @@ import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { Calendar } from "app/ui/calendar";
 import { type FC, Suspense, useCallback, useMemo, useState } from "react";
 import type { MonthChangeEventHandler } from "react-day-picker";
+import { TrainingSessionList } from "../../features/training/training-session-list";
 import { TrainingsPageLoading } from "./trainings-page-loading";
-import { TrainingSessionList } from "./trainingt-session-list";
 
 export const loader = async ({
   context,
@@ -123,11 +123,7 @@ const TrainingsPage: FC<TrainingsPageProps> = ({ trainee, trainings }) => {
           onSelect={setSelectedDate}
           defaultMonth={defaultMonth}
           onMonthChange={onMonthChange}
-          modifiers={{ hasTrainings }}
-          modifiersClassNames={{
-            hasTrainings:
-              "after:absolute after:top-6 after:h-2 after:w-2 after:rounded-full after:bg-primary after:aria-selected:bg-primary-foreground",
-          }}
+          modifiers={{ events: hasTrainings }}
           showOutsideDays={false}
         />
       </Section>

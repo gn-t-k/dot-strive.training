@@ -72,6 +72,10 @@ const Calendar = ({
         // biome-ignore lint/style/useNamingConvention: ライブラリ指定のため
         IconRight: (_props) => <ChevronRight className="size-4" />,
       }}
+      modifiersClassNames={{
+        events:
+          "after:absolute after:top-6 after:h-2 after:w-2 after:rounded-full after:bg-primary after:aria-selected:bg-primary-foreground",
+      }}
       {...props}
     />
   );
