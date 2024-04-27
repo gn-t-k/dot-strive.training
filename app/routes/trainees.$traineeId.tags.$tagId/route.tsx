@@ -269,10 +269,12 @@ const TagPage: FC<TagPageProps> = ({
         />
         <Chart
           defaultMonth={defaultMonth}
+          selectedDate={selectedDate}
+          selectDate={setSelectedDate}
           trainings={trainings
             .sort((a, b) => (a.date < b.date ? -1 : 1))
             .map((training) => ({
-              date: format(training.date, "d"),
+              date: new Date(training.date),
               setCount: training.sessions.flatMap((session) => session.sets)
                 .length,
             }))}
