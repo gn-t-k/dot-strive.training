@@ -54,6 +54,7 @@ import {
   useState,
 } from "react";
 import type { MonthChangeEventHandler } from "react-day-picker";
+import { Chart } from "./chart";
 import { deleteAction } from "./delete-action";
 import { updateAction } from "./update-action";
 
@@ -265,6 +266,16 @@ const TagPage: FC<TagPageProps> = ({
           onMonthChange={onMonthChange}
           modifiers={{ events: hasTrainings }}
           showOutsideDays={false}
+        />
+        <Chart
+          defaultMonth={defaultMonth}
+          trainings={trainings
+            .sort((a, b) => (a.date < b.date ? -1 : 1))
+            .map((training) => ({
+              date: format(training.date, "d"),
+              setCount: training.sessions.flatMap((session) => session.sets)
+                .length,
+            }))}
         />
         {filteredTrainings.length > 0 && (
           <ol className="flex flex-col gap-8">
