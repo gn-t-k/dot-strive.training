@@ -1,26 +1,47 @@
-import { getDaysInMonth } from "date-fns";
-import type { FC } from "react";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { format, getDaysInMonth, setDate } from "date-fns";
+import { type FC, type MouseEventHandler, useCallback } from "react";
+import {
+  Bar,
+  BarChart,
+  Cell,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-type Training = {
-  date: string;
-  setCount: number;
-};
-
-// TODO: 選択されている日付のBarを強調したい
 type Props = {
   defaultMonth: Date;
-  trainings: Training[];
+  selectedDate: Date | undefined;
+  selectDate: (date: Date | undefined) => void;
+  trainings: {
+    date: Date;
+    setCount: number;
+  }[];
 };
-export const Chart: FC<Props> = ({ defaultMonth, trainings }) => {
+export const Chart: FC<Props> = ({
+  defaultMonth,
+  selectDate,
+  selectedDate,
+  trainings,
+}) => {
   const data = Array.from(
     { length: getDaysInMonth(defaultMonth) },
     (_, i) => `${i + 1}`,
   ).map((date) => ({
     date,
     setCount:
-      trainings.find((training) => training.date === date)?.setCount ?? 0,
+      trainings.find((training) => format(training.date, "d") === date)
+        ?.setCount ?? 0,
   }));
+  const onClickCell = useCallback<(date: string) => MouseEventHandler>(
+    (date) => (_) => {
+      selectDate(
+        selectedDate ? undefined : setDate(defaultMonth, Number(date)),
+      );
+    },
+    [defaultMonth, selectedDate, selectDate],
+  );
+
   return (
     <ResponsiveContainer width="100%" height={160}>
       <BarChart data={data}>
@@ -44,7 +65,20 @@ export const Chart: FC<Props> = ({ defaultMonth, trainings }) => {
           fill="currentColor"
           radius={[4, 4, 0, 0]}
           className="fill-primary"
-        />
+        >
+          {data.map((entry) => (
+            <Cell
+              key={entry.date}
+              className={
+                selectedDate === undefined ||
+                format(selectedDate, "d") === entry.date
+                  ? "fill-primary"
+                  : "fill-primary/30"
+              }
+              onClick={onClickCell(entry.date)}
+            />
+          ))}
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   );

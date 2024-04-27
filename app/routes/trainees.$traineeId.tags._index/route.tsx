@@ -69,11 +69,14 @@ const Page: FC = () => {
           部位や動作パターンなどのタグを登録、種目にタグ付けすることで、タグごとにトレーニングの量・強度・頻度を管理することができます。
         </p>
       </header>
-      <TagForm
-        key={Math.random().toString()}
-        registeredTags={tags}
-        actionType="create"
-      />
+      <Section>
+        <Heading level={2}>タグを登録する</Heading>
+        <TagForm
+          key={Math.random().toString()}
+          registeredTags={tags}
+          actionType="create"
+        />
+      </Section>
       <Section>
         <Heading level={2}>登録されているタグ</Heading>
         <ul className="flex flex-col gap-4">
