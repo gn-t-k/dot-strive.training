@@ -207,6 +207,16 @@ const TagPage: FC<TagPageProps> = ({
       return from <= date && date <= to;
     });
   }, [selectedDate, trainings]);
+  const trainingsChartData = useMemo(
+    () =>
+      trainings
+        .sort((a, b) => (a.date < b.date ? -1 : 1))
+        .map((training) => ({
+          date: new Date(training.date),
+          setCount: training.sessions.flatMap((session) => session.sets).length,
+        })),
+    [trainings],
+  );
 
   const hasTrainings = useCallback(
     (date: Date) =>
@@ -271,13 +281,7 @@ const TagPage: FC<TagPageProps> = ({
           defaultMonth={defaultMonth}
           selectedDate={selectedDate}
           selectDate={setSelectedDate}
-          trainings={trainings
-            .sort((a, b) => (a.date < b.date ? -1 : 1))
-            .map((training) => ({
-              date: new Date(training.date),
-              setCount: training.sessions.flatMap((session) => session.sets)
-                .length,
-            }))}
+          trainings={trainingsChartData}
         />
         {filteredTrainings.length > 0 && (
           <ol className="flex flex-col gap-8">
