@@ -3,7 +3,7 @@ import { Link, useActionData, useLoaderData } from "@remix-run/react";
 import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exercises-with-tags-by-trainee-id";
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
-import { Card, CardContent, CardDescription, CardHeader } from "app/ui/card";
+import { Card, CardHeader } from "app/ui/card";
 import { Heading } from "app/ui/heading";
 import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
@@ -17,6 +17,15 @@ import type {
   LoaderFunctionArgs,
 } from "@remix-run/cloudflare";
 import { Badge } from "app/ui/badge";
+import { Button } from "app/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "app/ui/dialog";
 import type { FC } from "react";
 import { createAction } from "./create-action";
 
@@ -73,7 +82,37 @@ const Page: FC = () => {
 
   return (
     <Main>
+      <header>
+        <Heading level={1} size="lg">
+          種目
+        </Heading>
+        <p className="text-muted-foreground">
+          .STRIVEでは、トレーニングの種目を自由に登録・編集できます。
+        </p>
+        <p className="text-muted-foreground">
+          種目の記録を追跡したり、量・強度・頻度を管理することができます。
+        </p>
+      </header>
       <Section>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="secondary">種目を登録する</Button>
+          </DialogTrigger>
+          <DialogContent className="h-4/5 overflow-auto">
+            <DialogHeader>
+              <DialogTitle>種目を登録する</DialogTitle>
+              <DialogClose />
+            </DialogHeader>
+            <ExerciseForm
+              registeredTags={tags}
+              registeredExercises={exercises}
+              actionType="create"
+            />
+          </DialogContent>
+        </Dialog>
+      </Section>
+      <Section>
+        <Heading level={2}>登録されている種目</Heading>
         <ul className="flex flex-col gap-4">
           {exercisesWithTags.map((exercise) => {
             return (
@@ -98,21 +137,6 @@ const Page: FC = () => {
             );
           })}
         </ul>
-        <Card>
-          <CardHeader>
-            <Heading level={2}>種目を登録する</Heading>
-            <CardDescription>
-              .STRIVEでは、種目を名前とタグ付けで管理できます。
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ExerciseForm
-              registeredTags={tags}
-              registeredExercises={exercises}
-              actionType="create"
-            />
-          </CardContent>
-        </Card>
       </Section>
     </Main>
   );

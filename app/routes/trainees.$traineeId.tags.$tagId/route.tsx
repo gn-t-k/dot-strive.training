@@ -261,7 +261,7 @@ const TagPage: FC<TagPageProps> = ({
               #{tag.name}
             </Heading>
             <Button size="icon" variant="ghost" onClick={onClickEdit}>
-              <Pencil className="size=4" />
+              <Pencil className="size-4" />
             </Button>
           </header>
         )}

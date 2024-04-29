@@ -26,8 +26,19 @@ import {
   AlertDialogTrigger,
 } from "app/ui/alert-dialog";
 import { Button } from "app/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "app/ui/dialog";
+import { Heading } from "app/ui/heading";
 import { Main } from "app/ui/main";
+import { Section } from "app/ui/section";
 import { useToast } from "app/ui/use-toast";
+import { Pencil } from "lucide-react";
 import { type FC, useEffect } from "react";
 import { deleteAction } from "./delete-action";
 import { updateAction } from "./update-action";
@@ -124,16 +135,36 @@ const Page: FC = () => {
 
   return (
     <Main>
-      <ExerciseForm
-        registeredTags={registeredTags}
-        registeredExercises={registeredExercises}
-        defaultValues={{
-          id: exercise.id,
-          name: exercise.name,
-          tags: exercise.tags.map((tag) => tag.id),
-        }}
-        actionType="update"
-      />
+      <Section>
+        <Dialog>
+          <header className="flex items-center justify-between">
+            <Heading level={1} size="lg">
+              {exercise.name}
+            </Heading>
+            <DialogTrigger asChild>
+              <Button size="icon" variant="ghost">
+                <Pencil className="size-4" />
+              </Button>
+            </DialogTrigger>
+          </header>
+          <DialogContent className="h-4/5 overflow-auto">
+            <DialogHeader>
+              <DialogTitle>種目を編集する</DialogTitle>
+              <DialogClose />
+            </DialogHeader>
+            <ExerciseForm
+              registeredTags={registeredTags}
+              registeredExercises={registeredExercises}
+              defaultValues={{
+                id: exercise.id,
+                name: exercise.name,
+                tags: exercise.tags.map((tag) => tag.id),
+              }}
+              actionType="update"
+            />
+          </DialogContent>
+        </Dialog>
+      </Section>
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button variant="destructive">種目を削除する</Button>
