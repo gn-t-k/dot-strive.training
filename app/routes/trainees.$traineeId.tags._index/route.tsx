@@ -24,9 +24,7 @@ export const loader = async ({
   request,
   params,
 }: LoaderFunctionArgs) => {
-  const { trainee } = await traineeLoader({ context, request, params }).then(
-    (response) => response.json(),
-  );
+  const { trainee } = await traineeLoader({ context, request, params });
   const getTagsResult = await getTagsByTraineeId(context)(trainee.id);
   if (getTagsResult.result === "failure") {
     throw new Response("Internal Server Error", { status: 500 });
@@ -108,9 +106,7 @@ export const action = async ({
   context,
 }: ActionFunctionArgs) => {
   const [{ trainee }, formData] = await Promise.all([
-    traineeLoader({ context, request, params }).then((response) =>
-      response.json(),
-    ),
+    traineeLoader({ context, request, params }),
     request.formData(),
   ]);
 

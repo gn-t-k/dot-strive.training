@@ -34,9 +34,7 @@ export const loader = async ({
   request,
   params,
 }: LoaderFunctionArgs) => {
-  const { trainee } = await traineeLoader({ context, request, params }).then(
-    (response) => response.json(),
-  );
+  const { trainee } = await traineeLoader({ context, request, params });
   const [getTagsResult, getExercisesResult] = await Promise.all([
     getTagsByTraineeId(context)(trainee.id),
     getExercisesWithTagsByTraineeId(context)(trainee.id),
@@ -149,9 +147,7 @@ export const action = async ({
   context,
 }: ActionFunctionArgs) => {
   const [{ trainee }, formData] = await Promise.all([
-    traineeLoader({ context, request, params }).then((response) =>
-      response.json(),
-    ),
+    traineeLoader({ context, request, params }),
     request.formData(),
   ]);
 

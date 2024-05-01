@@ -30,9 +30,7 @@ export const loader = async ({
   params,
 }: LoaderFunctionArgs) => {
   const loaderData = (async () => {
-    const { trainee } = await traineeLoader({ context, request, params }).then(
-      (response) => response.json(),
-    );
+    const { trainee } = await traineeLoader({ context, request, params });
     const today = new Date();
     const dateRange = ((month: string | null) => {
       const date = month ? parseISO(month) : today;

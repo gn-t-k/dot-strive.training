@@ -32,9 +32,7 @@ export const loader = async ({
   request,
   params,
 }: LoaderFunctionArgs) => {
-  const { trainee } = await traineeLoader({ context, request, params }).then(
-    (response) => response.json(),
-  );
+  const { trainee } = await traineeLoader({ context, request, params });
 
   return json({ trainee });
 };
@@ -83,9 +81,7 @@ export const action = async ({
   request,
   context,
 }: ActionFunctionArgs) => {
-  const { trainee } = await traineeLoader({ context, request, params }).then(
-    (response) => response.json(),
-  );
+  const { trainee } = await traineeLoader({ context, request, params });
 
   const result = await deleteTrainee(context)({ id: trainee.id });
 

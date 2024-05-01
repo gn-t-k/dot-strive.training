@@ -1,4 +1,4 @@
-import { json, redirect } from "@remix-run/cloudflare";
+import { redirect } from "@remix-run/cloudflare";
 import { Outlet, useLoaderData, useNavigation } from "@remix-run/react";
 
 import { getAuthenticator } from "app/features/auth/get-authenticator.server";
@@ -19,7 +19,7 @@ export const loader = async ({
   const user = await authenticator.isAuthenticated(request);
 
   if (!user) {
-    return redirect("/login");
+    throw redirect("/login");
   }
 
   if (params["traineeId"] !== user.id) {
@@ -31,7 +31,7 @@ export const loader = async ({
     throw new Response("Sorry, something went wrong.", { status: 500 });
   }
 
-  return json({ trainee });
+  return { trainee };
 };
 
 const PageWithNavigationHeader: FC = () => {
