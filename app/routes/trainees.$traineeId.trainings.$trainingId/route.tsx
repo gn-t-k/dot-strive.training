@@ -1,7 +1,6 @@
 import {
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
-  json,
   redirect,
 } from "@remix-run/cloudflare";
 import {
@@ -11,6 +10,7 @@ import {
   useNavigate,
 } from "@remix-run/react";
 import { getExercisesByTraineeId } from "app/features/exercise/get-exercises-by-trainee-id";
+import { validateTrainee } from "app/features/trainee/schema";
 import { findTrainingById } from "app/features/training/find-training-by-id";
 import { TrainingForm } from "app/features/training/training-form";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
@@ -28,7 +28,7 @@ import {
 import { Button } from "app/ui/button";
 import { Main } from "app/ui/main";
 import { useToast } from "app/ui/use-toast";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { type FC, useEffect } from "react";
 import { deleteAction } from "./delete-action";
 import { updateAction } from "./update-action";
@@ -38,13 +38,11 @@ export const loader = async ({
   request,
   params,
 }: LoaderFunctionArgs) => {
-  const { trainee } = await traineeLoader({ context, request, params }).then(
-    (response) => response.json(),
-  );
+  const { trainee } = await traineeLoader({ context, request, params });
 
   const { trainingId } = params;
   if (!trainingId) {
-    return redirect(`/trainees/${trainee.id}/trainings`);
+    throw redirect(`/trainees/${trainee.id}/trainings`);
   }
 
   const findTrainingResult = await findTrainingById(context)(trainingId);
@@ -57,14 +55,14 @@ export const loader = async ({
         throw new Response("Internal Server Error", { status: 500 });
       }
 
-      return json({
+      return {
         trainee,
         training: findTrainingResult.data,
         registeredExercises: getExercisesResult.data,
-      });
+      };
     }
     case "not-found": {
-      return json({ trainee, training: null });
+      return { trainee, training: null };
     }
     case "failure": {
       throw new Response("Sorry, something went wrong.", { status: 500 });
@@ -119,10 +117,7 @@ const Page: FC = () => {
 
   const { registeredExercises } = loaderData;
 
-  const dateString = format(
-    parseISO(loaderData.training.date),
-    "yyyy年MM月dd日",
-  );
+  const dateString = format(loaderData.training.date, "yyyy年MM月dd日");
 
   return (
     <Main>
@@ -181,18 +176,29 @@ export const action = async ({
   params,
 }: ActionFunctionArgs) => {
   const [{ trainee }, formData] = await Promise.all([
-    traineeLoader({ context, request, params }).then((response) =>
-      response.json(),
-    ),
+    traineeLoader({ context, request, params }),
     request.formData(),
   ]);
 
+  const validatedTrainee = validateTrainee(trainee);
+  if (!validatedTrainee) {
+    throw new Response("Bad Request", { status: 400 });
+  }
+
   switch (formData.get("actionType")) {
     case "update": {
-      return await updateAction({ formData, context, trainee });
+      return await updateAction({
+        formData,
+        context,
+        trainee: validatedTrainee,
+      });
     }
     case "delete": {
-      return await deleteAction({ formData, context, trainee });
+      return await deleteAction({
+        formData,
+        context,
+        trainee: validatedTrainee,
+      });
     }
     default: {
       throw new Response("Bad Request", { status: 400 });

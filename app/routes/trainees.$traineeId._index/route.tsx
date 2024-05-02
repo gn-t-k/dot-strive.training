@@ -1,4 +1,4 @@
-import { Form, json, useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
 
 import { Button } from "app/ui/button";
 import { Main } from "app/ui/main";
@@ -32,11 +32,9 @@ export const loader = async ({
   request,
   params,
 }: LoaderFunctionArgs) => {
-  const { trainee } = await traineeLoader({ context, request, params }).then(
-    (response) => response.json(),
-  );
+  const { trainee } = await traineeLoader({ context, request, params });
 
-  return json({ trainee });
+  return { trainee };
 };
 
 const Page: FC = () => {
@@ -83,9 +81,7 @@ export const action = async ({
   request,
   context,
 }: ActionFunctionArgs) => {
-  const { trainee } = await traineeLoader({ context, request, params }).then(
-    (response) => response.json(),
-  );
+  const { trainee } = await traineeLoader({ context, request, params });
 
   const result = await deleteTrainee(context)({ id: trainee.id });
 

@@ -1,4 +1,4 @@
-import { json, redirect } from "@remix-run/cloudflare";
+import { redirect } from "@remix-run/cloudflare";
 import { Form } from "@remix-run/react";
 
 import { getAuthenticator } from "app/features/auth/get-authenticator.server";
@@ -13,7 +13,11 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   const authenticator = getAuthenticator(context, request);
   const trainee = await authenticator.isAuthenticated(request);
 
-  return trainee ? redirect(`/trainees/${trainee.id}/trainings`) : json({});
+  if (trainee) {
+    throw redirect(`/trainees/${trainee.id}/trainings`);
+  }
+
+  return null;
 };
 
 const Page: FC = () => {

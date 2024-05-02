@@ -1,10 +1,10 @@
 import {
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
-  json,
   redirect,
 } from "@remix-run/cloudflare";
 import {
+  Await,
   Form,
   Link,
   useActionData,
@@ -14,6 +14,7 @@ import {
 } from "@remix-run/react";
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { TagForm } from "app/features/tag/tag-form";
+import { validateTrainee } from "app/features/trainee/schema";
 import { getTrainingsByTagId } from "app/features/training/get-trainings-by-tag-id";
 import { TrainingSessionList } from "app/features/training/training-session-list";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
@@ -48,6 +49,7 @@ import { Pencil, X } from "lucide-react";
 import {
   type FC,
   type MouseEventHandler,
+  Suspense,
   useCallback,
   useEffect,
   useMemo,
@@ -56,6 +58,7 @@ import {
 import type { MonthChangeEventHandler } from "react-day-picker";
 import { Chart } from "./chart";
 import { deleteAction } from "./delete-action";
+import { TagPageLoading } from "./tag-page-loading";
 import { updateAction } from "./update-action";
 
 export const loader = async ({
@@ -63,13 +66,11 @@ export const loader = async ({
   request,
   params,
 }: LoaderFunctionArgs) => {
-  const { trainee } = await traineeLoader({ context, request, params }).then(
-    (response) => response.json(),
-  );
+  const { trainee } = await traineeLoader({ context, request, params });
 
   const { tagId } = params;
   if (!tagId) {
-    return redirect(`/trainees/${trainee.id}/tags`);
+    throw redirect(`/trainees/${trainee.id}/tags`);
   }
 
   const today = new Date();
@@ -95,12 +96,12 @@ export const loader = async ({
   const registeredTags = getTagsResult.data;
   const tag = registeredTags.find((tag) => tag.id === tagId);
   if (!tag) {
-    return json({ trainee, tag: null });
+    return { trainee, tag: null };
   }
 
   const trainings = getTrainingsResult.data;
 
-  return json({ trainee, tag, registeredTags, trainings });
+  return { trainee, tag, registeredTags, trainings };
 };
 
 const Page: FC = () => {
@@ -144,12 +145,21 @@ const Page: FC = () => {
   const { registeredTags, trainings } = loaderData;
 
   return (
-    <TagPage
-      traineeId={trainee.id}
-      tag={tag}
-      registeredTags={registeredTags}
-      trainings={trainings}
-    />
+    <Suspense fallback={<TagPageLoading />}>
+      <Await resolve={{ registeredTags, trainings }}>
+        {({ registeredTags, trainings }) => (
+          <TagPage
+            traineeId={trainee.id}
+            tag={tag}
+            registeredTags={registeredTags}
+            trainings={trainings.map((training) => ({
+              ...training,
+              date: new Date(training.date),
+            }))}
+          />
+        )}
+      </Await>
+    </Suspense>
   );
 };
 export default Page;
@@ -163,7 +173,7 @@ type TagPageProps = {
 type Tag = { id: string; name: string };
 type Training = {
   id: string;
-  date: string;
+  date: Date;
   sessions: {
     id: string;
     memo: string;
@@ -344,18 +354,21 @@ export const action = async ({
   params,
 }: ActionFunctionArgs) => {
   const [{ trainee }, formData] = await Promise.all([
-    traineeLoader({ context, request, params }).then((response) =>
-      response.json(),
-    ),
+    traineeLoader({ context, request, params }),
     request.formData(),
   ]);
 
+  const validatedTrainee = validateTrainee(trainee);
+  if (!validatedTrainee) {
+    throw new Response("Bad Request", { status: 400 });
+  }
+
   switch (formData.get("actionType")) {
     case "update": {
-      return updateAction({ formData, context, trainee });
+      return updateAction({ formData, context, trainee: validatedTrainee });
     }
     case "delete": {
-      return deleteAction({ formData, context, trainee });
+      return deleteAction({ formData, context, trainee: validatedTrainee });
     }
     default: {
       throw new Response("Bad Request", { status: 400 });

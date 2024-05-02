@@ -30,9 +30,7 @@ export const loader = async ({
   request,
   params,
 }: LoaderFunctionArgs) => {
-  const { trainee } = await traineeLoader({ context, request, params }).then(
-    (response) => response.json(),
-  );
+  const { trainee } = await traineeLoader({ context, request, params });
 
   const url = new URL(request.url);
   const date = url.searchParams.get("date");
@@ -42,7 +40,7 @@ export const loader = async ({
     throw new Response("Internal Server Error", { status: 500 });
   }
 
-  return json({ trainee, registeredExercises: getExercisesResult.data, date });
+  return { trainee, registeredExercises: getExercisesResult.data, date };
 };
 
 const Page: FC = () => {
@@ -98,9 +96,7 @@ export const action = async ({
   context,
 }: ActionFunctionArgs) => {
   const [{ trainee }, formData] = await Promise.all([
-    traineeLoader({ context, request, params }).then((response) =>
-      response.json(),
-    ),
+    traineeLoader({ context, request, params }),
     request.formData(),
   ]);
 
