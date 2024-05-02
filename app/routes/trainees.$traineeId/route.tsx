@@ -2,7 +2,6 @@ import { redirect } from "@remix-run/cloudflare";
 import { Outlet, useLoaderData, useNavigation } from "@remix-run/react";
 
 import { getAuthenticator } from "app/features/auth/get-authenticator.server";
-import { validateTrainee } from "app/features/trainee/schema";
 
 import { HeaderNavigation } from "./header-navigation";
 
@@ -26,12 +25,13 @@ export const loader = async ({
     throw new Response("Not found.", { status: 404 });
   }
 
-  const trainee = validateTrainee(user);
-  if (!trainee) {
-    throw new Response("Sorry, something went wrong.", { status: 500 });
-  }
-
-  return { trainee };
+  return {
+    trainee: {
+      id: user.id,
+      name: user.name,
+      image: user.image,
+    },
+  };
 };
 
 const PageWithNavigationHeader: FC = () => {

@@ -2,7 +2,7 @@ import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
 } from "@remix-run/cloudflare";
-import { json, redirect } from "@remix-run/cloudflare";
+import { redirect } from "@remix-run/cloudflare";
 import {
   Form,
   useActionData,
@@ -13,6 +13,7 @@ import { ExerciseForm } from "app/features/exercise/exercise-form";
 import { findExerciseById } from "app/features/exercise/find-exercise-by-id";
 import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exercises-with-tags-by-trainee-id";
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
+import { validateTrainee } from "app/features/trainee/schema";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import {
   AlertDialog,
@@ -52,7 +53,7 @@ export const loader = async ({
 
   const { exerciseId } = params;
   if (!exerciseId) {
-    return redirect(`/trainees/${trainee.id}/exercises`);
+    throw redirect(`/trainees/${trainee.id}/exercises`);
   }
 
   const findExerciseResult = await findExerciseById(context)(exerciseId);
@@ -75,15 +76,15 @@ export const loader = async ({
         getExercisesResult.data,
       ];
 
-      return json({
+      return {
         trainee,
         exercise: findExerciseResult.data,
         registeredTags,
         registeredExercises,
-      });
+      };
     }
     case "not-found": {
-      return json({ trainee, exercise: null });
+      return { trainee, exercise: null };
     }
     case "failure": {
       throw new Response("Sorry, something went wrong.", { status: 500 });
@@ -205,12 +206,17 @@ export const action = async ({
     request.formData(),
   ]);
 
+  const validatedTrainee = validateTrainee(trainee);
+  if (!validatedTrainee) {
+    throw new Response("Bad Request", { status: 400 });
+  }
+
   switch (formData.get("actionType")) {
     case "update": {
-      return updateAction({ formData, context, trainee });
+      return updateAction({ formData, context, trainee: validatedTrainee });
     }
     case "delete": {
-      return deleteAction({ formData, context, trainee });
+      return deleteAction({ formData, context, trainee: validatedTrainee });
     }
     default: {
       throw new Response("Bad Request", { status: 400 });

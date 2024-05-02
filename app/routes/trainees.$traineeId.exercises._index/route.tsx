@@ -1,4 +1,3 @@
-import { json } from "@remix-run/cloudflare";
 import { Link, useActionData, useLoaderData } from "@remix-run/react";
 import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exercises-with-tags-by-trainee-id";
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
@@ -16,6 +15,7 @@ import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
 } from "@remix-run/cloudflare";
+import { validateTrainee } from "app/features/trainee/schema";
 import { Badge } from "app/ui/badge";
 import { Button } from "app/ui/button";
 import {
@@ -52,7 +52,7 @@ export const loader = async ({
     getExercisesResult.data,
   ];
 
-  return json({ trainee, tags, exercisesWithTags });
+  return { trainee, tags, exercisesWithTags };
 };
 
 const Page: FC = () => {
@@ -151,9 +151,14 @@ export const action = async ({
     request.formData(),
   ]);
 
+  const validatedTrainee = validateTrainee(trainee);
+  if (!validatedTrainee) {
+    throw new Response("Bad Request", { status: 400 });
+  }
+
   switch (formData.get("actionType")) {
     case "create": {
-      return createAction({ formData, context, trainee });
+      return createAction({ formData, context, trainee: validatedTrainee });
     }
     default: {
       throw new Response("Bad Request", { status: 400 });

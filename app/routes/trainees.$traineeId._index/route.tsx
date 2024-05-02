@@ -1,4 +1,4 @@
-import { Form, json, useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
 
 import { Button } from "app/ui/button";
 import { Main } from "app/ui/main";
@@ -34,7 +34,7 @@ export const loader = async ({
 }: LoaderFunctionArgs) => {
   const { trainee } = await traineeLoader({ context, request, params });
 
-  return json({ trainee });
+  return { trainee };
 };
 
 const Page: FC = () => {

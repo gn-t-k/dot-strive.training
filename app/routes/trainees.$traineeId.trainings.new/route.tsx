@@ -40,7 +40,7 @@ export const loader = async ({
     throw new Response("Internal Server Error", { status: 500 });
   }
 
-  return json({ trainee, registeredExercises: getExercisesResult.data, date });
+  return { trainee, registeredExercises: getExercisesResult.data, date };
 };
 
 const Page: FC = () => {

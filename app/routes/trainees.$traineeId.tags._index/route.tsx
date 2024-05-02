@@ -1,4 +1,3 @@
-import { json } from "@remix-run/cloudflare";
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
@@ -6,6 +5,7 @@ import type {
 import { Link, useActionData, useLoaderData } from "@remix-run/react";
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { TagForm } from "app/features/tag/tag-form";
+import { validateTrainee } from "app/features/trainee/schema";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import {} from "app/ui/alert-dialog";
 import { Card, CardHeader } from "app/ui/card";
@@ -30,7 +30,7 @@ export const loader = async ({
     throw new Response("Internal Server Error", { status: 500 });
   }
 
-  return json({ trainee, tags: getTagsResult.data });
+  return { trainee, tags: getTagsResult.data };
 };
 
 const Page: FC = () => {
@@ -110,9 +110,14 @@ export const action = async ({
     request.formData(),
   ]);
 
+  const validatedTrainee = validateTrainee(trainee);
+  if (!validatedTrainee) {
+    throw new Response("Bad Request", { status: 400 });
+  }
+
   switch (formData.get("actionType")) {
     case "create": {
-      return createAction({ formData, context, trainee });
+      return createAction({ formData, context, trainee: validatedTrainee });
     }
     default: {
       throw new Response("Bad Request", { status: 400 });

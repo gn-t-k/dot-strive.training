@@ -1,4 +1,3 @@
-import { defer } from "@remix-run/cloudflare";
 import { Await, Link, useLoaderData, useSearchParams } from "@remix-run/react";
 import { getTrainingsByTraineeId } from "app/features/training/get-trainings-by-trainee-id";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
@@ -29,7 +28,7 @@ export const loader = async ({
   request,
   params,
 }: LoaderFunctionArgs) => {
-  const loaderData = (async () => {
+  const loaderData = await (async () => {
     const { trainee } = await traineeLoader({ context, request, params });
     const today = new Date();
     const dateRange = ((month: string | null) => {
@@ -50,7 +49,7 @@ export const loader = async ({
     return { trainee, trainings };
   })();
 
-  return defer({ loaderData });
+  return { loaderData };
 };
 
 const Page: FC = () => {
@@ -75,7 +74,7 @@ const Page: FC = () => {
 export default Page;
 
 type TrainingsPageProps = Awaited<
-  Awaited<ReturnType<typeof loader>>["data"]["loaderData"]
+  Awaited<ReturnType<typeof loader>>["loaderData"]
 >;
 const TrainingsPage: FC<TrainingsPageProps> = ({ trainee, trainings }) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
