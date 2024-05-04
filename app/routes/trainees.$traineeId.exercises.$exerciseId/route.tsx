@@ -10,7 +10,6 @@ import {
   useNavigate,
 } from "@remix-run/react";
 import { ExerciseForm } from "app/features/exercise/exercise-form";
-import { findExerciseById } from "app/features/exercise/find-exercise-by-id";
 import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exercises-with-tags-by-trainee-id";
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { validateTrainee } from "app/features/trainee/schema";
@@ -56,40 +55,36 @@ export const loader = async ({
     throw redirect(`/trainees/${trainee.id}/exercises`);
   }
 
-  const findExerciseResult = await findExerciseById(context)(exerciseId);
-  switch (findExerciseResult.result) {
-    case "found": {
-      const [getTagsResult, getExercisesResult] = await Promise.all([
-        getTagsByTraineeId(context)(trainee.id),
-        getExercisesWithTagsByTraineeId(context)(trainee.id),
-      ]);
-      if (
-        !(
-          getTagsResult.result === "success" &&
-          getExercisesResult.result === "success"
-        )
-      ) {
-        throw new Response("Internal Server Error", { status: 500 });
-      }
-      const [registeredTags, registeredExercises] = [
-        getTagsResult.data,
-        getExercisesResult.data,
-      ];
-
-      return {
-        trainee,
-        exercise: findExerciseResult.data,
-        registeredTags,
-        registeredExercises,
-      };
-    }
-    case "not-found": {
-      return { trainee, exercise: null };
-    }
-    case "failure": {
-      throw new Response("Sorry, something went wrong.", { status: 500 });
-    }
+  const [getTagsResult, getExercisesResult] = await Promise.all([
+    getTagsByTraineeId(context)(trainee.id),
+    getExercisesWithTagsByTraineeId(context)(trainee.id),
+  ]);
+  if (
+    !(
+      getTagsResult.result === "success" &&
+      getExercisesResult.result === "success"
+    )
+  ) {
+    throw new Response("Internal Server Error", { status: 500 });
   }
+  const [registeredTags, registeredExercises] = [
+    getTagsResult.data,
+    getExercisesResult.data,
+  ];
+
+  const exercise = registeredExercises.find(
+    (exercise) => exercise.id === exerciseId,
+  );
+  if (!exercise) {
+    return { trainee, exercise: null };
+  }
+
+  return {
+    trainee,
+    exercise,
+    registeredTags,
+    registeredExercises,
+  };
 };
 
 const Page: FC = () => {
