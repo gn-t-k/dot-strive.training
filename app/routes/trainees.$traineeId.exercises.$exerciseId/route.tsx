@@ -4,16 +4,20 @@ import type {
 } from "@remix-run/cloudflare";
 import { redirect } from "@remix-run/cloudflare";
 import {
+  Await,
   Form,
+  Link,
   useActionData,
   useLoaderData,
   useNavigate,
+  useSearchParams,
 } from "@remix-run/react";
 import { ExerciseForm } from "app/features/exercise/exercise-form";
-import { findExerciseById } from "app/features/exercise/find-exercise-by-id";
 import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exercises-with-tags-by-trainee-id";
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { validateTrainee } from "app/features/trainee/schema";
+import { getTrainingsByExerciseId } from "app/features/training/get-trainings-by-exercise-id";
+import { TrainingSessionList } from "app/features/training/training-session-list";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import {
   AlertDialog,
@@ -27,6 +31,8 @@ import {
   AlertDialogTrigger,
 } from "app/ui/alert-dialog";
 import { Button } from "app/ui/button";
+import { Calendar } from "app/ui/calendar";
+import { Card, CardContent, CardHeader } from "app/ui/card";
 import {
   Dialog,
   DialogClose,
@@ -39,8 +45,26 @@ import { Heading } from "app/ui/heading";
 import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
 import { useToast } from "app/ui/use-toast";
+import {
+  endOfDay,
+  endOfMonth,
+  format,
+  isSameDay,
+  parseISO,
+  startOfDay,
+  startOfMonth,
+} from "date-fns";
 import { Pencil } from "lucide-react";
-import { type FC, useEffect } from "react";
+import {
+  type FC,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import type { MonthChangeEventHandler } from "react-day-picker";
+import { ExercisesPageLoading } from "../trainees.$traineeId.exercises._index/exercises-page-loading";
 import { deleteAction } from "./delete-action";
 import { updateAction } from "./update-action";
 
@@ -56,40 +80,48 @@ export const loader = async ({
     throw redirect(`/trainees/${trainee.id}/exercises`);
   }
 
-  const findExerciseResult = await findExerciseById(context)(exerciseId);
-  switch (findExerciseResult.result) {
-    case "found": {
-      const [getTagsResult, getExercisesResult] = await Promise.all([
-        getTagsByTraineeId(context)(trainee.id),
-        getExercisesWithTagsByTraineeId(context)(trainee.id),
-      ]);
-      if (
-        !(
-          getTagsResult.result === "success" &&
-          getExercisesResult.result === "success"
-        )
-      ) {
-        throw new Response("Internal Server Error", { status: 500 });
-      }
-      const [registeredTags, registeredExercises] = [
-        getTagsResult.data,
-        getExercisesResult.data,
-      ];
+  const today = new Date();
+  const dateRange = ((month: string | null) => {
+    const date = month ? parseISO(month) : today;
 
-      return {
-        trainee,
-        exercise: findExerciseResult.data,
-        registeredTags,
-        registeredExercises,
-      };
-    }
-    case "not-found": {
-      return { trainee, exercise: null };
-    }
-    case "failure": {
-      throw new Response("Sorry, something went wrong.", { status: 500 });
-    }
+    return { from: startOfMonth(date), to: endOfMonth(date) };
+  })(new URL(request.url).searchParams.get("month"));
+
+  const [getTagsResult, getExercisesResult, getTrainingsResult] =
+    await Promise.all([
+      getTagsByTraineeId(context)(trainee.id),
+      getExercisesWithTagsByTraineeId(context)(trainee.id),
+      getTrainingsByExerciseId(context)(exerciseId, dateRange),
+    ]);
+  if (
+    !(
+      getTagsResult.result === "success" &&
+      getExercisesResult.result === "success" &&
+      getTrainingsResult.result === "success"
+    )
+  ) {
+    throw new Response("Internal Server Error", { status: 500 });
   }
+  const [registeredTags, registeredExercises, trainings] = [
+    getTagsResult.data,
+    getExercisesResult.data,
+    getTrainingsResult.data,
+  ];
+
+  const exercise = registeredExercises.find(
+    (exercise) => exercise.id === exerciseId,
+  );
+  if (!exercise) {
+    return { trainee, exercise: null };
+  }
+
+  return {
+    trainee,
+    trainings,
+    exercise,
+    registeredTags,
+    registeredExercises,
+  };
 };
 
 const Page: FC = () => {
@@ -130,7 +162,102 @@ const Page: FC = () => {
     return null;
   }
 
-  const { registeredExercises, registeredTags } = loaderData;
+  const { registeredExercises, registeredTags, trainings } = loaderData;
+
+  return (
+    <Suspense fallback={<ExercisesPageLoading />}>
+      <Await resolve={{ trainings, registeredExercises, registeredTags }}>
+        {({ trainings, registeredExercises, registeredTags }) => (
+          <ExercisePage
+            traineeId={trainee.id}
+            trainings={trainings}
+            exercise={exercise}
+            registeredExercises={registeredExercises}
+            registeredTags={registeredTags}
+          />
+        )}
+      </Await>
+    </Suspense>
+  );
+};
+export default Page;
+
+type ExercisePageProps = {
+  traineeId: string;
+  exercise: Exercise;
+  trainings: Training[];
+  registeredExercises: Exercise[];
+  registeredTags: Tag[];
+};
+type Training = {
+  id: string;
+  date: Date;
+  sessions: {
+    id: string;
+    memo: string;
+    exercise: {
+      id: string;
+      name: string;
+    };
+    sets: {
+      id: string;
+      weight: number;
+      repetition: number;
+      rpe: number;
+      estimatedMaximumWeight: number;
+    }[];
+  }[];
+};
+type Exercise = {
+  id: string;
+  name: string;
+  tags: Tag[];
+};
+type Tag = {
+  id: string;
+  name: string;
+};
+const ExercisePage: FC<ExercisePageProps> = ({
+  traineeId,
+  trainings,
+  exercise,
+  registeredTags,
+  registeredExercises,
+}) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+
+  const today = new Date();
+
+  const defaultMonth = useMemo<Date>(() => {
+    const month = searchParams.get("month");
+    return month ? new Date(month) : today;
+  }, [searchParams.get, today]);
+  const filteredTrainings = useMemo(() => {
+    if (!selectedDate) {
+      return trainings;
+    }
+    const from = startOfDay(selectedDate);
+    const to = endOfDay(selectedDate);
+    return trainings.filter((training) => {
+      const date = new Date(training.date);
+      return from <= date && date <= to;
+    });
+  }, [selectedDate, trainings]);
+
+  const onMonthChange = useCallback<MonthChangeEventHandler>(
+    (month) => {
+      setSelectedDate(undefined);
+      searchParams.set("month", format(month, "yyyy-MM"));
+      setSearchParams(searchParams, { preventScrollReset: true });
+    },
+    [searchParams, setSearchParams],
+  );
+  const hasTrainings = useCallback(
+    (date: Date) =>
+      trainings.some((training) => isSameDay(date, training.date)),
+    [trainings.some],
+  );
 
   return (
     <Main>
@@ -164,37 +291,71 @@ const Page: FC = () => {
           </DialogContent>
         </Dialog>
       </Section>
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button variant="destructive">種目を削除する</Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>種目の削除</AlertDialogTitle>
-            <AlertDialogDescription>
-              {exercise.name}を削除しますか？
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>キャンセル</AlertDialogCancel>
-            <Form method="post">
-              <input type="hidden" name="id" value={exercise.id} />
-              <AlertDialogAction
-                type="submit"
-                name="actionType"
-                value="delete"
-                className="w-full"
-              >
-                削除
-              </AlertDialogAction>
-            </Form>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Section>
+        <Heading level={2}>記録</Heading>
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={setSelectedDate}
+          defaultMonth={defaultMonth}
+          onMonthChange={onMonthChange}
+          modifiers={{ events: hasTrainings }}
+          showOutsideDays={false}
+        />
+        {filteredTrainings.length > 0 && (
+          <ol className="flex flex-col gap-8">
+            {filteredTrainings.map((training) => {
+              const dateString = format(training.date, "yyyy年MM月dd日");
+              return (
+                <li key={training.id}>
+                  <Link to={`/trainees/${traineeId}/trainings/${training.id}`}>
+                    <Card>
+                      <CardHeader>
+                        <Heading level={3}>{dateString}</Heading>
+                      </CardHeader>
+                      <CardContent>
+                        <TrainingSessionList sessions={training.sessions} />
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
+        )}
+      </Section>
+      <Section>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive">種目を削除する</Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>種目の削除</AlertDialogTitle>
+              <AlertDialogDescription>
+                {exercise.name}を削除しますか？
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>キャンセル</AlertDialogCancel>
+              <Form method="post">
+                <input type="hidden" name="id" value={exercise.id} />
+                <AlertDialogAction
+                  type="submit"
+                  name="actionType"
+                  value="delete"
+                  className="w-full"
+                >
+                  削除
+                </AlertDialogAction>
+              </Form>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </Section>
     </Main>
   );
 };
-export default Page;
 
 export const action = async ({
   request,
