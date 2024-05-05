@@ -1,7 +1,5 @@
 import type { AppLoadContext } from "@remix-run/cloudflare";
 import { exercises } from "database/tables/exercises";
-import { tagExerciseMappings } from "database/tables/tag-exercise-mappings";
-import { tags } from "database/tables/tags";
 import { trainingSessions } from "database/tables/training-sessions";
 import { trainingSets } from "database/tables/training-sets";
 import { trainings } from "database/tables/trainings";
@@ -88,11 +86,6 @@ export const getTrainingsByExerciseId: GetTrainingsByExerciseId =
         )
         .leftJoin(trainingSets, eq(trainingSessions.id, trainingSets.sessionId))
         .leftJoin(exercises, eq(trainingSessions.exerciseId, exercises.id))
-        .leftJoin(
-          tagExerciseMappings,
-          eq(exercises.id, tagExerciseMappings.exerciseId),
-        )
-        .leftJoin(tags, eq(tagExerciseMappings.tagId, tags.id))
         .where(
           and(
             eq(exercises.id, exerciseId),
