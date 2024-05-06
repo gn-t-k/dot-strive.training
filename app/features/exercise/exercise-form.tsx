@@ -91,16 +91,23 @@ export const ExerciseForm: FC<Props> = ({
     defaultValue: defaultValues,
   });
 
+  const { key: idKey, ...idProps } = getInputProps(fields.id, {
+    type: "hidden",
+  });
+  const { key: nameKey, ...nameProps } = getInputProps(fields.name, {
+    type: "text",
+  });
+
   return (
     <Form
       method="post"
       className="flex flex-col space-y-3"
       {...getFormProps(form)}
     >
-      <input {...getInputProps(fields.id, { type: "hidden" })} />
+      <input key={idKey} {...idProps} />
       <div className="space-y-2">
         <Label htmlFor={fields.name.id}>名前</Label>
-        <Input {...getInputProps(fields.name, { type: "text" })} />
+        <Input key={nameKey} {...nameProps} />
         {fields.name.errors?.map((error) => (
           <FormErrorMessage key={error} message={error} />
         ))}
@@ -112,14 +119,16 @@ export const ExerciseForm: FC<Props> = ({
         {getCollectionProps(fields.tags, {
           type: "checkbox",
           options: registeredTags.map((tag) => tag.id),
-        }).map((props) => (
-          <div key={props.id} className="flex items-center space-x-1">
-            <Checkbox {...props} type="button" />
-            <Label htmlFor={props.id} className="font-medium">
-              {registeredTags.find((tag) => tag.id === props.value)?.name}
-            </Label>
-          </div>
-        ))}
+        }).map(({ key, ...props }) => {
+          return (
+            <div key={props.id} className="flex items-center space-x-1">
+              <Checkbox key={key} {...props} type="button" />
+              <Label htmlFor={props.id} className="font-medium">
+                {registeredTags.find((tag) => tag.id === props.value)?.name}
+              </Label>
+            </div>
+          );
+        })}
         {fields.tags.errors?.map((error) => (
           <FormErrorMessage key={error} message={error} />
         ))}

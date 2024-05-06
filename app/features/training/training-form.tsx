@@ -311,11 +311,13 @@ const ExerciseField: FC<ExerciseFieldProps> = ({
   registeredExercises,
   exerciseField,
 }) => {
+  const { key, ...props } = getSelectProps(exerciseField);
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor={exerciseField.id}>種目</Label>
       <Select
-        {...getSelectProps(exerciseField)}
+        key={key}
+        {...props}
         defaultValue={exerciseField.initialValue ?? ""}
       >
         <SelectTrigger id={exerciseField.id}>
@@ -348,10 +350,11 @@ type MemoFieldProps = {
   memoField: FieldMetadata<SessionFieldsType["memo"]>;
 };
 const MemoField: FC<MemoFieldProps> = ({ memoField }) => {
+  const { key, ...props } = getTextareaProps(memoField);
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor={memoField.id}>メモ</Label>
-      <Textarea {...getTextareaProps(memoField)} />
+      <Textarea key={key} {...props} />
       {memoField.errors?.map((error) => (
         <FormErrorMessage key={error} message={error} />
       ))}
@@ -470,7 +473,7 @@ const WeightField: FC<WeightFieldProps> = ({ weightField, lastValue }) => {
     change((Number(value) + 2.5).toString());
   }, [change, value]);
 
-  const inputProps = getInputProps(weightField, {
+  const { key, ...props } = getInputProps(weightField, {
     type: "number",
     value: false,
   });
@@ -483,7 +486,8 @@ const WeightField: FC<WeightFieldProps> = ({ weightField, lastValue }) => {
         </Label>
         <div className="col-span-2 flex items-center gap-1">
           <Input
-            {...inputProps}
+            key={key}
+            {...props}
             value={value}
             onChange={(event) => change(event.target.value)}
             inputMode="decimal"
@@ -546,7 +550,10 @@ const RepsField: FC<RepsFieldProps> = ({ repsField, lastValue }) => {
     change((Number(value) + 1).toString());
   }, [change, value]);
 
-  const inputProps = getInputProps(repsField, { type: "number", value: false });
+  const { key, ...props } = getInputProps(repsField, {
+    type: "number",
+    value: false,
+  });
 
   return (
     <div className="flex flex-col gap-2 pl-2">
@@ -556,7 +563,8 @@ const RepsField: FC<RepsFieldProps> = ({ repsField, lastValue }) => {
         </Label>
         <div className="col-span-2 flex items-center gap-1">
           <Input
-            {...inputProps}
+            key={key}
+            {...props}
             value={value}
             onChange={(event) => change(event.target.value)}
             pattern="[0-9]*"

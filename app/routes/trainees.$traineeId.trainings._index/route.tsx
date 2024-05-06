@@ -18,6 +18,7 @@ import {
 
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { Calendar } from "app/ui/calendar";
+import { ArrowRightCircle } from "lucide-react";
 import { type FC, Suspense, useCallback, useMemo, useState } from "react";
 import type { MonthChangeEventHandler } from "react-day-picker";
 import { TrainingSessionList } from "../../features/training/training-session-list";
@@ -157,16 +158,22 @@ const TrainingsPage: FC<TrainingsPageProps> = ({ trainee, trainings }) => {
               const dateString = format(training.date, "yyyy年MM月dd日");
               return (
                 <li key={training.id}>
-                  <Link to={`/trainees/${trainee.id}/trainings/${training.id}`}>
-                    <Card>
-                      <CardHeader>
-                        <Heading level={2}>{dateString}</Heading>
-                      </CardHeader>
-                      <CardContent>
-                        <TrainingSessionList sessions={training.sessions} />
-                      </CardContent>
-                    </Card>
-                  </Link>
+                  <Card>
+                    <CardHeader className="flex justify-between items-center">
+                      <Heading level={2}>{dateString}</Heading>
+                      <Link
+                        to={`/trainees/${trainee.id}/trainings/${training.id}`}
+                      >
+                        <ArrowRightCircle className="size-4" />
+                      </Link>
+                    </CardHeader>
+                    <CardContent>
+                      <TrainingSessionList
+                        traineeId={trainee.id}
+                        sessions={training.sessions}
+                      />
+                    </CardContent>
+                  </Card>
                 </li>
               );
             })}

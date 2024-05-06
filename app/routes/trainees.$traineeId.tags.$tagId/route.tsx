@@ -45,7 +45,7 @@ import {
   startOfDay,
   startOfMonth,
 } from "date-fns";
-import { Pencil, X } from "lucide-react";
+import { ArrowRightCircle, Pencil, X } from "lucide-react";
 import {
   type FC,
   type MouseEventHandler,
@@ -299,16 +299,22 @@ const TagPage: FC<TagPageProps> = ({
               const dateString = format(training.date, "yyyy年MM月dd日");
               return (
                 <li key={training.id}>
-                  <Link to={`/trainees/${traineeId}/trainings/${training.id}`}>
-                    <Card>
-                      <CardHeader>
-                        <Heading level={3}>{dateString}</Heading>
-                      </CardHeader>
-                      <CardContent>
-                        <TrainingSessionList sessions={training.sessions} />
-                      </CardContent>
-                    </Card>
-                  </Link>
+                  <Card>
+                    <CardHeader className="flex justify-between items-center">
+                      <Heading level={3}>{dateString}</Heading>
+                      <Link
+                        to={`/trainees/${traineeId}/trainings/${training.id}`}
+                      >
+                        <ArrowRightCircle className="size-4" />
+                      </Link>
+                    </CardHeader>
+                    <CardContent>
+                      <TrainingSessionList
+                        traineeId={traineeId}
+                        sessions={training.sessions}
+                      />
+                    </CardContent>
+                  </Card>
                 </li>
               );
             })}
