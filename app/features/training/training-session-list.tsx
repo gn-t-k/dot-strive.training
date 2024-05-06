@@ -1,10 +1,13 @@
+import { Link } from "@remix-run/react";
 import { Heading } from "app/ui/heading";
 import type { FC } from "react";
 
 type Props = {
+  traineeId: string;
   sessions: {
     id: string;
     exercise: {
+      id: string;
       name: string;
     };
     sets: {
@@ -16,14 +19,19 @@ type Props = {
     memo: string;
   }[];
 };
-export const TrainingSessionList: FC<Props> = ({ sessions }) => {
+export const TrainingSessionList: FC<Props> = ({ traineeId, sessions }) => {
   return (
     <ol className="flex flex-col gap-6">
       {sessions.map((session) => {
         return (
           <li key={session.id} className="flex flex-col gap-4">
             <Heading level={3} size="sm">
-              {session.exercise.name}
+              <Link
+                to={`/trainees/${traineeId}/exercises/${session.exercise.id}`}
+                className="underline"
+              >
+                {session.exercise.name}
+              </Link>
             </Heading>
             <ol className="flex flex-col gap-2 px-4">
               {session.sets.map((set, setIndex) => {
