@@ -7,7 +7,7 @@ import { Section } from "app/ui/section";
 import { Skeleton } from "app/ui/skeleton";
 
 import { type FC, useMemo } from "react";
-import { SetCountChart } from "../../features/training/set-count-chart";
+import { SetCountChart } from "./set-count-chart";
 
 export const TagPageLoading: FC = () => {
   const navigation = useNavigation();

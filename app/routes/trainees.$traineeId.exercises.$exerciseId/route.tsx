@@ -17,8 +17,8 @@ import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exerc
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { validateTrainee } from "app/features/trainee/schema";
 import { getTrainingsByExerciseId } from "app/features/training/get-trainings-by-exercise-id";
-import { SetCountChart } from "app/features/training/set-count-chart";
 import { TrainingSessionList } from "app/features/training/training-session-list";
+import { VolumeAndIntensityChart } from "app/routes/trainees.$traineeId.exercises.$exerciseId/volume-and-intensity-chart";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import {
   AlertDialog,
@@ -250,7 +250,7 @@ const ExercisePage: FC<ExercisePageProps> = ({
       .sort((a, b) => (a.date < b.date ? -1 : 1))
       .map((training) => ({
         date: new Date(training.date),
-        setCount: training.sessions.flatMap((session) => session.sets).length,
+        sets: training.sessions.flatMap((session) => session.sets),
       }));
   }, [trainings]);
 
@@ -311,7 +311,7 @@ const ExercisePage: FC<ExercisePageProps> = ({
           modifiers={{ events: hasTrainings }}
           showOutsideDays={false}
         />
-        <SetCountChart
+        <VolumeAndIntensityChart
           defaultMonth={defaultMonth}
           selectedDate={selectedDate}
           selectDate={setSelectedDate}

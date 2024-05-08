@@ -56,8 +56,8 @@ import {
   useState,
 } from "react";
 import type { MonthChangeEventHandler } from "react-day-picker";
-import { SetCountChart } from "../../features/training/set-count-chart";
 import { deleteAction } from "./delete-action";
+import { SetCountChart } from "./set-count-chart";
 import { TagPageLoading } from "./tag-page-loading";
 import { updateAction } from "./update-action";
 
