@@ -1,5 +1,5 @@
 import { format, getDaysInMonth, setDate } from "date-fns";
-import { type FC, type MouseEventHandler, useCallback } from "react";
+import { type FC, type MouseEventHandler, useCallback, useMemo } from "react";
 import {
   Bar,
   BarChart,
@@ -18,21 +18,23 @@ type Props = {
     setCount: number;
   }[];
 };
-export const Chart: FC<Props> = ({
+export const SetCountChart: FC<Props> = ({
   defaultMonth,
   selectDate,
   selectedDate,
   trainings,
 }) => {
-  const data = Array.from(
-    { length: getDaysInMonth(defaultMonth) },
-    (_, i) => `${i + 1}`,
-  ).map((date) => ({
-    date,
-    setCount:
-      trainings.find((training) => format(training.date, "d") === date)
-        ?.setCount ?? 0,
-  }));
+  const data = useMemo(() => {
+    return Array.from(
+      { length: getDaysInMonth(defaultMonth) },
+      (_, i) => `${i + 1}`,
+    ).map((date) => ({
+      date,
+      setCount:
+        trainings.find((training) => format(training.date, "d") === date)
+          ?.setCount ?? 0,
+    }));
+  }, [defaultMonth, trainings]);
   const onClickCell = useCallback<(date: string) => MouseEventHandler>(
     (date) => (_) => {
       selectDate(
