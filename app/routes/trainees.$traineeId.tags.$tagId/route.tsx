@@ -56,7 +56,7 @@ import {
   useState,
 } from "react";
 import type { MonthChangeEventHandler } from "react-day-picker";
-import { Chart } from "./chart";
+import { SetCountChart } from "../../features/training/set-count-chart";
 import { deleteAction } from "./delete-action";
 import { TagPageLoading } from "./tag-page-loading";
 import { updateAction } from "./update-action";
@@ -287,7 +287,7 @@ const TagPage: FC<TagPageProps> = ({
           modifiers={{ events: hasTrainings }}
           showOutsideDays={false}
         />
-        <Chart
+        <SetCountChart
           defaultMonth={defaultMonth}
           selectedDate={selectedDate}
           selectDate={setSelectedDate}

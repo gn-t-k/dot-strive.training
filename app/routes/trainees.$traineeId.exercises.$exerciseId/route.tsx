@@ -17,6 +17,7 @@ import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exerc
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { validateTrainee } from "app/features/trainee/schema";
 import { getTrainingsByExerciseId } from "app/features/training/get-trainings-by-exercise-id";
+import { SetCountChart } from "app/features/training/set-count-chart";
 import { TrainingSessionList } from "app/features/training/training-session-list";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import {
@@ -244,6 +245,14 @@ const ExercisePage: FC<ExercisePageProps> = ({
       return from <= date && date <= to;
     });
   }, [selectedDate, trainings]);
+  const trainingsChartData = useMemo(() => {
+    return trainings
+      .sort((a, b) => (a.date < b.date ? -1 : 1))
+      .map((training) => ({
+        date: new Date(training.date),
+        setCount: training.sessions.flatMap((session) => session.sets).length,
+      }));
+  }, [trainings]);
 
   const onMonthChange = useCallback<MonthChangeEventHandler>(
     (month) => {
@@ -301,6 +310,12 @@ const ExercisePage: FC<ExercisePageProps> = ({
           onMonthChange={onMonthChange}
           modifiers={{ events: hasTrainings }}
           showOutsideDays={false}
+        />
+        <SetCountChart
+          defaultMonth={defaultMonth}
+          selectedDate={selectedDate}
+          selectDate={setSelectedDate}
+          trainings={trainingsChartData}
         />
         {filteredTrainings.length > 0 && (
           <ol className="flex flex-col gap-8">

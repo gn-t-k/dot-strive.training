@@ -7,7 +7,7 @@ import { Section } from "app/ui/section";
 import { Skeleton } from "app/ui/skeleton";
 
 import { type FC, useMemo } from "react";
-import { Chart } from "./chart";
+import { SetCountChart } from "../../features/training/set-count-chart";
 
 export const TagPageLoading: FC = () => {
   const navigation = useNavigation();
@@ -26,7 +26,7 @@ export const TagPageLoading: FC = () => {
       <Section>
         <Heading level={2}>記録</Heading>
         <Calendar defaultMonth={defaultMonth} showOutsideDays={false} />
-        <Chart
+        <SetCountChart
           defaultMonth={defaultMonth}
           selectedDate={undefined}
           selectDate={() => {
