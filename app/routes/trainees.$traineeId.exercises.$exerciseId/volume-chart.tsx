@@ -2,10 +2,9 @@ import { format, getDaysInMonth, setDate } from "date-fns";
 import { type FC, type MouseEventHandler, useCallback, useMemo } from "react";
 import {
   Bar,
+  BarChart,
   Cell,
-  ComposedChart,
   Legend,
-  Line,
   ResponsiveContainer,
   XAxis,
   YAxis,
@@ -20,11 +19,10 @@ type Props = {
     sets: {
       weight: number;
       repetition: number;
-      estimatedMaximumWeight: number;
     }[];
   }[];
 };
-export const VolumeAndIntensityChart: FC<Props> = ({
+export const VolumeChart: FC<Props> = ({
   defaultMonth,
   selectDate,
   selectedDate,
@@ -41,13 +39,6 @@ export const VolumeAndIntensityChart: FC<Props> = ({
           .find((training) => format(training.date, "d") === date)
           ?.sets.reduce((acc, cur) => acc + cur.weight * cur.repetition, 0) ??
         0,
-      intensity:
-        trainings
-          .find((training) => format(training.date, "d") === date)
-          ?.sets.sort(
-            (a, b) => a.estimatedMaximumWeight - b.estimatedMaximumWeight,
-          )
-          .at(0)?.estimatedMaximumWeight ?? 0,
     }));
   }, [defaultMonth, trainings]);
   const onClickCell = useCallback<(date: string) => MouseEventHandler>(
@@ -60,8 +51,8 @@ export const VolumeAndIntensityChart: FC<Props> = ({
   );
 
   return (
-    <ResponsiveContainer width="100%" height={200}>
-      <ComposedChart data={data}>
+    <ResponsiveContainer width="100%" height={300}>
+      <BarChart data={data}>
         <XAxis
           dataKey="date"
           stroke="#888888"
@@ -70,40 +61,18 @@ export const VolumeAndIntensityChart: FC<Props> = ({
           axisLine={false}
         />
         <YAxis
+          dataKey="volume"
           stroke="#888888"
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) => `${value}`}
           minTickGap={1}
-          yAxisId="left"
-          label={{
-            value: "ボリューム[kg]",
-            angle: -90,
-          }}
-          className="text-xs"
-        />
-        <YAxis
-          stroke="#888888"
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-          tickFormatter={(value) => `${value}`}
-          minTickGap={1}
-          yAxisId="right"
-          orientation="right"
-          label={{
-            value: "推定1RM[kg]",
-            angle: -90,
-          }}
-          className="text-xs"
         />
         <Bar
           dataKey="volume"
           fill="currentColor"
           radius={[4, 4, 0, 0]}
           className="fill-primary"
-          yAxisId="left"
         >
           {data.map((entry) => (
             <Cell
@@ -118,19 +87,16 @@ export const VolumeAndIntensityChart: FC<Props> = ({
             />
           ))}
         </Bar>
-        <Line dataKey="intensity" dot={false} yAxisId="right" />
         <Legend
           formatter={(value) => (
             <span className="text-sm">
               {value === "volume"
-                ? "ボリューム[kg]"
-                : value === "intensity"
-                  ? "推定1RM[kg]"
-                  : value}
+                ? `${format(defaultMonth, "M")}月のトレーニングボリューム[kg]`
+                : value}
             </span>
           )}
         />
-      </ComposedChart>
+      </BarChart>
     </ResponsiveContainer>
   );
 };

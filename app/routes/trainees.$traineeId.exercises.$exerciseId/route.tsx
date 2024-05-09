@@ -18,7 +18,7 @@ import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { validateTrainee } from "app/features/trainee/schema";
 import { getTrainingsByExerciseId } from "app/features/training/get-trainings-by-exercise-id";
 import { TrainingSessionList } from "app/features/training/training-session-list";
-import { VolumeAndIntensityChart } from "app/routes/trainees.$traineeId.exercises.$exerciseId/volume-and-intensity-chart";
+import { VolumeChart } from "app/routes/trainees.$traineeId.exercises.$exerciseId/volume-chart";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import {
   AlertDialog,
@@ -45,6 +45,7 @@ import {
 import { Heading } from "app/ui/heading";
 import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "app/ui/tabs";
 import { useToast } from "app/ui/use-toast";
 import {
   endOfDay,
@@ -67,6 +68,7 @@ import {
 import type { MonthChangeEventHandler } from "react-day-picker";
 import { ExercisesPageLoading } from "../trainees.$traineeId.exercises._index/exercises-page-loading";
 import { deleteAction } from "./delete-action";
+import { MaximumWeightChart } from "./maximum-weight-chart";
 import { updateAction } from "./update-action";
 
 export const loader = async ({
@@ -302,21 +304,46 @@ const ExercisePage: FC<ExercisePageProps> = ({
       </Section>
       <Section>
         <Heading level={2}>記録</Heading>
-        <Calendar
-          mode="single"
-          selected={selectedDate}
-          onSelect={setSelectedDate}
-          defaultMonth={defaultMonth}
-          onMonthChange={onMonthChange}
-          modifiers={{ events: hasTrainings }}
-          showOutsideDays={false}
-        />
-        <VolumeAndIntensityChart
-          defaultMonth={defaultMonth}
-          selectedDate={selectedDate}
-          selectDate={setSelectedDate}
-          trainings={trainingsChartData}
-        />
+        <Tabs defaultValue="calendar">
+          <TabsList className="w-full">
+            <TabsTrigger className="w-full" value="calendar">
+              カレンダー
+            </TabsTrigger>
+            <TabsTrigger className="w-full" value="volume">
+              ボリューム
+            </TabsTrigger>
+            <TabsTrigger className="w-full" value="maximum-weight">
+              推定1RM
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="calendar">
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              defaultMonth={defaultMonth}
+              onMonthChange={onMonthChange}
+              modifiers={{ events: hasTrainings }}
+              showOutsideDays={false}
+            />
+          </TabsContent>
+          <TabsContent value="volume">
+            <VolumeChart
+              defaultMonth={defaultMonth}
+              selectedDate={selectedDate}
+              selectDate={setSelectedDate}
+              trainings={trainingsChartData}
+            />
+          </TabsContent>
+          <TabsContent value="maximum-weight">
+            <MaximumWeightChart
+              defaultMonth={defaultMonth}
+              selectedDate={selectedDate}
+              selectDate={setSelectedDate}
+              trainings={trainingsChartData}
+            />
+          </TabsContent>
+        </Tabs>
         {filteredTrainings.length > 0 && (
           <ol className="flex flex-col gap-8">
             {filteredTrainings.map((training) => {
