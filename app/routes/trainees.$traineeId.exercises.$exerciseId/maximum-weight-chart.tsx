@@ -1,5 +1,5 @@
-import { format, getDaysInMonth } from "date-fns";
-import { type FC, useMemo } from "react";
+import { format, getDaysInMonth, setDate } from "date-fns";
+import { type FC, useCallback, useMemo } from "react";
 import {
   Legend,
   Line,
@@ -16,14 +16,14 @@ type Props = {
   trainings: {
     date: Date;
     sets: {
-      estimatedMaximumWeight: number;
+      weight: number;
     }[];
   }[];
 };
 export const MaximumWeightChart: FC<Props> = ({
   defaultMonth,
-  selectDate: _selectDate,
-  selectedDate: _selectedDate,
+  selectDate,
+  selectedDate,
   trainings,
 }) => {
   const data = useMemo(() => {
@@ -34,12 +34,21 @@ export const MaximumWeightChart: FC<Props> = ({
       date,
       maximumWeight: trainings
         .find((training) => format(training.date, "d") === date)
-        ?.sets.sort(
-          (a, b) => a.estimatedMaximumWeight - b.estimatedMaximumWeight,
-        )
-        .at(0)?.estimatedMaximumWeight,
+        ?.sets.sort((a, b) => b.weight - a.weight)
+        .at(0)?.weight,
     }));
   }, [defaultMonth, trainings]);
+  const onClick = useCallback(
+    (props_: unknown) => {
+      const props = props_ as { payload: (typeof data)[number] };
+      selectDate(
+        selectedDate
+          ? undefined
+          : setDate(defaultMonth, Number(props.payload.date)),
+      );
+    },
+    [defaultMonth, selectDate, selectedDate],
+  );
 
   return (
     <ResponsiveContainer width="100%" height={300}>
@@ -64,10 +73,13 @@ export const MaximumWeightChart: FC<Props> = ({
           strokeWidth={2}
           connectNulls
           type="monotone"
+          dot={{ onClick }}
         />
         <Legend
           formatter={(value) =>
-            value === "maximumWeight" ? "推定1RM[kg]" : value
+            value === "maximumWeight"
+              ? `${format(defaultMonth, "M")}月の最大重量[kg]`
+              : value
           }
         />
       </LineChart>
