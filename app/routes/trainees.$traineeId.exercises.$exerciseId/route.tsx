@@ -313,7 +313,7 @@ const ExercisePage: FC<ExercisePageProps> = ({
               ボリューム
             </TabsTrigger>
             <TabsTrigger className="w-full" value="maximum-weight">
-              推定1RM
+              最大重量
             </TabsTrigger>
           </TabsList>
           <TabsContent value="calendar">
