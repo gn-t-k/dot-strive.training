@@ -2,8 +2,7 @@ import { Await, Link, useLoaderData, useSearchParams } from "@remix-run/react";
 import { getTrainingsByTraineeId } from "app/features/training/get-trainings-by-trainee-id";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import { Button } from "app/ui/button";
-import { Card, CardContent, CardHeader } from "app/ui/card";
-import { Heading } from "app/ui/heading";
+import {} from "app/ui/card";
 import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
 import {
@@ -17,11 +16,10 @@ import {
 } from "date-fns";
 
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { TrainingCard } from "app/features/training/training-card";
 import { Calendar } from "app/ui/calendar";
-import { ArrowRightCircle } from "lucide-react";
 import { type FC, Suspense, useCallback, useMemo, useState } from "react";
 import type { MonthChangeEventHandler } from "react-day-picker";
-import { TrainingSessionList } from "../../features/training/training-session-list";
 import { TrainingsPageLoading } from "./trainings-page-loading";
 
 export const loader = async ({
@@ -154,29 +152,11 @@ const TrainingsPage: FC<TrainingsPageProps> = ({ trainee, trainings }) => {
         )}
         {filteredTrainings.length > 0 && (
           <ol className="flex flex-col gap-8">
-            {filteredTrainings.map((training) => {
-              const dateString = format(training.date, "yyyy年MM月dd日");
-              return (
-                <li key={training.id}>
-                  <Card>
-                    <CardHeader className="flex justify-between items-center">
-                      <Heading level={2}>{dateString}</Heading>
-                      <Link
-                        to={`/trainees/${trainee.id}/trainings/${training.id}`}
-                      >
-                        <ArrowRightCircle className="size-4" />
-                      </Link>
-                    </CardHeader>
-                    <CardContent>
-                      <TrainingSessionList
-                        traineeId={trainee.id}
-                        sessions={training.sessions}
-                      />
-                    </CardContent>
-                  </Card>
-                </li>
-              );
-            })}
+            {filteredTrainings.map((training) => (
+              <li key={training.id}>
+                <TrainingCard traineeId={trainee.id} training={training} />
+              </li>
+            ))}
           </ol>
         )}
       </Section>

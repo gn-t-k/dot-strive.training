@@ -17,7 +17,7 @@ import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exerc
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { validateTrainee } from "app/features/trainee/schema";
 import { getTrainingsByExerciseId } from "app/features/training/get-trainings-by-exercise-id";
-import { TrainingSessionList } from "app/features/training/training-session-list";
+import { TrainingCard } from "app/features/training/training-card";
 import { VolumeChart } from "app/routes/trainees.$traineeId.exercises.$exerciseId/volume-chart";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import {
@@ -31,8 +31,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "app/ui/alert-dialog";
+import { Badge } from "app/ui/badge";
 import { Button } from "app/ui/button";
-import { Card, CardContent, CardHeader } from "app/ui/card";
+import {} from "app/ui/card";
 import {
   Dialog,
   DialogClose,
@@ -56,12 +57,7 @@ import {
   startOfMonth,
   subMonths,
 } from "date-fns";
-import {
-  ArrowRightCircle,
-  ChevronLeft,
-  ChevronRight,
-  Pencil,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import {
   type FC,
   Suspense,
@@ -283,10 +279,23 @@ const ExercisePage: FC<ExercisePageProps> = ({
     <Main>
       <Section>
         <Dialog>
-          <header className="flex items-center justify-between">
-            <Heading level={1} size="lg">
-              {exercise.name}
-            </Heading>
+          <header className="flex justify-between">
+            <div className="flex flex-col gap-2">
+              <Heading level={1} size="lg">
+                {exercise.name}
+              </Heading>
+              <ul className="inline leading-relaxed">
+                {exercise.tags.map((tag, index) => {
+                  return (
+                    <li className="inline mr-1" key={`${index}_${tag}`}>
+                      <Link to={`/trainees/${traineeId}/tags/${tag.id}`}>
+                        <Badge variant="outline">#{tag.name}</Badge>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
             <DialogTrigger asChild>
               <Button size="icon" variant="ghost">
                 <Pencil className="size-4" />
@@ -351,29 +360,11 @@ const ExercisePage: FC<ExercisePageProps> = ({
         </Tabs>
         {filteredTrainings.length > 0 && (
           <ol className="flex flex-col gap-8">
-            {filteredTrainings.map((training) => {
-              const dateString = format(training.date, "yyyy年MM月dd日");
-              return (
-                <li key={training.id}>
-                  <Card>
-                    <CardHeader className="flex justify-between items-center">
-                      <Heading level={3}>{dateString}</Heading>
-                      <Link
-                        to={`/trainees/${traineeId}/trainings/${training.id}`}
-                      >
-                        <ArrowRightCircle className="size-4" />
-                      </Link>
-                    </CardHeader>
-                    <CardContent>
-                      <TrainingSessionList
-                        traineeId={traineeId}
-                        sessions={training.sessions}
-                      />
-                    </CardContent>
-                  </Card>
-                </li>
-              );
-            })}
+            {filteredTrainings.map((training) => (
+              <li key={training.id}>
+                <TrainingCard traineeId={traineeId} training={training} />
+              </li>
+            ))}
           </ol>
         )}
       </Section>

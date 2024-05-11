@@ -6,7 +6,6 @@ import {
 import {
   Await,
   Form,
-  Link,
   useActionData,
   useLoaderData,
   useNavigate,
@@ -16,7 +15,7 @@ import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { TagForm } from "app/features/tag/tag-form";
 import { validateTrainee } from "app/features/trainee/schema";
 import { getTrainingsByTagId } from "app/features/training/get-trainings-by-tag-id";
-import { TrainingSessionList } from "app/features/training/training-session-list";
+import { TrainingCard } from "app/features/training/training-card";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import {
   AlertDialog,
@@ -31,7 +30,7 @@ import {
 } from "app/ui/alert-dialog";
 import { Button } from "app/ui/button";
 import { Calendar } from "app/ui/calendar";
-import { Card, CardContent, CardHeader } from "app/ui/card";
+import {} from "app/ui/card";
 import { Heading } from "app/ui/heading";
 import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
@@ -45,7 +44,7 @@ import {
   startOfDay,
   startOfMonth,
 } from "date-fns";
-import { ArrowRightCircle, Pencil, X } from "lucide-react";
+import { Pencil, X } from "lucide-react";
 import {
   type FC,
   type MouseEventHandler,
@@ -295,29 +294,11 @@ const TagPage: FC<TagPageProps> = ({
         />
         {filteredTrainings.length > 0 && (
           <ol className="flex flex-col gap-8">
-            {filteredTrainings.map((training) => {
-              const dateString = format(training.date, "yyyy年MM月dd日");
-              return (
-                <li key={training.id}>
-                  <Card>
-                    <CardHeader className="flex justify-between items-center">
-                      <Heading level={3}>{dateString}</Heading>
-                      <Link
-                        to={`/trainees/${traineeId}/trainings/${training.id}`}
-                      >
-                        <ArrowRightCircle className="size-4" />
-                      </Link>
-                    </CardHeader>
-                    <CardContent>
-                      <TrainingSessionList
-                        traineeId={traineeId}
-                        sessions={training.sessions}
-                      />
-                    </CardContent>
-                  </Card>
-                </li>
-              );
-            })}
+            {filteredTrainings.map((training) => (
+              <li key={training.id}>
+                <TrainingCard traineeId={traineeId} training={training} />
+              </li>
+            ))}
           </ol>
         )}
       </Section>
