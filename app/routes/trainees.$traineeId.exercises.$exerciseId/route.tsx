@@ -31,6 +31,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "app/ui/alert-dialog";
+import { Badge } from "app/ui/badge";
 import { Button } from "app/ui/button";
 import { Card, CardContent, CardHeader } from "app/ui/card";
 import {
@@ -56,12 +57,7 @@ import {
   startOfMonth,
   subMonths,
 } from "date-fns";
-import {
-  ArrowRightCircle,
-  ChevronLeft,
-  ChevronRight,
-  Pencil,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import {
   type FC,
   Suspense,
@@ -283,10 +279,23 @@ const ExercisePage: FC<ExercisePageProps> = ({
     <Main>
       <Section>
         <Dialog>
-          <header className="flex items-center justify-between">
-            <Heading level={1} size="lg">
-              {exercise.name}
-            </Heading>
+          <header className="flex justify-between">
+            <div className="flex flex-col gap-2">
+              <Heading level={1} size="lg">
+                {exercise.name}
+              </Heading>
+              <ul className="inline leading-relaxed">
+                {exercise.tags.map((tag, index) => {
+                  return (
+                    <li className="inline mr-1" key={`${index}_${tag}`}>
+                      <Link to={`/trainees/${traineeId}/tags/${tag.id}`}>
+                        <Badge variant="outline">#{tag.name}</Badge>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
             <DialogTrigger asChild>
               <Button size="icon" variant="ghost">
                 <Pencil className="size-4" />
@@ -357,11 +366,12 @@ const ExercisePage: FC<ExercisePageProps> = ({
                 <li key={training.id}>
                   <Card>
                     <CardHeader className="flex justify-between items-center">
-                      <Heading level={3}>{dateString}</Heading>
                       <Link
                         to={`/trainees/${traineeId}/trainings/${training.id}`}
                       >
-                        <ArrowRightCircle className="size-4" />
+                        <Heading level={3} className="underline">
+                          {dateString}
+                        </Heading>
                       </Link>
                     </CardHeader>
                     <CardContent>

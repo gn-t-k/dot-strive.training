@@ -26,7 +26,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "app/ui/dialog";
-import { ArrowRightCircle } from "lucide-react";
 import type { FC } from "react";
 import { createAction } from "./create-action";
 
@@ -117,28 +116,25 @@ const Page: FC = () => {
             return (
               <li key={exercise.id}>
                 <Card>
-                  <CardHeader className="flex justify-between items-center">
-                    <div className="flex flex-col gap-2">
-                      <Heading level={2}>{exercise.name}</Heading>
-                      <ul className="inline leading-relaxed">
-                        {exercise.tags.map((tag, index) => {
-                          return (
-                            <li className="inline mr-1" key={`${index}_${tag}`}>
-                              <Link
-                                to={`/trainees/${trainee.id}/tags/${tag.id}`}
-                              >
-                                <Badge variant="outline">#{tag.name}</Badge>
-                              </Link>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
+                  <CardHeader className="flex flex-col gap-2">
                     <Link
                       to={`/trainees/${trainee.id}/exercises/${exercise.id}`}
                     >
-                      <ArrowRightCircle className="size-4" />
+                      <Heading level={2} className="underline">
+                        {exercise.name}
+                      </Heading>
                     </Link>
+                    <ul className="inline leading-relaxed">
+                      {exercise.tags.map((tag, index) => {
+                        return (
+                          <li className="inline mr-1" key={`${index}_${tag}`}>
+                            <Link to={`/trainees/${trainee.id}/tags/${tag.id}`}>
+                              <Badge variant="outline">#{tag.name}</Badge>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
                   </CardHeader>
                 </Card>
               </li>
