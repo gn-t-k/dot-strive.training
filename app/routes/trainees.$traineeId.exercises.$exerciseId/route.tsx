@@ -32,7 +32,6 @@ import {
   AlertDialogTrigger,
 } from "app/ui/alert-dialog";
 import { Button } from "app/ui/button";
-import { Calendar } from "app/ui/calendar";
 import { Card, CardContent, CardHeader } from "app/ui/card";
 import {
   Dialog,
@@ -48,15 +47,21 @@ import { Section } from "app/ui/section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "app/ui/tabs";
 import { useToast } from "app/ui/use-toast";
 import {
+  addMonths,
   endOfDay,
   endOfMonth,
   format,
-  isSameDay,
   parseISO,
   startOfDay,
   startOfMonth,
+  subMonths,
 } from "date-fns";
-import { ArrowRightCircle, Pencil } from "lucide-react";
+import {
+  ArrowRightCircle,
+  ChevronLeft,
+  ChevronRight,
+  Pencil,
+} from "lucide-react";
 import {
   type FC,
   Suspense,
@@ -65,7 +70,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import type { MonthChangeEventHandler } from "react-day-picker";
 import { ExercisesPageLoading } from "../trainees.$traineeId.exercises._index/exercises-page-loading";
 import { deleteAction } from "./delete-action";
 import { MaximumWeightChart } from "./maximum-weight-chart";
@@ -236,6 +240,13 @@ const ExercisePage: FC<ExercisePageProps> = ({
     const month = searchParams.get("month");
     return month ? new Date(month) : today;
   }, [searchParams.get, today]);
+  const prevMonth = useMemo<Date>(() => {
+    return subMonths(defaultMonth, 1);
+  }, [defaultMonth]);
+  const nextMonth = useMemo<Date>(() => {
+    return addMonths(defaultMonth, 1);
+  }, [defaultMonth]);
+
   const filteredTrainings = useMemo(() => {
     if (!selectedDate) {
       return trainings;
@@ -247,6 +258,7 @@ const ExercisePage: FC<ExercisePageProps> = ({
       return from <= date && date <= to;
     });
   }, [selectedDate, trainings]);
+
   const trainingsChartData = useMemo(() => {
     return trainings
       .sort((a, b) => (a.date < b.date ? -1 : 1))
@@ -256,19 +268,16 @@ const ExercisePage: FC<ExercisePageProps> = ({
       }));
   }, [trainings]);
 
-  const onMonthChange = useCallback<MonthChangeEventHandler>(
-    (month) => {
-      setSelectedDate(undefined);
-      searchParams.set("month", format(month, "yyyy-MM"));
-      setSearchParams(searchParams, { preventScrollReset: true });
-    },
-    [searchParams, setSearchParams],
-  );
-  const hasTrainings = useCallback(
-    (date: Date) =>
-      trainings.some((training) => isSameDay(date, training.date)),
-    [trainings.some],
-  );
+  const setMonthPrev = useCallback(() => {
+    setSelectedDate(undefined);
+    searchParams.set("month", format(prevMonth, "yyyy-MM"));
+    setSearchParams(searchParams, { preventScrollReset: true });
+  }, [searchParams, setSearchParams, prevMonth]);
+  const setMonthNext = useCallback(() => {
+    setSelectedDate(undefined);
+    searchParams.set("month", format(nextMonth, "yyyy-MM"));
+    setSearchParams(searchParams, { preventScrollReset: true });
+  }, [searchParams, setSearchParams, nextMonth]);
 
   return (
     <Main>
@@ -303,12 +312,19 @@ const ExercisePage: FC<ExercisePageProps> = ({
         </Dialog>
       </Section>
       <Section>
-        <Heading level={2}>記録</Heading>
-        <Tabs defaultValue="calendar">
+        <header className="flex items-center justify-between">
+          <Heading level={2}>{format(defaultMonth, "M")}月の記録</Heading>
+          <div className="flex items-center gap-2">
+            <Button size="icon" variant="ghost" onClick={setMonthPrev}>
+              <ChevronLeft className="size-4" />
+            </Button>
+            <Button size="icon" variant="ghost" onClick={setMonthNext}>
+              <ChevronRight className="size-4" />
+            </Button>
+          </div>
+        </header>
+        <Tabs defaultValue="volume">
           <TabsList className="w-full">
-            <TabsTrigger className="w-full" value="calendar">
-              カレンダー
-            </TabsTrigger>
             <TabsTrigger className="w-full" value="volume">
               ボリューム
             </TabsTrigger>
@@ -316,17 +332,6 @@ const ExercisePage: FC<ExercisePageProps> = ({
               最大重量
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="calendar">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              defaultMonth={defaultMonth}
-              onMonthChange={onMonthChange}
-              modifiers={{ events: hasTrainings }}
-              showOutsideDays={false}
-            />
-          </TabsContent>
           <TabsContent value="volume">
             <VolumeChart
               defaultMonth={defaultMonth}
