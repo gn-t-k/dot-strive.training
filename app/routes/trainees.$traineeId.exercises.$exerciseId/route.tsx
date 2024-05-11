@@ -17,7 +17,7 @@ import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exerc
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { validateTrainee } from "app/features/trainee/schema";
 import { getTrainingsByExerciseId } from "app/features/training/get-trainings-by-exercise-id";
-import { TrainingSessionList } from "app/features/training/training-session-list";
+import { TrainingCard } from "app/features/training/training-card";
 import { VolumeChart } from "app/routes/trainees.$traineeId.exercises.$exerciseId/volume-chart";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
 import {
@@ -33,7 +33,7 @@ import {
 } from "app/ui/alert-dialog";
 import { Badge } from "app/ui/badge";
 import { Button } from "app/ui/button";
-import { Card, CardContent, CardHeader } from "app/ui/card";
+import {} from "app/ui/card";
 import {
   Dialog,
   DialogClose,
@@ -360,30 +360,11 @@ const ExercisePage: FC<ExercisePageProps> = ({
         </Tabs>
         {filteredTrainings.length > 0 && (
           <ol className="flex flex-col gap-8">
-            {filteredTrainings.map((training) => {
-              const dateString = format(training.date, "yyyy年MM月dd日");
-              return (
-                <li key={training.id}>
-                  <Card>
-                    <CardHeader className="flex justify-between items-center">
-                      <Link
-                        to={`/trainees/${traineeId}/trainings/${training.id}`}
-                      >
-                        <Heading level={3} className="underline">
-                          {dateString}
-                        </Heading>
-                      </Link>
-                    </CardHeader>
-                    <CardContent>
-                      <TrainingSessionList
-                        traineeId={traineeId}
-                        sessions={training.sessions}
-                      />
-                    </CardContent>
-                  </Card>
-                </li>
-              );
-            })}
+            {filteredTrainings.map((training) => (
+              <li key={training.id}>
+                <TrainingCard traineeId={traineeId} training={training} />
+              </li>
+            ))}
           </ol>
         )}
       </Section>
