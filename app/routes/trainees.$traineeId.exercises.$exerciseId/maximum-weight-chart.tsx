@@ -69,11 +69,13 @@ export const MaximumWeightChart: FC<Props> = ({
         />
         <Line
           dataKey="maximumWeight"
-          stroke="#888888"
+          stroke={selectedDate ? "#888888" : "currentColor"}
           strokeWidth={2}
           connectNulls
           type="monotone"
-          dot={{ onClick }}
+          dot={{
+            onClick,
+          }}
         />
         <Legend
           formatter={(value) =>

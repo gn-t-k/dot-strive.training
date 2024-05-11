@@ -32,7 +32,6 @@ import {
   AlertDialogTrigger,
 } from "app/ui/alert-dialog";
 import { Button } from "app/ui/button";
-import { Calendar } from "app/ui/calendar";
 import { Card, CardContent, CardHeader } from "app/ui/card";
 import {
   Dialog,
@@ -303,12 +302,9 @@ const ExercisePage: FC<ExercisePageProps> = ({
         </Dialog>
       </Section>
       <Section>
-        <Heading level={2}>記録</Heading>
-        <Tabs defaultValue="calendar">
+        <Heading level={2}>{format(defaultMonth, "M")}月の記録</Heading>
+        <Tabs defaultValue="volume">
           <TabsList className="w-full">
-            <TabsTrigger className="w-full" value="calendar">
-              カレンダー
-            </TabsTrigger>
             <TabsTrigger className="w-full" value="volume">
               ボリューム
             </TabsTrigger>
@@ -316,17 +312,6 @@ const ExercisePage: FC<ExercisePageProps> = ({
               最大重量
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="calendar">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              defaultMonth={defaultMonth}
-              onMonthChange={onMonthChange}
-              modifiers={{ events: hasTrainings }}
-              showOutsideDays={false}
-            />
-          </TabsContent>
           <TabsContent value="volume">
             <VolumeChart
               defaultMonth={defaultMonth}
