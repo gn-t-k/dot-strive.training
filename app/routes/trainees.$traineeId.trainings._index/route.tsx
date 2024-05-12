@@ -22,12 +22,8 @@ import { type FC, Suspense, useCallback, useMemo, useState } from "react";
 import type { MonthChangeEventHandler } from "react-day-picker";
 import { TrainingsPageLoading } from "./trainings-page-loading";
 
-export const loader = async ({
-  context,
-  request,
-  params,
-}: LoaderFunctionArgs) => {
-  const loaderData = await (async () => {
+export const loader = ({ context, request, params }: LoaderFunctionArgs) => {
+  const loaderData = (async () => {
     const { trainee } = await traineeLoader({ context, request, params });
     const today = new Date();
     const dateRange = ((month: string | null) => {

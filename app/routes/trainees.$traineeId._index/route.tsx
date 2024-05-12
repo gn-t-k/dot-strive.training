@@ -1,4 +1,4 @@
-import { Form, useLoaderData } from "@remix-run/react";
+import { Await, Form, useLoaderData } from "@remix-run/react";
 
 import { Button } from "app/ui/button";
 import { Main } from "app/ui/main";
@@ -21,25 +21,40 @@ import {
   AlertDialogHeader,
   AlertDialogTrigger,
 } from "app/ui/alert-dialog";
-import type { FC } from "react";
+import { type FC, Suspense } from "react";
 
 import { deleteTrainee } from "app/features/trainee/delete-trainee";
 import { action as logoutAction } from "app/routes/auth.logout/route";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
+import { TraineePageLoading } from "./trainee-page-loading";
 
-export const loader = async ({
-  context,
-  request,
-  params,
-}: LoaderFunctionArgs) => {
-  const { trainee } = await traineeLoader({ context, request, params });
+export const loader = ({ context, request, params }: LoaderFunctionArgs) => {
+  const loaderData = (async () => {
+    const { trainee } = await traineeLoader({ context, request, params });
 
-  return { trainee };
+    return { trainee };
+  })();
+
+  return { loaderData };
 };
 
 const Page: FC = () => {
-  const { trainee } = useLoaderData<typeof loader>();
+  const { loaderData } = useLoaderData<typeof loader>();
 
+  return (
+    <Suspense fallback={<TraineePageLoading />}>
+      <Await resolve={loaderData}>
+        {(loaderData) => <TraineePage {...loaderData} />}
+      </Await>
+    </Suspense>
+  );
+};
+export default Page;
+
+type TraineePageProps = Awaited<
+  Awaited<ReturnType<typeof loader>>["loaderData"]
+>;
+export const TraineePage: FC<TraineePageProps> = ({ trainee }) => {
   return (
     <Main>
       <Section className="mt-4 items-center">
@@ -74,7 +89,6 @@ const Page: FC = () => {
     </Main>
   );
 };
-export default Page;
 
 export const action = async ({
   params,

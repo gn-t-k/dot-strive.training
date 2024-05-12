@@ -9,6 +9,7 @@ import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import type { FC } from "react";
 import { TraineesRouteLoading } from "./trainees-route-loading";
 
+// TODO: Promiseそのまま返す形にしたい
 export const loader = async ({
   context,
   request,
@@ -41,7 +42,7 @@ const PageWithNavigationHeader: FC = () => {
   return (
     <>
       <header className="sticky top-0">
-        <HeaderNavigation traineeId={trainee.id} />
+        <HeaderNavigation isLoading={false} traineeId={trainee.id} />
       </header>
       {navigation.state === "idle" ? <Outlet /> : <TraineesRouteLoading />}
       <footer className="mt-8 flex h-24 items-center justify-center border-t px-4">
