@@ -1,8 +1,13 @@
 import { createId } from "@paralleldrive/cuid2";
 import { json } from "@remix-run/cloudflare";
-import { useActionData, useLoaderData, useNavigate } from "@remix-run/react";
+import {
+  Await,
+  useActionData,
+  useLoaderData,
+  useNavigate,
+} from "@remix-run/react";
 import { parseWithValibot } from "conform-to-valibot";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 
 import { getExercisesByTraineeId } from "app/features/exercise/get-exercises-by-trainee-id";
 import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exercises-with-tags-by-trainee-id";
@@ -25,26 +30,47 @@ import type {
 import { format } from "date-fns";
 import type { FC } from "react";
 
-export const loader = async ({
-  context,
-  request,
-  params,
-}: LoaderFunctionArgs) => {
-  const { trainee } = await traineeLoader({ context, request, params });
+export const loader = ({ context, request, params }: LoaderFunctionArgs) => {
+  const loaderData = (async () => {
+    const { trainee } = await traineeLoader({ context, request, params });
 
-  const url = new URL(request.url);
-  const date = url.searchParams.get("date");
+    const url = new URL(request.url);
+    const date = url.searchParams.get("date");
 
-  const getExercisesResult = await getExercisesByTraineeId(context)(trainee.id);
-  if (getExercisesResult.result !== "success") {
-    throw new Response("Internal Server Error", { status: 500 });
-  }
+    const getExercisesResult = await getExercisesByTraineeId(context)(
+      trainee.id,
+    );
+    if (getExercisesResult.result !== "success") {
+      throw new Response("Internal Server Error", { status: 500 });
+    }
 
-  return { trainee, registeredExercises: getExercisesResult.data, date };
+    return { trainee, registeredExercises: getExercisesResult.data, date };
+  })();
+
+  return { loaderData };
 };
 
 const Page: FC = () => {
-  const { trainee, registeredExercises, date } = useLoaderData<typeof loader>();
+  const { loaderData } = useLoaderData<typeof loader>();
+
+  return (
+    <Suspense>
+      <Await resolve={loaderData}>
+        {(loaderData) => <NewTrainingPage {...loaderData} />}
+      </Await>
+    </Suspense>
+  );
+};
+export default Page;
+
+type NewTrainingPageProps = Awaited<
+  Awaited<ReturnType<typeof loader>>["loaderData"]
+>;
+const NewTrainingPage: FC<NewTrainingPageProps> = ({
+  trainee,
+  registeredExercises,
+  date,
+}) => {
   const actionData = useActionData<typeof action>();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -88,7 +114,6 @@ const Page: FC = () => {
     </Main>
   );
 };
-export default Page;
 
 export const action = async ({
   params,

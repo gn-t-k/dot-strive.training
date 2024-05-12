@@ -4,6 +4,7 @@ import {
   redirect,
 } from "@remix-run/cloudflare";
 import {
+  Await,
   Form,
   useActionData,
   useLoaderData,
@@ -29,54 +30,72 @@ import { Button } from "app/ui/button";
 import { Main } from "app/ui/main";
 import { useToast } from "app/ui/use-toast";
 import { format } from "date-fns";
-import { type FC, useEffect } from "react";
+import { type FC, Suspense, useEffect } from "react";
 import { deleteAction } from "./delete-action";
 import { updateAction } from "./update-action";
 
-export const loader = async ({
-  context,
-  request,
-  params,
-}: LoaderFunctionArgs) => {
-  const { trainee } = await traineeLoader({ context, request, params });
+export const loader = ({ context, request, params }: LoaderFunctionArgs) => {
+  const loaderData = (async () => {
+    const { trainee } = await traineeLoader({ context, request, params });
 
-  const { trainingId } = params;
-  if (!trainingId) {
-    throw redirect(`/trainees/${trainee.id}/trainings`);
-  }
+    const { trainingId } = params;
+    if (!trainingId) {
+      throw redirect(`/trainees/${trainee.id}/trainings`);
+    }
 
-  const findTrainingResult = await findTrainingById(context)(trainingId);
-  switch (findTrainingResult.result) {
-    case "found": {
-      const getExercisesResult = await getExercisesByTraineeId(context)(
-        trainee.id,
-      );
-      if (getExercisesResult.result !== "success") {
-        throw new Response("Internal Server Error", { status: 500 });
+    const findTrainingResult = await findTrainingById(context)(trainingId);
+    switch (findTrainingResult.result) {
+      case "found": {
+        const getExercisesResult = await getExercisesByTraineeId(context)(
+          trainee.id,
+        );
+        if (getExercisesResult.result !== "success") {
+          throw new Response("Internal Server Error", { status: 500 });
+        }
+
+        return {
+          trainee,
+          training: findTrainingResult.data,
+          registeredExercises: getExercisesResult.data,
+        };
       }
+      case "not-found": {
+        return { trainee, training: null };
+      }
+      case "failure": {
+        throw new Response("Sorry, something went wrong.", { status: 500 });
+      }
+    }
+  })();
 
-      return {
-        trainee,
-        training: findTrainingResult.data,
-        registeredExercises: getExercisesResult.data,
-      };
-    }
-    case "not-found": {
-      return { trainee, training: null };
-    }
-    case "failure": {
-      throw new Response("Sorry, something went wrong.", { status: 500 });
-    }
-  }
+  return { loaderData };
 };
 
 const Page: FC = () => {
-  const loaderData = useLoaderData<typeof loader>();
+  const { loaderData } = useLoaderData<typeof loader>();
+
+  return (
+    <Suspense>
+      <Await resolve={loaderData}>
+        {(loaderData) => <TrainingPage {...loaderData} />}
+      </Await>
+    </Suspense>
+  );
+};
+export default Page;
+
+type TrainingPageProps = Awaited<
+  Awaited<ReturnType<typeof loader>>["loaderData"]
+>;
+const TrainingPage: FC<TrainingPageProps> = ({
+  trainee,
+  registeredExercises,
+  training,
+}) => {
   const actionData = useActionData<typeof action>();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const { trainee, training } = loaderData;
   useEffect(() => {
     if (!actionData) {
       return;
@@ -115,9 +134,7 @@ const Page: FC = () => {
     return null;
   }
 
-  const { registeredExercises } = loaderData;
-
-  const dateString = format(loaderData.training.date, "yyyy年MM月dd日");
+  const dateString = format(training.date, "yyyy年MM月dd日");
 
   return (
     <Main>
@@ -168,7 +185,6 @@ const Page: FC = () => {
     </Main>
   );
 };
-export default Page;
 
 export const action = async ({
   request,

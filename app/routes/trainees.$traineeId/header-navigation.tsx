@@ -4,13 +4,29 @@ import { Link, useLocation, useNavigation } from "@remix-run/react";
 import { Logotype } from "app/ui/logotype";
 import type { FC } from "react";
 
-type Props = {
-  traineeId: string;
-};
-export const HeaderNavigation: FC<Props> = ({ traineeId }) => {
+type Props = { isLoading: true } | { isLoading: false; traineeId: string };
+export const HeaderNavigation: FC<Props> = (props) => {
   const { state } = useNavigation();
   const { pathname } = useLocation();
   const location = pathname.split("/")[3] ?? "";
+
+  if (props.isLoading) {
+    return (
+      <nav className="flex w-full items-center justify-between bg-white py-2 px-4">
+        <div>
+          <Logotype />
+        </div>
+        <div className="flex w-full items-center justify-end">
+          <CalendarDays size="20px" className="text-muted-foreground/50" />
+          <Dumbbell size="20px" className="text-muted-foreground/50" />
+          <Tag size="20px" className="text-muted-foreground/50" />
+          <CircleUserRound size="20px" className="text-muted-foreground/50" />
+        </div>
+      </nav>
+    );
+  }
+
+  const { traineeId } = props;
 
   return (
     <nav className="flex w-full items-center justify-between bg-white py-2 px-4">

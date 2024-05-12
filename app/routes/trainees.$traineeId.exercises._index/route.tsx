@@ -1,4 +1,4 @@
-import { Link, useActionData, useLoaderData } from "@remix-run/react";
+import { Await, Link, useActionData, useLoaderData } from "@remix-run/react";
 import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exercises-with-tags-by-trainee-id";
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
@@ -7,7 +7,7 @@ import { Heading } from "app/ui/heading";
 import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
 import { useToast } from "app/ui/use-toast";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 
 import { ExerciseForm } from "../../features/exercise/exercise-form";
 
@@ -28,35 +28,33 @@ import {
 } from "app/ui/dialog";
 import type { FC } from "react";
 import { createAction } from "./create-action";
+import { ExercisesPageLoading } from "./exercises-page-loading";
 
-export const loader = async ({
-  context,
-  request,
-  params,
-}: LoaderFunctionArgs) => {
-  const { trainee } = await traineeLoader({ context, request, params });
-  const [getTagsResult, getExercisesResult] = await Promise.all([
-    getTagsByTraineeId(context)(trainee.id),
-    getExercisesWithTagsByTraineeId(context)(trainee.id),
-  ]);
-  if (
-    !(
-      getTagsResult.result === "success" &&
-      getExercisesResult.result === "success"
-    )
-  ) {
-    throw new Response("Internal Server Error", { status: 500 });
-  }
-  const [tags, exercisesWithTags] = [
-    getTagsResult.data,
-    getExercisesResult.data,
-  ];
+export const loader = ({ context, request, params }: LoaderFunctionArgs) => {
+  const loaderData = (async () => {
+    const { trainee } = await traineeLoader({ context, request, params });
+    const [getTagsResult, getExercisesResult] = await Promise.all([
+      getTagsByTraineeId(context)(trainee.id),
+      getExercisesWithTagsByTraineeId(context)(trainee.id),
+    ]);
+    if (
+      !(
+        getTagsResult.result === "success" &&
+        getExercisesResult.result === "success"
+      )
+    ) {
+      throw new Response("Internal Server Error", { status: 500 });
+    }
+    const [tags, exercises] = [getTagsResult.data, getExercisesResult.data];
 
-  return { trainee, tags, exercisesWithTags };
+    return { trainee, tags, exercises };
+  })();
+
+  return { loaderData };
 };
 
 const Page: FC = () => {
-  const { trainee, tags, exercisesWithTags } = useLoaderData<typeof loader>();
+  const { loaderData } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const { toast } = useToast();
 
@@ -76,8 +74,26 @@ const Page: FC = () => {
     }
   }, [actionData, toast]);
 
-  const exercises = exercisesWithTags;
+  return (
+    <Suspense fallback={<ExercisesPageLoading />}>
+      <Await resolve={loaderData}>
+        {({ trainee, tags, exercises }) => (
+          <ExercisesPage trainee={trainee} exercises={exercises} tags={tags} />
+        )}
+      </Await>
+    </Suspense>
+  );
+};
+export default Page;
 
+type ExercisesPageProps = Awaited<
+  Awaited<ReturnType<typeof loader>>["loaderData"]
+>;
+const ExercisesPage: FC<ExercisesPageProps> = ({
+  trainee,
+  exercises,
+  tags,
+}) => {
   return (
     <Main>
       <header>
@@ -112,7 +128,7 @@ const Page: FC = () => {
       <Section>
         <Heading level={2}>登録されている種目</Heading>
         <ul className="flex flex-col gap-4">
-          {exercisesWithTags.map((exercise) => {
+          {exercises.map((exercise) => {
             return (
               <li key={exercise.id}>
                 <Card>
@@ -145,7 +161,6 @@ const Page: FC = () => {
     </Main>
   );
 };
-export default Page;
 
 export const action = async ({
   params,

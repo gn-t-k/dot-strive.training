@@ -66,74 +66,94 @@ import {
   useMemo,
   useState,
 } from "react";
-import { ExercisesPageLoading } from "../trainees.$traineeId.exercises._index/exercises-page-loading";
 import { deleteAction } from "./delete-action";
+import { ExercisePageLoading } from "./exercise-page-loading";
 import { MaximumWeightChart } from "./maximum-weight-chart";
 import { updateAction } from "./update-action";
 
-export const loader = async ({
-  context,
-  request,
-  params,
-}: LoaderFunctionArgs) => {
-  const { trainee } = await traineeLoader({ context, request, params });
+export const loader = ({ context, request, params }: LoaderFunctionArgs) => {
+  const loaderData = (async () => {
+    const { trainee } = await traineeLoader({ context, request, params });
 
-  const { exerciseId } = params;
-  if (!exerciseId) {
-    throw redirect(`/trainees/${trainee.id}/exercises`);
-  }
+    const { exerciseId } = params;
+    if (!exerciseId) {
+      throw redirect(`/trainees/${trainee.id}/exercises`);
+    }
 
-  const today = new Date();
-  const dateRange = ((month: string | null) => {
-    const date = month ? parseISO(month) : today;
+    const today = new Date();
+    const dateRange = ((month: string | null) => {
+      const date = month ? parseISO(month) : today;
 
-    return { from: startOfMonth(date), to: endOfMonth(date) };
-  })(new URL(request.url).searchParams.get("month"));
+      return { from: startOfMonth(date), to: endOfMonth(date) };
+    })(new URL(request.url).searchParams.get("month"));
 
-  const [getTagsResult, getExercisesResult, getTrainingsResult] =
-    await Promise.all([
-      getTagsByTraineeId(context)(trainee.id),
-      getExercisesWithTagsByTraineeId(context)(trainee.id),
-      getTrainingsByExerciseId(context)(exerciseId, dateRange),
-    ]);
-  if (
-    !(
-      getTagsResult.result === "success" &&
-      getExercisesResult.result === "success" &&
-      getTrainingsResult.result === "success"
-    )
-  ) {
-    throw new Response("Internal Server Error", { status: 500 });
-  }
-  const [registeredTags, registeredExercises, trainings] = [
-    getTagsResult.data,
-    getExercisesResult.data,
-    getTrainingsResult.data,
-  ];
+    const [getTagsResult, getExercisesResult, getTrainingsResult] =
+      await Promise.all([
+        getTagsByTraineeId(context)(trainee.id),
+        getExercisesWithTagsByTraineeId(context)(trainee.id),
+        getTrainingsByExerciseId(context)(exerciseId, dateRange),
+      ]);
+    if (
+      !(
+        getTagsResult.result === "success" &&
+        getExercisesResult.result === "success" &&
+        getTrainingsResult.result === "success"
+      )
+    ) {
+      throw new Response("Internal Server Error", { status: 500 });
+    }
+    const [registeredTags, registeredExercises, trainings] = [
+      getTagsResult.data,
+      getExercisesResult.data,
+      getTrainingsResult.data,
+    ];
 
-  const exercise = registeredExercises.find(
-    (exercise) => exercise.id === exerciseId,
-  );
-  if (!exercise) {
-    return { trainee, exercise: null };
-  }
+    const exercise = registeredExercises.find(
+      (exercise) => exercise.id === exerciseId,
+    );
+    if (!exercise) {
+      return { trainee, exercise: null };
+    }
 
-  return {
-    trainee,
-    trainings,
-    exercise,
-    registeredTags,
-    registeredExercises,
-  };
+    return {
+      trainee,
+      trainings,
+      exercise,
+      registeredTags,
+      registeredExercises,
+    };
+  })();
+
+  return { loaderData };
 };
 
 const Page: FC = () => {
-  const loaderData = useLoaderData<typeof loader>();
-  const actionData = useActionData<typeof action>();
+  const { loaderData } = useLoaderData<typeof loader>();
+
+  return (
+    <Suspense fallback={<ExercisePageLoading />}>
+      <Await resolve={loaderData}>
+        {(loaderData) => <ExercisePage {...loaderData} />}
+      </Await>
+    </Suspense>
+  );
+};
+export default Page;
+
+type ExercisePageProps = Awaited<
+  Awaited<ReturnType<typeof loader>>["loaderData"]
+>;
+const ExercisePage: FC<ExercisePageProps> = ({
+  trainee,
+  trainings,
+  exercise,
+  registeredTags,
+  registeredExercises,
+}) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const actionData = useActionData<typeof action>();
 
-  const { exercise, trainee } = loaderData;
   useEffect(() => {
     if (!actionData) {
       return;
@@ -165,77 +185,104 @@ const Page: FC = () => {
     return null;
   }
 
-  const { registeredExercises, registeredTags, trainings } = loaderData;
-
   return (
-    <Suspense fallback={<ExercisesPageLoading />}>
-      <Await resolve={{ trainings, registeredExercises, registeredTags }}>
-        {({ trainings, registeredExercises, registeredTags }) => (
-          <ExercisePage
-            traineeId={trainee.id}
-            trainings={trainings}
-            exercise={exercise}
-            registeredExercises={registeredExercises}
-            registeredTags={registeredTags}
-          />
-        )}
-      </Await>
-    </Suspense>
+    <Main>
+      <Section>
+        <Dialog>
+          <header className="flex justify-between">
+            <div className="flex flex-col gap-2">
+              <Heading level={1} size="lg">
+                {exercise.name}
+              </Heading>
+              <ul className="inline leading-relaxed">
+                {exercise.tags.map((tag, index) => {
+                  return (
+                    <li className="inline mr-1" key={`${index}_${tag}`}>
+                      <Link to={`/trainees/${trainee.id}/tags/${tag.id}`}>
+                        <Badge variant="outline">#{tag.name}</Badge>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+            <DialogTrigger asChild>
+              <Button size="icon" variant="ghost">
+                <Pencil className="size-4" />
+              </Button>
+            </DialogTrigger>
+          </header>
+          <DialogContent className="h-4/5 overflow-auto">
+            <DialogHeader>
+              <DialogTitle>種目を編集する</DialogTitle>
+              <DialogClose />
+            </DialogHeader>
+            <ExerciseForm
+              registeredTags={registeredTags}
+              registeredExercises={registeredExercises}
+              defaultValues={{
+                id: exercise.id,
+                name: exercise.name,
+                tags: exercise.tags.map((tag) => tag.id),
+              }}
+              actionType="update"
+            />
+          </DialogContent>
+        </Dialog>
+      </Section>
+      <MonthlyTrainingsSection traineeId={trainee.id} trainings={trainings} />
+      <Section>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive">種目を削除する</Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>種目の削除</AlertDialogTitle>
+              <AlertDialogDescription>
+                {exercise.name}を削除しますか？
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>キャンセル</AlertDialogCancel>
+              <Form method="post">
+                <input type="hidden" name="id" value={exercise.id} />
+                <AlertDialogAction
+                  type="submit"
+                  name="actionType"
+                  value="delete"
+                  className="w-full"
+                >
+                  削除
+                </AlertDialogAction>
+              </Form>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </Section>
+    </Main>
   );
 };
-export default Page;
 
-type ExercisePageProps = {
+type MonthlyTrainingsSectionProps = {
   traineeId: string;
-  exercise: Exercise;
-  trainings: Training[];
-  registeredExercises: Exercise[];
-  registeredTags: Tag[];
+  trainings: NonNullable<
+    Awaited<Awaited<ReturnType<typeof loader>>["loaderData"]>["trainings"]
+  >;
 };
-type Training = {
-  id: string;
-  date: Date;
-  sessions: {
-    id: string;
-    memo: string;
-    exercise: {
-      id: string;
-      name: string;
-    };
-    sets: {
-      id: string;
-      weight: number;
-      repetition: number;
-      rpe: number;
-      estimatedMaximumWeight: number;
-    }[];
-  }[];
-};
-type Exercise = {
-  id: string;
-  name: string;
-  tags: Tag[];
-};
-type Tag = {
-  id: string;
-  name: string;
-};
-const ExercisePage: FC<ExercisePageProps> = ({
+const MonthlyTrainingsSection: FC<MonthlyTrainingsSectionProps> = ({
   traineeId,
   trainings,
-  exercise,
-  registeredTags,
-  registeredExercises,
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
 
-  const today = new Date();
-
   const defaultMonth = useMemo<Date>(() => {
     const month = searchParams.get("month");
+    const today = new Date();
+
     return month ? new Date(month) : today;
-  }, [searchParams.get, today]);
+  }, [searchParams.get]);
   const prevMonth = useMemo<Date>(() => {
     return subMonths(defaultMonth, 1);
   }, [defaultMonth]);
@@ -274,130 +321,55 @@ const ExercisePage: FC<ExercisePageProps> = ({
     searchParams.set("month", format(nextMonth, "yyyy-MM"));
     setSearchParams(searchParams, { preventScrollReset: true });
   }, [searchParams, setSearchParams, nextMonth]);
-
   return (
-    <Main>
-      <Section>
-        <Dialog>
-          <header className="flex justify-between">
-            <div className="flex flex-col gap-2">
-              <Heading level={1} size="lg">
-                {exercise.name}
-              </Heading>
-              <ul className="inline leading-relaxed">
-                {exercise.tags.map((tag, index) => {
-                  return (
-                    <li className="inline mr-1" key={`${index}_${tag}`}>
-                      <Link to={`/trainees/${traineeId}/tags/${tag.id}`}>
-                        <Badge variant="outline">#{tag.name}</Badge>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-            <DialogTrigger asChild>
-              <Button size="icon" variant="ghost">
-                <Pencil className="size-4" />
-              </Button>
-            </DialogTrigger>
-          </header>
-          <DialogContent className="h-4/5 overflow-auto">
-            <DialogHeader>
-              <DialogTitle>種目を編集する</DialogTitle>
-              <DialogClose />
-            </DialogHeader>
-            <ExerciseForm
-              registeredTags={registeredTags}
-              registeredExercises={registeredExercises}
-              defaultValues={{
-                id: exercise.id,
-                name: exercise.name,
-                tags: exercise.tags.map((tag) => tag.id),
-              }}
-              actionType="update"
-            />
-          </DialogContent>
-        </Dialog>
-      </Section>
-      <Section>
-        <header className="flex items-center justify-between">
-          <Heading level={2}>{format(defaultMonth, "M")}月の記録</Heading>
-          <div className="flex items-center gap-2">
-            <Button size="icon" variant="ghost" onClick={setMonthPrev}>
-              <ChevronLeft className="size-4" />
-            </Button>
-            <Button size="icon" variant="ghost" onClick={setMonthNext}>
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
-        </header>
-        <Tabs defaultValue="volume">
-          <TabsList className="w-full">
-            <TabsTrigger className="w-full" value="volume">
-              ボリューム
-            </TabsTrigger>
-            <TabsTrigger className="w-full" value="maximum-weight">
-              最大重量
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="volume">
-            <VolumeChart
-              defaultMonth={defaultMonth}
-              selectedDate={selectedDate}
-              selectDate={setSelectedDate}
-              trainings={trainingsChartData}
-            />
-          </TabsContent>
-          <TabsContent value="maximum-weight">
-            <MaximumWeightChart
-              defaultMonth={defaultMonth}
-              selectedDate={selectedDate}
-              selectDate={setSelectedDate}
-              trainings={trainingsChartData}
-            />
-          </TabsContent>
-        </Tabs>
-        {filteredTrainings.length > 0 && (
-          <ol className="flex flex-col gap-8">
-            {filteredTrainings.map((training) => (
-              <li key={training.id}>
-                <TrainingCard traineeId={traineeId} training={training} />
-              </li>
-            ))}
-          </ol>
-        )}
-      </Section>
-      <Section>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive">種目を削除する</Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>種目の削除</AlertDialogTitle>
-              <AlertDialogDescription>
-                {exercise.name}を削除しますか？
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>キャンセル</AlertDialogCancel>
-              <Form method="post">
-                <input type="hidden" name="id" value={exercise.id} />
-                <AlertDialogAction
-                  type="submit"
-                  name="actionType"
-                  value="delete"
-                  className="w-full"
-                >
-                  削除
-                </AlertDialogAction>
-              </Form>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </Section>
-    </Main>
+    <Section>
+      <header className="flex items-center justify-between">
+        <Heading level={2}>{format(defaultMonth, "M")}月の記録</Heading>
+        <div className="flex items-center gap-2">
+          <Button size="icon" variant="ghost" onClick={setMonthPrev}>
+            <ChevronLeft className="size-4" />
+          </Button>
+          <Button size="icon" variant="ghost" onClick={setMonthNext}>
+            <ChevronRight className="size-4" />
+          </Button>
+        </div>
+      </header>
+      <Tabs defaultValue="volume">
+        <TabsList className="w-full">
+          <TabsTrigger className="w-full" value="volume">
+            ボリューム
+          </TabsTrigger>
+          <TabsTrigger className="w-full" value="maximum-weight">
+            最大重量
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="volume">
+          <VolumeChart
+            defaultMonth={defaultMonth}
+            selectedDate={selectedDate}
+            selectDate={setSelectedDate}
+            trainings={trainingsChartData}
+          />
+        </TabsContent>
+        <TabsContent value="maximum-weight">
+          <MaximumWeightChart
+            defaultMonth={defaultMonth}
+            selectedDate={selectedDate}
+            selectDate={setSelectedDate}
+            trainings={trainingsChartData}
+          />
+        </TabsContent>
+      </Tabs>
+      {filteredTrainings.length > 0 && (
+        <ol className="flex flex-col gap-8">
+          {filteredTrainings.map((training) => (
+            <li key={training.id}>
+              <TrainingCard traineeId={traineeId} training={training} />
+            </li>
+          ))}
+        </ol>
+      )}
+    </Section>
   );
 };
 

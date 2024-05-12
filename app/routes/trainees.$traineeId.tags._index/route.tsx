@@ -2,7 +2,7 @@ import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
 } from "@remix-run/cloudflare";
-import { Link, useActionData, useLoaderData } from "@remix-run/react";
+import { Await, Link, useActionData, useLoaderData } from "@remix-run/react";
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { TagForm } from "app/features/tag/tag-form";
 import { validateTrainee } from "app/features/trainee/schema";
@@ -15,26 +15,27 @@ import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
 import { useToast } from "app/ui/use-toast";
 import {} from "lucide-react";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import type { FC } from "react";
 import { createAction } from "./create-action";
+import { TagsPageLoading } from "./tags-page-loading";
 
-export const loader = async ({
-  context,
-  request,
-  params,
-}: LoaderFunctionArgs) => {
-  const { trainee } = await traineeLoader({ context, request, params });
-  const getTagsResult = await getTagsByTraineeId(context)(trainee.id);
-  if (getTagsResult.result === "failure") {
-    throw new Response("Internal Server Error", { status: 500 });
-  }
+export const loader = ({ context, request, params }: LoaderFunctionArgs) => {
+  const loaderData = (async () => {
+    const { trainee } = await traineeLoader({ context, request, params });
+    const getTagsResult = await getTagsByTraineeId(context)(trainee.id);
+    if (getTagsResult.result === "failure") {
+      throw new Response("Internal Server Error", { status: 500 });
+    }
 
-  return { trainee, tags: getTagsResult.data };
+    return { trainee, tags: getTagsResult.data };
+  })();
+
+  return { loaderData };
 };
 
 const Page: FC = () => {
-  const { trainee, tags } = useLoaderData<typeof loader>();
+  const { loaderData } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const { toast } = useToast();
 
@@ -54,6 +55,18 @@ const Page: FC = () => {
     }
   }, [actionData, toast]);
 
+  return (
+    <Suspense fallback={<TagsPageLoading />}>
+      <Await resolve={loaderData}>
+        {(loaderData) => <TagsPage {...loaderData} />}
+      </Await>
+    </Suspense>
+  );
+};
+export default Page;
+
+type TagsPageProps = Awaited<Awaited<ReturnType<typeof loader>>["loaderData"]>;
+const TagsPage: FC<TagsPageProps> = ({ trainee, tags }) => {
   return (
     <Main>
       <header>
@@ -98,7 +111,6 @@ const Page: FC = () => {
     </Main>
   );
 };
-export default Page;
 
 export const action = async ({
   params,
