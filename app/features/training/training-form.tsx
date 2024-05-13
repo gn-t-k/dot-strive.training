@@ -606,22 +606,43 @@ type RPEFieldProps = {
 const RPEField: FC<RPEFieldProps> = ({ rpeField }) => {
   const { value, change } = useInputControl(rpeField);
   const defaultValue = Number(rpeField.initialValue);
+  const onSliderChange = useCallback(
+    (value: number[]) => {
+      change(value[0]?.toString());
+    },
+    [change],
+  );
+  const onClearButtonClick = useCallback(() => {
+    change("0");
+  }, [change]);
+  const sliderValue = value === undefined ? {} : { value: [Number(value)] };
 
   return (
     <div className="flex flex-col gap-2 pl-2">
-      <div className="grid grid-cols-6 items-center gap-2">
+      <div className="grid grid-cols-5 items-center gap-2">
         <Label className="col-span-1">RPE</Label>
-        <span className="col-span-1">
-          {[undefined, "0"].includes(value) ? "-" : value}
-        </span>
         <Slider
-          step={1}
-          min={0}
+          step={0.5}
+          min={5}
           max={10}
-          onValueChange={(value) => change(value[0]?.toString())}
+          {...sliderValue}
+          onValueChange={onSliderChange}
           defaultValue={Number.isNaN(defaultValue) ? [0] : [defaultValue]}
-          className="col-span-3"
+          className="col-span-2"
         />
+        <div className="col-span-2 flex items-center justify-end gap-1">
+          <span className="text-center content-center size-10">
+            {[undefined, "0"].includes(value) ? "-" : value}
+          </span>
+          <Button
+            onClick={onClearButtonClick}
+            size="icon"
+            variant="outline"
+            type="button"
+          >
+            <X className="size-4" />
+          </Button>
+        </div>
       </div>
       {rpeField.errors?.map((error) => (
         <FormErrorMessage key={error} message={error} />

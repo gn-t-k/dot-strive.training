@@ -17,7 +17,7 @@ export const trainingSets = sqliteTable(
     id: text("id").notNull(),
     weight: real("weight").notNull(),
     repetition: integer("repetition").notNull(),
-    rpe: integer("rpe").notNull(),
+    rpe: real("rpe").notNull(),
     order: integer("order").notNull(),
     estimatedMaximumWeight: real("estimated_maximum_weight").notNull(),
     sessionId: text("session_id").notNull(),

@@ -1,8 +1,6 @@
 {
-  "version": "5",
+  "version": "6",
   "dialect": "sqlite",
-  "id": "b2e30184-0670-4dd8-bd97-9ce239064a85",
-  "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "exercises": {
       "name": "exercises",
@@ -64,15 +62,15 @@
         "exercises_trainee_id_trainees_id_fk": {
           "name": "exercises_trainee_id_trainees_id_fk",
           "tableFrom": "exercises",
-          "tableTo": "trainees",
           "columnsFrom": [
             "trainee_id"
           ],
+          "tableTo": "trainees",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -101,28 +99,28 @@
         "muscle_exercise_mappings_muscle_id_muscles_id_fk": {
           "name": "muscle_exercise_mappings_muscle_id_muscles_id_fk",
           "tableFrom": "muscle_exercise_mappings",
-          "tableTo": "muscles",
           "columnsFrom": [
             "muscle_id"
           ],
+          "tableTo": "muscles",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "muscle_exercise_mappings_exercise_id_exercises_id_fk": {
           "name": "muscle_exercise_mappings_exercise_id_exercises_id_fk",
           "tableFrom": "muscle_exercise_mappings",
-          "tableTo": "exercises",
           "columnsFrom": [
             "exercise_id"
           ],
+          "tableTo": "exercises",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {
@@ -196,15 +194,15 @@
         "muscles_trainee_id_trainees_id_fk": {
           "name": "muscles_trainee_id_trainees_id_fk",
           "tableFrom": "muscles",
-          "tableTo": "trainees",
           "columnsFrom": [
             "trainee_id"
           ],
+          "tableTo": "trainees",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -328,28 +326,28 @@
         "training_sessions_training_id_trainings_id_fk": {
           "name": "training_sessions_training_id_trainings_id_fk",
           "tableFrom": "training_sessions",
-          "tableTo": "trainings",
           "columnsFrom": [
             "training_id"
           ],
+          "tableTo": "trainings",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "training_sessions_exercise_id_exercises_id_fk": {
           "name": "training_sessions_exercise_id_exercises_id_fk",
           "tableFrom": "training_sessions",
-          "tableTo": "exercises",
           "columnsFrom": [
             "exercise_id"
           ],
+          "tableTo": "exercises",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -428,15 +426,15 @@
         "training_sets_session_id_training_sessions_id_fk": {
           "name": "training_sets_session_id_training_sessions_id_fk",
           "tableFrom": "training_sets",
-          "tableTo": "training_sessions",
           "columnsFrom": [
             "session_id"
           ],
+          "tableTo": "training_sessions",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -494,15 +492,15 @@
         "trainings_trainee_id_trainees_id_fk": {
           "name": "trainings_trainee_id_trainees_id_fk",
           "tableFrom": "trainings",
-          "tableTo": "trainees",
           "columnsFrom": [
             "trainee_id"
           ],
+          "tableTo": "trainees",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -511,8 +509,9 @@
   },
   "enums": {},
   "_meta": {
-    "schemas": {},
     "tables": {},
     "columns": {}
-  }
+  },
+  "id": "b2e30184-0670-4dd8-bd97-9ce239064a85",
+  "prevId": "00000000-0000-0000-0000-000000000000"
 }
