@@ -99,6 +99,7 @@ const NewTrainingPage: FC<NewTrainingPageProps> = ({
     <Main>
       <TrainingForm
         actionType="create"
+        traineeId={trainee.id}
         registeredExercises={registeredExercises}
         defaultValue={{
           date: date ?? format(new Date(), "yyyy-MM-dd"),
