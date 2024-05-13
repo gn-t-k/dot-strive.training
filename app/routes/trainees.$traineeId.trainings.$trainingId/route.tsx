@@ -140,6 +140,7 @@ const TrainingPage: FC<TrainingPageProps> = ({
     <Main>
       <TrainingForm
         actionType="update"
+        traineeId={trainee.id}
         registeredExercises={registeredExercises}
         defaultValue={{
           id: training.id,

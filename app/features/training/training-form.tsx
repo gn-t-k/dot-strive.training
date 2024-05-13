@@ -2,15 +2,14 @@ import {
   getFieldsetProps,
   getFormProps,
   getInputProps,
-  getSelectProps,
   getTextareaProps,
   useForm,
   useInputControl,
 } from "@conform-to/react";
-import { Form } from "@remix-run/react";
+import { Form, Link } from "@remix-run/react";
 import { parseWithValibot } from "conform-to-valibot";
 import { format } from "date-fns";
-import { X } from "lucide-react";
+import { ExternalLink, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
   array,
@@ -103,6 +102,7 @@ type SessionFieldsType = Infer<ReturnType<typeof getSessionSchema>>;
 type SetFieldsType = Infer<typeof setSchema>;
 
 type Props = {
+  traineeId: string;
   registeredExercises: Exercise[];
   actionType: string;
   defaultValue: {
@@ -121,6 +121,7 @@ type Props = {
 };
 type Exercise = { id: string; name: string };
 export const TrainingForm: FC<Props> = ({
+  traineeId,
   registeredExercises,
   actionType,
   defaultValue,
@@ -145,6 +146,7 @@ export const TrainingForm: FC<Props> = ({
         insertIntent={form.insert}
         sessionsField={fields.sessions}
         registeredExercises={registeredExercises}
+        traineeId={traineeId}
       />
       <Button type="submit" name="actionType" value={actionType}>
         登録
@@ -189,12 +191,14 @@ type SessionsFieldsetProps = {
   insertIntent: FormMetadata<TrainingFormType>["insert"];
   sessionsField: FieldMetadata<TrainingFormType["sessions"]>;
   registeredExercises: Exercise[];
+  traineeId: string;
 };
 const SessionsFieldset: FC<SessionsFieldsetProps> = ({
   removeIntent,
   insertIntent,
   sessionsField,
   registeredExercises,
+  traineeId,
 }) => {
   const sessions = sessionsField.getFieldList();
 
@@ -212,6 +216,7 @@ const SessionsFieldset: FC<SessionsFieldsetProps> = ({
               sessionField={session}
               registeredExercises={registeredExercises}
               sessionIndex={sessionIndex}
+              traineeId={traineeId}
             />
           </li>
         ))}
@@ -238,6 +243,7 @@ type SessionFieldsProps = {
   sessionField: FieldMetadata<SessionFieldsType>;
   registeredExercises: Exercise[];
   sessionIndex: number;
+  traineeId: string;
 };
 const SessionFields: FC<SessionFieldsProps> = ({
   removeIntent,
@@ -245,6 +251,7 @@ const SessionFields: FC<SessionFieldsProps> = ({
   sessionField,
   registeredExercises,
   sessionIndex,
+  traineeId,
 }) => {
   const sessionFields = sessionField.getFieldset();
   const setFieldList = sessionFields.sets.getFieldList();
@@ -282,6 +289,7 @@ const SessionFields: FC<SessionFieldsProps> = ({
         <ExerciseField
           registeredExercises={registeredExercises}
           exerciseField={sessionFields.exerciseId}
+          traineeId={traineeId}
         />
         <SetsFieldset
           setFieldList={setFieldList}
@@ -306,39 +314,60 @@ const SessionFields: FC<SessionFieldsProps> = ({
 type ExerciseFieldProps = {
   registeredExercises: Exercise[];
   exerciseField: FieldMetadata<SessionFieldsType["exerciseId"]>;
+  traineeId: string;
 };
 const ExerciseField: FC<ExerciseFieldProps> = ({
   registeredExercises,
   exerciseField,
+  traineeId,
 }) => {
-  const { key, ...props } = getSelectProps(exerciseField);
+  const { value, change } = useInputControl(exerciseField);
+  const selectValue = value ? { value } : {};
+  const selectDefaultValue = exerciseField.initialValue
+    ? { defaultValue: exerciseField.initialValue }
+    : {};
+
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor={exerciseField.id}>種目</Label>
-      <Select
-        key={key}
-        {...props}
-        defaultValue={exerciseField.initialValue ?? ""}
-      >
-        <SelectTrigger id={exerciseField.id}>
-          <SelectValue placeholder="種目を選択する" />
-        </SelectTrigger>
-        <SelectContent
-          // https://github.com/radix-ui/primitives/issues/1658
-          ref={(ref) =>
-            ref?.addEventListener("touchend", (event) => event.preventDefault())
-          }
+      <div className="flex gap-2 items-center">
+        <Select
+          {...selectValue}
+          {...selectDefaultValue}
+          onValueChange={(value) => change(value)}
         >
-          {registeredExercises.map((exercise) => (
-            <SelectItem
-              key={`${exercise.id}-${exercise.id}`}
-              value={exercise.id}
-            >
-              {exercise.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          <SelectTrigger id={exerciseField.id}>
+            <SelectValue placeholder="種目を選択する" />
+          </SelectTrigger>
+          <SelectContent
+            // https://github.com/radix-ui/primitives/issues/1658
+            ref={(ref) =>
+              ref?.addEventListener("touchend", (event) =>
+                event.preventDefault(),
+              )
+            }
+          >
+            {registeredExercises.map((exercise) => (
+              <SelectItem
+                key={`${exercise.id}-${exercise.id}`}
+                value={exercise.id}
+              >
+                {exercise.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {value ? (
+          <Link
+            to={`/trainees/${traineeId}/exercises/${value}`}
+            target="_blank"
+          >
+            <ExternalLink className="size-4 align-middle text-primary" />
+          </Link>
+        ) : (
+          <ExternalLink className="size-4 align-middle text-muted-foreground/50" />
+        )}
+      </div>
       {exerciseField.errors?.map((error) => (
         <FormErrorMessage key={error} message={error} />
       ))}
