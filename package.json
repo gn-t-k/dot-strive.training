@@ -12,7 +12,7 @@
     "typegen": "wrangler types",
     "preview": "bun run build && wrangler pages dev ./build/client",
     "build-cf-types": "wrangler types",
-    "migrations:gen": "drizzle-kit generate:sqlite --config=./database/drizzle.config.ts",
+    "migrations:gen": "drizzle-kit generate --config=./database/drizzle.config.ts",
     "migrations:apply": "wrangler d1 migrations apply dot-strive-db --local",
     "migrations:drop": "drizzle-kit drop --config=./database/drizzle.config.ts"
   },
