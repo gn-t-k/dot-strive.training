@@ -1,8 +1,8 @@
-type GetEstimatedMaximumWeight = (props: {
+type EstimateMaximumWeight = (props: {
   weight: number;
   repetition: number;
 }) => number;
-export const getEstimatedMaximumWeight: GetEstimatedMaximumWeight = (set) => {
+export const estimateMaximumWeight: EstimateMaximumWeight = (set) => {
   const { weight, repetition } = set;
 
   if (repetition < 1) {

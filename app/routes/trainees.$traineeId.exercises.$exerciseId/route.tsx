@@ -13,6 +13,7 @@ import {
   useSearchParams,
 } from "@remix-run/react";
 import { ExerciseForm } from "app/features/exercise/exercise-form";
+import { findEstimatedMaximumWeightById } from "app/features/exercise/find-estimated-maximum-weight-by-id";
 import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exercises-with-tags-by-trainee-id";
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { validateTrainee } from "app/features/trainee/schema";
@@ -87,17 +88,23 @@ export const loader = ({ context, request, params }: LoaderFunctionArgs) => {
       return { from: startOfMonth(date), to: endOfMonth(date) };
     })(new URL(request.url).searchParams.get("month"));
 
-    const [getTagsResult, getExercisesResult, getTrainingsResult] =
-      await Promise.all([
-        getTagsByTraineeId(context)(trainee.id),
-        getExercisesWithTagsByTraineeId(context)(trainee.id),
-        getTrainingsByExerciseId(context)(exerciseId, dateRange),
-      ]);
+    const [
+      getTagsResult,
+      getExercisesResult,
+      getTrainingsResult,
+      findMaxTrainingResult,
+    ] = await Promise.all([
+      getTagsByTraineeId(context)(trainee.id),
+      getExercisesWithTagsByTraineeId(context)(trainee.id),
+      getTrainingsByExerciseId(context)(exerciseId, dateRange),
+      findEstimatedMaximumWeightById(context)(exerciseId),
+    ]);
     if (
       !(
         getTagsResult.result === "success" &&
         getExercisesResult.result === "success" &&
-        getTrainingsResult.result === "success"
+        getTrainingsResult.result === "success" &&
+        findMaxTrainingResult.result !== "failure"
       )
     ) {
       throw new Response("Internal Server Error", { status: 500 });
@@ -107,6 +114,10 @@ export const loader = ({ context, request, params }: LoaderFunctionArgs) => {
       getExercisesResult.data,
       getTrainingsResult.data,
     ];
+    const maxTraining =
+      findMaxTrainingResult.result === "found"
+        ? findMaxTrainingResult.data
+        : null;
 
     const exercise = registeredExercises.find(
       (exercise) => exercise.id === exerciseId,
@@ -121,6 +132,7 @@ export const loader = ({ context, request, params }: LoaderFunctionArgs) => {
       exercise,
       registeredTags,
       registeredExercises,
+      maxTraining,
     };
   })();
 
@@ -149,6 +161,7 @@ const ExercisePage: FC<ExercisePageProps> = ({
   exercise,
   registeredTags,
   registeredExercises,
+  maxTraining,
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -230,6 +243,27 @@ const ExercisePage: FC<ExercisePageProps> = ({
           </DialogContent>
         </Dialog>
       </Section>
+      {maxTraining && (
+        <Section>
+          <Heading level={2}>記録</Heading>
+          <Section>
+            <Heading level={3} size="sm">
+              推定1RM
+            </Heading>
+            <p>
+              {maxTraining.estimatedMaximumWeight}kg（
+              <Link
+                to={`/trainees/${trainee.id}/trainings/${maxTraining.training.id}`}
+                className="underline text-sm text-muted-foreground"
+              >
+                {format(maxTraining.training.date, "yyyy年MM月dd日")}
+                のトレーニング
+              </Link>
+              ）
+            </p>
+          </Section>
+        </Section>
+      )}
       <MonthlyTrainingsSection traineeId={trainee.id} trainings={trainings} />
       <Section>
         <AlertDialog>
@@ -324,7 +358,7 @@ const MonthlyTrainingsSection: FC<MonthlyTrainingsSectionProps> = ({
   return (
     <Section>
       <header className="flex items-center justify-between">
-        <Heading level={2}>{format(defaultMonth, "M")}月の記録</Heading>
+        <Heading level={2}>{format(defaultMonth, "M")}月のトレーニング</Heading>
         <div className="flex items-center gap-2">
           <Button size="icon" variant="ghost" onClick={setMonthPrev}>
             <ChevronLeft className="size-4" />
