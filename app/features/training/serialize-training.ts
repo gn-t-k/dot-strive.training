@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { getEstimatedMaximumWeight } from "./get-estimated-maximum-weight";
+import { estimateMaximumWeight } from "./estimate-maximum-weight";
 import type { Training } from "./schema";
 
 type SerializeTraining = (training: Training) => Payload;
@@ -39,7 +39,7 @@ export const serializeTraining: SerializeTraining = (training) => {
         repetition: set.reps,
         rpe: set.rpe,
         order: index,
-        estimatedMaximumWeight: getEstimatedMaximumWeight({
+        estimatedMaximumWeight: estimateMaximumWeight({
           weight: set.weight,
           repetition: set.reps,
         }),
