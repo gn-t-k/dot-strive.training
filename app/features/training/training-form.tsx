@@ -49,6 +49,7 @@ import { Slider } from "app/ui/slider";
 import { Textarea } from "app/ui/textarea";
 
 import type { FieldMetadata, FormMetadata } from "@conform-to/react";
+import { Popover, PopoverContent, PopoverTrigger } from "app/ui/popover";
 import type { FC } from "react";
 import type { Input as Infer } from "valibot";
 
@@ -358,14 +359,27 @@ const ExerciseField: FC<ExerciseFieldProps> = ({
           </SelectContent>
         </Select>
         {value ? (
-          <Link
-            to={`/trainees/${traineeId}/exercises/${value}`}
-            target="_blank"
-          >
-            <ExternalLink className="size-4 align-middle text-primary" />
-          </Link>
+          <Button size="icon" variant="outline" asChild>
+            <Link
+              to={`/trainees/${traineeId}/exercises/${value}`}
+              target="_blank"
+            >
+              <ExternalLink className="size-4 text-primary" />
+            </Link>
+          </Button>
         ) : (
-          <ExternalLink className="size-4 align-middle text-muted-foreground/50" />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button size="icon" variant="outline">
+                <ExternalLink className="size-4 text-muted-foreground/50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent>
+              <p className="text-sm text-muted-foreground">
+                種目を選択してください
+              </p>
+            </PopoverContent>
+          </Popover>
         )}
       </div>
       {exerciseField.errors?.map((error) => (
