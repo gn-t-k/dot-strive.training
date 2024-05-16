@@ -270,12 +270,10 @@ const MonthlyTrainingsSection: FC<MonthlyTrainingsSectionProps> = ({
   }, [selectedDate, trainings]);
   const trainingsChartData = useMemo(
     () =>
-      trainings
-        .sort((a, b) => (a.date < b.date ? -1 : 1))
-        .map((training) => ({
-          date: new Date(training.date),
-          setCount: training.sessions.flatMap((session) => session.sets).length,
-        })),
+      trainings.map((training) => ({
+        date: new Date(training.date),
+        setCount: training.sessions.flatMap((session) => session.sets).length,
+      })),
     [trainings],
   );
 

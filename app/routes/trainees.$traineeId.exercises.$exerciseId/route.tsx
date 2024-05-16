@@ -337,12 +337,10 @@ const MonthlyTrainingsSection: FC<MonthlyTrainingsSectionProps> = ({
   }, [selectedDate, trainings]);
 
   const trainingsChartData = useMemo(() => {
-    return trainings
-      .sort((a, b) => (a.date < b.date ? -1 : 1))
-      .map((training) => ({
-        date: new Date(training.date),
-        sets: training.sessions.flatMap((session) => session.sets),
-      }));
+    return trainings.map((training) => ({
+      date: new Date(training.date),
+      sets: training.sessions.flatMap((session) => session.sets),
+    }));
   }, [trainings]);
 
   const setMonthPrev = useCallback(() => {
@@ -355,6 +353,7 @@ const MonthlyTrainingsSection: FC<MonthlyTrainingsSectionProps> = ({
     searchParams.set("month", format(nextMonth, "yyyy-MM"));
     setSearchParams(searchParams, { preventScrollReset: true });
   }, [searchParams, setSearchParams, nextMonth]);
+
   return (
     <Section>
       <header className="flex items-center justify-between">
