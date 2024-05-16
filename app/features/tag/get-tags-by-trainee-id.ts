@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 
 import { tags as tagsSchema } from "database/tables/tags";
 
@@ -21,7 +21,7 @@ export const getTagsByTraineeId: GetTagsByTraineeId =
         .select({ id: tagsSchema.id, name: tagsSchema.name })
         .from(tagsSchema)
         .where(eq(tagsSchema.traineeId, traineeId))
-        .orderBy(desc(tagsSchema.createdAt));
+        .orderBy(asc(tagsSchema.name));
 
       return { result: "success", data };
     } catch (error) {

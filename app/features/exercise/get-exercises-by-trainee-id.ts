@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 
 import type { AppLoadContext } from "@remix-run/cloudflare";
 import { exercises as exercisesSchema } from "database/tables/exercises";
@@ -20,7 +20,7 @@ export const getExercisesByTraineeId: GetExercisesByTraineeId =
         .select({ id: exercisesSchema.id, name: exercisesSchema.name })
         .from(exercisesSchema)
         .where(eq(exercisesSchema.traineeId, traineeId))
-        .orderBy(desc(exercisesSchema.createdAt));
+        .orderBy(asc(exercisesSchema.name));
 
       return { result: "success", data };
     } catch (error) {
