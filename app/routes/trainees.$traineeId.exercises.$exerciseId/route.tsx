@@ -44,6 +44,7 @@ import {
   DialogTrigger,
 } from "app/ui/dialog";
 import { Heading } from "app/ui/heading";
+import { Input } from "app/ui/input";
 import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "app/ui/tabs";
@@ -246,22 +247,40 @@ const ExercisePage: FC<ExercisePageProps> = ({
       {maxTraining && (
         <Section>
           <Heading level={2}>記録</Heading>
-          <Section>
-            <Heading level={3} size="sm">
-              推定1RM
-            </Heading>
-            <p>
-              {maxTraining.estimatedMaximumWeight}kg（
+          <div className="flex items-center gap-2">
+            <span className="w-2/4">推定1RM: </span>
+            <span className="w-1/4">
+              {maxTraining.estimatedMaximumWeight}kg
+            </span>
+            <span className="w-1/4">
               <Link
                 to={`/trainees/${trainee.id}/trainings/${maxTraining.training.id}`}
                 className="underline text-sm text-muted-foreground"
               >
-                {format(maxTraining.training.date, "yyyy年MM月dd日")}
-                のトレーニング
+                {format(maxTraining.training.date, "yyyy/MM/dd")}
               </Link>
-              ）
-            </p>
-          </Section>
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-2/4 flex items-center gap-2">
+              <Input className="w-1/3" />
+              <span className="w-2/3">回の最大重量:</span>
+            </span>
+            <span className="w-1/4"> -kg</span>
+            <span className="w-1/4">
+              <p className="underline text-sm text-muted-foreground">-</p>
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-2/4 flex items-center gap-2">
+              <Input className="w-1/3" />
+              <span className="w-2/3">kgの最大回数:</span>
+            </span>
+            <span className="w-1/4"> -回</span>
+            <span className="w-1/4">
+              <p className="underline text-sm text-muted-foreground">-</p>
+            </span>
+          </div>
         </Section>
       )}
       <MonthlyTrainingsSection traineeId={trainee.id} trainings={trainings} />
