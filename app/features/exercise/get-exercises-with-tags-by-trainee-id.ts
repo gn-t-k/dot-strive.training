@@ -1,4 +1,4 @@
-import { desc, eq, sql } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { array, merge, object, safeParse, string } from "valibot";
 
 import type { AppLoadContext } from "@remix-run/cloudflare";
@@ -48,7 +48,7 @@ export const getExercisesWithTagsByTraineeId: GetExercisesWithTagsByTraineeId =
         )
         .leftJoin(tagsSchema, eq(tagExerciseMappings.tagId, tagsSchema.id))
         .where(eq(exercises.traineeId, traineeId))
-        .orderBy(desc(exercises.createdAt));
+        .orderBy(asc(exercises.name), asc(tagsSchema.name));
 
       const payload = data.reduce<Payload>(
         (accumulator, { exerciseId, exerciseName, tagId, tagName }) => {
