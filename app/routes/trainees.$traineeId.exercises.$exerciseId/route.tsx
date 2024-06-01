@@ -1,19 +1,22 @@
+import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
 } from "@remix-run/cloudflare";
-import { redirect } from "@remix-run/cloudflare";
+import { json, redirect } from "@remix-run/cloudflare";
 import {
   Await,
   Form,
   Link,
   useActionData,
+  useFetcher,
   useLoaderData,
   useNavigate,
   useSearchParams,
 } from "@remix-run/react";
 import { ExerciseForm } from "app/features/exercise/exercise-form";
 import { findEstimatedMaximumWeightById } from "app/features/exercise/find-estimated-maximum-weight-by-id";
+import { findMaximumRepsByWeight } from "app/features/exercise/find-maximum-reps-by-weight";
 import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exercises-with-tags-by-trainee-id";
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { validateTrainee } from "app/features/trainee/schema";
@@ -44,11 +47,11 @@ import {
   DialogTrigger,
 } from "app/ui/dialog";
 import { Heading } from "app/ui/heading";
-import { Input } from "app/ui/input";
 import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "app/ui/tabs";
 import { useToast } from "app/ui/use-toast";
+import { parseWithValibot } from "conform-to-valibot";
 import {
   addMonths,
   endOfDay,
@@ -68,6 +71,8 @@ import {
   useMemo,
   useState,
 } from "react";
+import { minValue, nonOptional, number, object, string } from "valibot";
+import type { Input as Infer } from "valibot";
 import { deleteAction } from "./delete-action";
 import { ExercisePageLoading } from "./exercise-page-loading";
 import { MaximumWeightChart } from "./maximum-weight-chart";
@@ -247,40 +252,25 @@ const ExercisePage: FC<ExercisePageProps> = ({
       {maxTraining && (
         <Section>
           <Heading level={2}>記録</Heading>
-          <div className="flex items-center gap-2">
-            <span className="w-2/4">推定1RM: </span>
-            <span className="w-1/4">
-              {maxTraining.estimatedMaximumWeight}kg
+          <Section>
+            <Heading level={3} size="sm">
+              推定1RM
+            </Heading>
+            <span>
+              {maxTraining.estimatedMaximumWeight}kg （
+              {
+                <Link
+                  className="text-muted-foreground underline"
+                  to={`/trainees/${trainee.id}/trainings/${maxTraining.training.id}`}
+                >
+                  {format(maxTraining.training.date, "yyyy年MM月dd日")}
+                  のトレーニング
+                </Link>
+              }
+              ）
             </span>
-            <span className="w-1/4">
-              <Link
-                to={`/trainees/${trainee.id}/trainings/${maxTraining.training.id}`}
-                className="underline text-sm text-muted-foreground"
-              >
-                {format(maxTraining.training.date, "yyyy/MM/dd")}
-              </Link>
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2/4 flex items-center gap-2">
-              <Input className="w-1/3" />
-              <span className="w-2/3">回の最大重量:</span>
-            </span>
-            <span className="w-1/4"> -kg</span>
-            <span className="w-1/4">
-              <p className="underline text-sm text-muted-foreground">-</p>
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2/4 flex items-center gap-2">
-              <Input className="w-1/3" />
-              <span className="w-2/3">kgの最大回数:</span>
-            </span>
-            <span className="w-1/4"> -回</span>
-            <span className="w-1/4">
-              <p className="underline text-sm text-muted-foreground">-</p>
-            </span>
-          </div>
+          </Section>
+          <MaximumRepetitionSection exerciseId={exercise.id} />
         </Section>
       )}
       <MonthlyTrainingsSection traineeId={trainee.id} trainings={trainings} />
@@ -314,6 +304,57 @@ const ExercisePage: FC<ExercisePageProps> = ({
         </AlertDialog>
       </Section>
     </Main>
+  );
+};
+
+const maximumRepetitionFormSchema = object({
+  exerciseId: nonOptional(string()),
+  weight: nonOptional(
+    number([minValue(0, "0以上の数値で入力してください")]),
+    "回数を入力してください",
+  ),
+});
+type MaximumRepetitionSectionProps = {
+  exerciseId: string;
+};
+const MaximumRepetitionSection: FC<MaximumRepetitionSectionProps> = ({
+  exerciseId,
+}) => {
+  const [form, fields] = useForm<Infer<typeof maximumRepetitionFormSchema>>({
+    shouldValidate: "onBlur",
+    shouldRevalidate: "onInput",
+    onValidate: ({ formData }) => {
+      return parseWithValibot(formData, {
+        schema: maximumRepetitionFormSchema,
+      });
+    },
+  });
+  const fetcher = useFetcher<typeof action>();
+
+  return (
+    <Section>
+      <Heading level={3} size="sm">
+        重量あたりの最大回数
+      </Heading>
+      <fetcher.Form method="post" {...getFormProps(form)}>
+        <input
+          {...getInputProps(fields.exerciseId, { type: "hidden" })}
+          value={exerciseId}
+        />
+        <input
+          {...getInputProps(fields.weight, { type: "number", value: false })}
+          inputMode="decimal"
+          step="0.01"
+          placeholder="0.00"
+        />
+        <Button type="submit" name="actionType" value="searchMaxReps">
+          検索
+        </Button>
+      </fetcher.Form>
+      {fetcher.data?.action === "searchMaxReps" && fetcher.data.success && (
+        <p>{fetcher.data.data}</p>
+      )}
+    </Section>
   );
 };
 
@@ -446,6 +487,34 @@ export const action = async ({
     }
     case "delete": {
       return deleteAction({ formData, context, trainee: validatedTrainee });
+    }
+    case "searchMaxReps": {
+      const exerciseId = formData.get("exerciseId")?.toString();
+      const weight = formData.get("weight")?.toString();
+      if (!(exerciseId && weight)) {
+        return json({
+          action: "searchMaxReps",
+          success: false as const,
+          description: 'get formData "exerciseId" or "weight" failed',
+        });
+      }
+      const result = await findMaximumRepsByWeight(context)({
+        exerciseId,
+        weight: Number(weight),
+      });
+      if (result.result === "failure") {
+        return json({
+          action: "searchMaxReps",
+          success: false as const,
+          description: "findMaximumRepsByWeight failed",
+        });
+      }
+
+      return json({
+        action: "searchMaxReps",
+        success: true as const,
+        data: result.result === "found" ? result.reps : undefined,
+      });
     }
     default: {
       throw new Response("Bad Request", { status: 400 });
