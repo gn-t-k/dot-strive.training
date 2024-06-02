@@ -16,7 +16,7 @@ import {
 } from "valibot";
 import { deserializeTraining } from "./deserialize-training";
 
-type GetTrainingsByExerciseId = (
+type GetExerciseTrainingsByDateRange = (
   context: AppLoadContext,
 ) => (
   exerciseId: string,
@@ -58,7 +58,7 @@ const payloadSchema = array(
     }),
   ]),
 );
-export const getTrainingsByExerciseId: GetTrainingsByExerciseId =
+export const getExerciseTrainingsByDateRange: GetExerciseTrainingsByDateRange =
   (context) =>
   async (exerciseId, { from, to }) => {
     try {
