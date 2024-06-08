@@ -2,7 +2,7 @@ import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Form } from "@remix-run/react";
 import { parseWithValibot } from "conform-to-valibot";
-import { custom, nonOptional, object, optional, string } from "valibot";
+import { check, nonOptional, object, optional, pipe, string } from "valibot";
 
 import { Button } from "app/ui/button";
 import { FormErrorMessage } from "app/ui/form-error-message";
@@ -18,14 +18,15 @@ export const getTagFormSchema = ({
   object({
     id: optional(string()),
     name: nonOptional(
-      string([
-        custom(
+      pipe(
+        string(),
+        check(
           (value) =>
             registeredTags.every((tag) => tag.name !== value) ||
             value === beforeName,
           "タグの名前が重複しています",
         ),
-      ]),
+      ),
       "タグの名前を入力してください",
     ),
     actionType: string(),

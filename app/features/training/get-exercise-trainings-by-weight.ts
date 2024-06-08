@@ -5,15 +5,7 @@ import { trainingSets } from "database/tables/training-sets";
 import { trainings } from "database/tables/trainings";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
-import {
-  type Input,
-  array,
-  date,
-  merge,
-  number,
-  object,
-  string,
-} from "valibot";
+import { type InferInput, array, date, number, object, string } from "valibot";
 import { deserializeTraining } from "./deserialize-training";
 
 type GetExerciseTrainingsByWeight = (
@@ -22,7 +14,7 @@ type GetExerciseTrainingsByWeight = (
   exerciseId: string,
   weight: number,
 ) => Promise<{ result: "success"; data: Payload } | { result: "failure" }>;
-type Payload = Input<typeof payloadSchema>;
+type Payload = InferInput<typeof payloadSchema>;
 const exerciseSchema = object({
   id: string(),
   name: string(),
@@ -43,20 +35,20 @@ const setSchema = object({
   estimatedMaximumWeight: number(),
 });
 const payloadSchema = array(
-  merge([
-    trainingSchema,
-    object({
+  object({
+    ...trainingSchema.entries,
+    ...object({
       sessions: array(
-        merge([
-          sessionSchema,
-          object({
+        object({
+          ...sessionSchema.entries,
+          ...object({
             exercise: exerciseSchema,
             sets: array(setSchema),
-          }),
-        ]),
+          }).entries,
+        }),
       ),
-    }),
-  ]),
+    }).entries,
+  }),
 );
 export const getExerciseTrainingsByWeight: GetExerciseTrainingsByWeight =
   (context) => async (exerciseId, weight) => {

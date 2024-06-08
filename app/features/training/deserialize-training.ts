@@ -1,8 +1,7 @@
 import {
-  type Input,
+  type InferInput,
   array,
   date,
-  merge,
   number,
   object,
   safeParse,
@@ -26,7 +25,7 @@ type Props = {
   setOrder: unknown;
 }[];
 
-type Payload = Input<typeof payloadSchema>;
+type Payload = InferInput<typeof payloadSchema>;
 const exerciseSchema = object({
   id: string(),
   name: string(),
@@ -47,20 +46,20 @@ const setSchema = object({
   estimatedMaximumWeight: number(),
 });
 const payloadSchema = array(
-  merge([
-    trainingSchema,
-    object({
+  object({
+    ...trainingSchema.entries,
+    ...object({
       sessions: array(
-        merge([
-          sessionSchema,
-          object({
+        object({
+          ...sessionSchema.entries,
+          ...object({
             exercise: exerciseSchema,
             sets: array(setSchema),
-          }),
-        ]),
+          }).entries,
+        }),
       ),
-    }),
-  ]),
+    }).entries,
+  }),
 );
 
 export const deserializeTraining: DeserializeTraining = (props) =>

@@ -13,11 +13,11 @@ import {
 
 import { exercise } from "../exercise/schema";
 
-import type { Output } from "valibot";
+import { type InferOutput, pipe } from "valibot";
 
-export const training = brand(
+export const training = pipe(
   object({
-    id: string([cuid2("training cuid")]),
+    id: pipe(string(), cuid2("training cuid")),
     date: date("training date"),
     sessions: array(
       object({
@@ -25,21 +25,22 @@ export const training = brand(
         memo: string("training memo"),
         sets: array(
           object({
-            weight: number([minValue(0, "weight min value")]),
-            reps: number([minValue(0, "reps min value")]),
-            rpe: number([
+            weight: pipe(number(), minValue(0, "weight min value")),
+            reps: pipe(number(), minValue(0, "reps min value")),
+            rpe: pipe(
+              number(),
               minValue(0, "rpe min value"),
               maxValue(10, "rpe max value"),
-            ]),
+            ),
           }),
         ),
       }),
     ),
   }),
-  "training",
+  brand("training"),
 );
 
-export type Training = Output<typeof training>;
+export type Training = InferOutput<typeof training>;
 
 type ValidateTraining = (input: unknown) => Training | undefined;
 export const validateTraining: ValidateTraining = (input) => {

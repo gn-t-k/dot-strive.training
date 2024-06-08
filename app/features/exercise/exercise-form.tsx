@@ -9,11 +9,12 @@ import { Form } from "@remix-run/react";
 import { parseWithValibot } from "conform-to-valibot";
 import {
   array,
-  custom,
+  check,
   minLength,
   nonOptional,
   object,
   optional,
+  pipe,
   string,
 } from "valibot";
 
@@ -37,22 +38,26 @@ export const getExerciseFormSchema = ({
   object({
     id: optional(string()),
     name: nonOptional(
-      string([
-        custom(
+      pipe(
+        string(),
+        check(
           (value) =>
             registeredExercises.every((exercise) => exercise.name !== value) ||
             value === beforeName,
           "種目の名前が重複しています",
         ),
-      ]),
+      ),
       "種目の名前を入力してください",
     ),
-    tags: array(
-      string([
-        minLength(1),
-        custom((value) => registeredTags.some((tag) => tag.id === value)),
-      ]),
-      [minLength(1, "種目に紐付けるタグを選択してください")],
+    tags: pipe(
+      array(
+        pipe(
+          string(),
+          minLength(1),
+          check((value) => registeredTags.some((tag) => tag.id === value)),
+        ),
+      ),
+      minLength(1, "種目に紐付けるタグを選択してください"),
     ),
     actionType: string(),
   });

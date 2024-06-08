@@ -1,16 +1,24 @@
-import { brand, cuid2, minLength, object, safeParse, string } from "valibot";
+import {
+  brand,
+  cuid2,
+  minLength,
+  object,
+  pipe,
+  safeParse,
+  string,
+} from "valibot";
 
-import type { Output } from "valibot";
+import type { InferOutput } from "valibot";
 
-export const tag = brand(
+export const tag = pipe(
   object({
-    id: string([cuid2("tag cuid")]),
-    name: string([minLength(1, "tag name min length")]),
+    id: pipe(string(), cuid2("tag cuid")),
+    name: pipe(string(), minLength(1, "tag name min length")),
   }),
-  "tag",
+  brand("tag"),
 );
 
-export type Tag = Output<typeof tag>;
+export type Tag = InferOutput<typeof tag>;
 
 type ValidateTag = (input: unknown) => Tag | undefined;
 export const validateTag: ValidateTag = (input) => {

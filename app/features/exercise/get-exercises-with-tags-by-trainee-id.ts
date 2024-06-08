@@ -1,19 +1,19 @@
 import { asc, eq, sql } from "drizzle-orm";
-import { array, merge, object, safeParse, string } from "valibot";
+import { array, object, safeParse, string } from "valibot";
 
 import type { AppLoadContext } from "@remix-run/cloudflare";
 import { exercises } from "database/tables/exercises";
 import { tagExerciseMappings } from "database/tables/tag-exercise-mappings";
 import { tags as tagsSchema } from "database/tables/tags";
 import { drizzle } from "drizzle-orm/d1";
-import type { Input } from "valibot";
+import type { InferInput } from "valibot";
 
 type GetExercisesWithTagsByTraineeId = (
   context: AppLoadContext,
 ) => (
   traineeId: string,
 ) => Promise<{ result: "success"; data: Payload } | { result: "failure" }>;
-type Payload = Input<typeof payloadSchema>;
+type Payload = InferInput<typeof payloadSchema>;
 const tagSchema = object({
   id: string(),
   name: string(),
@@ -23,12 +23,12 @@ const exerciseSchema = object({
   name: string(),
 });
 const payloadSchema = array(
-  merge([
-    exerciseSchema,
-    object({
+  object({
+    ...exerciseSchema.entries,
+    ...object({
       tags: array(tagSchema),
-    }),
-  ]),
+    }).entries,
+  }),
 );
 export const getExercisesWithTagsByTraineeId: GetExercisesWithTagsByTraineeId =
   (context) => async (traineeId) => {

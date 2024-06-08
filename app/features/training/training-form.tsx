@@ -13,7 +13,7 @@ import { ExternalLink, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
   array,
-  custom,
+  check,
   maxLength,
   maxValue,
   minLength,
@@ -22,6 +22,7 @@ import {
   number,
   object,
   optional,
+  pipe,
   string,
 } from "valibot";
 
@@ -51,56 +52,65 @@ import { Textarea } from "app/ui/textarea";
 import type { FieldMetadata, FormMetadata } from "@conform-to/react";
 import { Popover, PopoverContent, PopoverTrigger } from "app/ui/popover";
 import type { FC } from "react";
-import type { Input as Infer } from "valibot";
+import type { InferInput } from "valibot";
 
 export const getTrainingFormSchema = (registeredExercises: Exercise[]) =>
   object({
     id: optional(string()),
     date: nonOptional(
-      string([custom((value) => !Number.isNaN(new Date(value).getTime()))]),
+      pipe(
+        string(),
+        check((value) => !Number.isNaN(new Date(value).getTime())),
+      ),
       "日付を選択してください",
     ),
-    sessions: array(getSessionSchema(registeredExercises), [
+    sessions: pipe(
+      array(getSessionSchema(registeredExercises)),
       minLength(1, "セッションの情報を入力してください"),
-    ]),
+    ),
   });
 const getSessionSchema = (registeredExercises: Exercise[]) =>
   object({
     exerciseId: nonOptional(
-      string([
-        custom((value) =>
+      pipe(
+        string(),
+        check((value) =>
           registeredExercises.some((exercise) => exercise.id === value),
         ),
-      ]),
+      ),
       "種目を選択してください",
     ),
     memo: optional(
-      string([maxLength(100, "メモは100文字以内で入力してください")]),
+      pipe(string(), maxLength(100, "メモは100文字以内で入力してください")),
       "",
     ),
-    sets: array(setSchema, [minLength(1, "セットの情報を入力してください")]),
+    sets: pipe(
+      array(setSchema),
+      minLength(1, "セットの情報を入力してください"),
+    ),
   });
 const setSchema = object({
   weight: nonOptional(
-    number([minValue(0, "0以上の数値で入力してください")]),
+    pipe(number(), minValue(0, "0以上の数値で入力してください")),
     "重量を入力してください",
   ),
   reps: nonOptional(
-    number([minValue(0, "0以上の数値で入力してください")]),
+    pipe(number(), minValue(0, "0以上の数値で入力してください")),
     "回数を入力してください",
   ),
   rpe: optional(
-    number([
+    pipe(
+      number(),
       minValue(0, "1以上の数値で入力してください"),
       maxValue(10, "10以下の数値で入力してください"),
-    ]),
+    ),
     0,
   ),
 });
 
-type TrainingFormType = Infer<ReturnType<typeof getTrainingFormSchema>>;
-type SessionFieldsType = Infer<ReturnType<typeof getSessionSchema>>;
-type SetFieldsType = Infer<typeof setSchema>;
+type TrainingFormType = InferInput<ReturnType<typeof getTrainingFormSchema>>;
+type SessionFieldsType = InferInput<ReturnType<typeof getSessionSchema>>;
+type SetFieldsType = InferInput<typeof setSchema>;
 
 type Props = {
   traineeId: string;
