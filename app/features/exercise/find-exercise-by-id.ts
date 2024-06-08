@@ -4,7 +4,7 @@ import { tagExerciseMappings } from "database/tables/tag-exercise-mappings";
 import { tags } from "database/tables/tags";
 import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
-import { type Input, array, merge, object, safeParse, string } from "valibot";
+import { type InferInput, array, object, safeParse, string } from "valibot";
 
 type FindExerciseById = (
   context: AppLoadContext,
@@ -15,7 +15,7 @@ type FindExerciseById = (
   | { result: "not-found" }
   | { result: "failure" }
 >;
-type Payload = Input<typeof payloadSchema>;
+type Payload = InferInput<typeof payloadSchema>;
 const tagSchema = object({
   id: string(),
 });
@@ -23,12 +23,12 @@ const exerciseSchema = object({
   id: string(),
   name: string(),
 });
-const payloadSchema = merge([
-  exerciseSchema,
-  object({
+const payloadSchema = object({
+  ...exerciseSchema.entries,
+  ...object({
     tags: array(tagSchema),
-  }),
-]);
+  }).entries,
+});
 export const findExerciseById: FindExerciseById =
   (context) => async (exerciseId) => {
     try {

@@ -5,12 +5,12 @@ import {
 } from "@remix-run/cloudflare";
 import { Authenticator } from "remix-auth";
 import { GoogleStrategy } from "remix-auth-google";
-import { type Input, object, string } from "valibot";
+import { type InferInput, object, string } from "valibot";
 import { findTraineeByAuthUserId } from "../trainee/find-trainee-by-auth-user-id";
 import { initializeTrainee } from "../trainee/initialize-trainee";
 
 let authenticator: Authenticator<AuthUser>;
-type AuthUser = Input<typeof authUserSchema>;
+type AuthUser = InferInput<typeof authUserSchema>;
 const authUserSchema = object({
   id: string(),
   name: string(),

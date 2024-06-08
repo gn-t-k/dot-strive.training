@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, gte, lte, sql } from "drizzle-orm";
-import { array, date, merge, number, object, string } from "valibot";
+import { array, date, number, object, string } from "valibot";
 
 import { exercises } from "database/tables/exercises";
 import { trainingSessions } from "database/tables/training-sessions";
@@ -8,7 +8,7 @@ import { trainings } from "database/tables/trainings";
 
 import type { AppLoadContext } from "@remix-run/cloudflare";
 import { drizzle } from "drizzle-orm/d1";
-import type { Input } from "valibot";
+import type { InferInput } from "valibot";
 import { deserializeTraining } from "./deserialize-training";
 
 type GetTrainingsByTraineeId = (
@@ -17,7 +17,7 @@ type GetTrainingsByTraineeId = (
   traineeId: string,
   dateRange: { from: Date; to: Date },
 ) => Promise<{ result: "success"; data: Payload } | { result: "failure" }>;
-type Payload = Input<typeof payloadSchema>;
+type Payload = InferInput<typeof payloadSchema>;
 const exerciseSchema = object({
   id: string(),
   name: string(),
@@ -38,20 +38,20 @@ const setSchema = object({
   estimatedMaximumWeight: number(),
 });
 const payloadSchema = array(
-  merge([
-    trainingSchema,
-    object({
+  object({
+    ...trainingSchema.entries,
+    ...object({
       sessions: array(
-        merge([
-          sessionSchema,
-          object({
+        object({
+          ...sessionSchema.entries,
+          ...object({
             exercise: exerciseSchema,
             sets: array(setSchema),
-          }),
-        ]),
+          }).entries,
+        }),
       ),
-    }),
-  ]),
+    }).entries,
+  }),
 );
 export const getTrainingsByTraineeId: GetTrainingsByTraineeId =
   (context) =>

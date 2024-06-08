@@ -72,8 +72,8 @@ import {
   useMemo,
   useState,
 } from "react";
-import { minValue, nonOptional, number, object, string } from "valibot";
-import type { Input as Infer } from "valibot";
+import { minValue, nonOptional, number, object, pipe, string } from "valibot";
+import type { InferInput } from "valibot";
 import { deleteAction } from "./delete-action";
 import { ExercisePageLoading } from "./exercise-page-loading";
 import { MaximumWeightChart } from "./maximum-weight-chart";
@@ -333,7 +333,7 @@ const ExercisePage: FC<ExercisePageProps> = ({
 const maximumRepetitionFormSchema = object({
   exerciseId: nonOptional(string()),
   weight: nonOptional(
-    number([minValue(0, "0以上の数値で入力してください")]),
+    pipe(number(), minValue(0, "0以上の数値で入力してください")),
     "回数を入力してください",
   ),
 });
@@ -345,7 +345,9 @@ const MaximumRepetitionSection: FC<MaximumRepetitionSectionProps> = ({
   traineeId,
   exerciseId,
 }) => {
-  const [form, fields] = useForm<Infer<typeof maximumRepetitionFormSchema>>({
+  const [form, fields] = useForm<
+    InferInput<typeof maximumRepetitionFormSchema>
+  >({
     shouldValidate: "onBlur",
     shouldRevalidate: "onInput",
     onValidate: ({ formData }) => {

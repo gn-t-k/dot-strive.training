@@ -4,24 +4,25 @@ import {
   cuid2,
   minLength,
   object,
+  pipe,
   safeParse,
   string,
 } from "valibot";
 
 import { tag } from "../tag/schema";
 
-import type { Output } from "valibot";
+import type { InferOutput } from "valibot";
 
-export const exercise = brand(
+export const exercise = pipe(
   object({
-    id: string([cuid2("exercise cuid")]),
-    name: string([minLength(1, "exercise name min length")]),
+    id: pipe(string(), cuid2("exercise cuid")),
+    name: pipe(string(), minLength(1, "exercise name min length")),
     tags: array(tag),
   }),
-  "exercise",
+  brand("exercise"),
 );
 
-export type Exercise = Output<typeof exercise>;
+export type Exercise = InferOutput<typeof exercise>;
 
 type ValidateExercise = (input: unknown) => Exercise | undefined;
 export const validateExercise: ValidateExercise = (input) => {

@@ -5,15 +5,7 @@ import { trainingSets as trainingSetsSchema } from "database/tables/training-set
 import { trainings as trainingsSchema } from "database/tables/trainings";
 import { asc, desc, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
-import {
-  type Input,
-  array,
-  date,
-  merge,
-  number,
-  object,
-  string,
-} from "valibot";
+import { type InferInput, array, date, number, object, string } from "valibot";
 import { deserializeTraining } from "./deserialize-training";
 
 type FindTrainingById = (
@@ -25,7 +17,7 @@ type FindTrainingById = (
   | { result: "not-found" }
   | { result: "failure" }
 >;
-type Payload = Input<typeof payloadSchema>;
+type Payload = InferInput<typeof payloadSchema>;
 const exerciseSchema = object({
   id: string(),
   name: string(),
@@ -45,20 +37,20 @@ const setSchema = object({
   rpe: number(),
   estimatedMaximumWeight: number(),
 });
-const payloadSchema = merge([
-  trainingSchema,
-  object({
+const payloadSchema = object({
+  ...trainingSchema.entries,
+  ...object({
     sessions: array(
-      merge([
-        sessionSchema,
-        object({
+      object({
+        ...sessionSchema.entries,
+        ...object({
           exercise: exerciseSchema,
           sets: array(setSchema),
-        }),
-      ]),
+        }).entries,
+      }),
     ),
-  }),
-]);
+  }).entries,
+});
 export const findTrainingById: FindTrainingById =
   (context) => async (trainingId) => {
     try {
