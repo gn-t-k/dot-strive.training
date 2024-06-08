@@ -1,13 +1,15 @@
+import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
 } from "@remix-run/cloudflare";
-import { redirect } from "@remix-run/cloudflare";
+import { json, redirect } from "@remix-run/cloudflare";
 import {
   Await,
   Form,
   Link,
   useActionData,
+  useFetcher,
   useLoaderData,
   useNavigate,
   useSearchParams,
@@ -17,7 +19,8 @@ import { findEstimatedMaximumWeightById } from "app/features/exercise/find-estim
 import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exercises-with-tags-by-trainee-id";
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { validateTrainee } from "app/features/trainee/schema";
-import { getTrainingsByExerciseId } from "app/features/training/get-trainings-by-exercise-id";
+import { getExerciseTrainingsByDateRange } from "app/features/training/get-exercise-trainings-by-date-range";
+import { getExerciseTrainingsByWeight } from "app/features/training/get-exercise-trainings-by-weight";
 import { TrainingCard } from "app/features/training/training-card";
 import { VolumeChart } from "app/routes/trainees.$traineeId.exercises.$exerciseId/volume-chart";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
@@ -49,6 +52,7 @@ import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "app/ui/tabs";
 import { useToast } from "app/ui/use-toast";
+import { parseWithValibot } from "conform-to-valibot";
 import {
   addMonths,
   endOfDay,
@@ -68,6 +72,8 @@ import {
   useMemo,
   useState,
 } from "react";
+import { minValue, nonOptional, number, object, string } from "valibot";
+import type { Input as Infer } from "valibot";
 import { deleteAction } from "./delete-action";
 import { ExercisePageLoading } from "./exercise-page-loading";
 import { MaximumWeightChart } from "./maximum-weight-chart";
@@ -97,7 +103,7 @@ export const loader = ({ context, request, params }: LoaderFunctionArgs) => {
     ] = await Promise.all([
       getTagsByTraineeId(context)(trainee.id),
       getExercisesWithTagsByTraineeId(context)(trainee.id),
-      getTrainingsByExerciseId(context)(exerciseId, dateRange),
+      getExerciseTrainingsByDateRange(context)(exerciseId, dateRange),
       findEstimatedMaximumWeightById(context)(exerciseId),
     ]);
     if (
@@ -246,44 +252,51 @@ const ExercisePage: FC<ExercisePageProps> = ({
       </Section>
       {maxTraining && (
         <Section>
-          <Heading level={2}>記録</Heading>
-          <div className="flex items-center gap-2">
-            <span className="w-2/4">推定1RM: </span>
-            <span className="w-1/4">
-              {maxTraining.estimatedMaximumWeight}kg
-            </span>
-            <span className="w-1/4">
+          <Heading level={2}>推定1RM</Heading>
+          <span>
+            {maxTraining.estimatedMaximumWeight}kg （
+            {
               <Link
+                className="text-muted-foreground underline"
                 to={`/trainees/${trainee.id}/trainings/${maxTraining.training.id}`}
-                className="underline text-sm text-muted-foreground"
               >
-                {format(maxTraining.training.date, "yyyy/MM/dd")}
+                {format(maxTraining.training.date, "yyyy年MM月dd日")}
+                のトレーニング
               </Link>
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2/4 flex items-center gap-2">
-              <Input className="w-1/3" />
-              <span className="w-2/3">回の最大重量:</span>
-            </span>
-            <span className="w-1/4"> -kg</span>
-            <span className="w-1/4">
-              <p className="underline text-sm text-muted-foreground">-</p>
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2/4 flex items-center gap-2">
-              <Input className="w-1/3" />
-              <span className="w-2/3">kgの最大回数:</span>
-            </span>
-            <span className="w-1/4"> -回</span>
-            <span className="w-1/4">
-              <p className="underline text-sm text-muted-foreground">-</p>
-            </span>
-          </div>
+            }
+            ）
+          </span>
         </Section>
       )}
-      <MonthlyTrainingsSection traineeId={trainee.id} trainings={trainings} />
+      <Section>
+        <Heading level={2}>トレーニング記録</Heading>
+        <Tabs defaultValue="date">
+          <TabsList className="w-full">
+            <TabsTrigger value="date" className="w-full">
+              日付
+            </TabsTrigger>
+            <TabsTrigger value="weight" className="w-full">
+              重量
+            </TabsTrigger>
+            <TabsTrigger value="reps" className="w-full">
+              回数
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="date">
+            <MonthlyTrainingsSection
+              traineeId={trainee.id}
+              trainings={trainings}
+            />
+          </TabsContent>
+          <TabsContent value="weight">
+            <MaximumRepetitionSection
+              traineeId={trainee.id}
+              exerciseId={exercise.id}
+            />
+          </TabsContent>
+          <TabsContent value="reps">test</TabsContent>
+        </Tabs>
+      </Section>
       <Section>
         <AlertDialog>
           <AlertDialogTrigger asChild>
@@ -314,6 +327,82 @@ const ExercisePage: FC<ExercisePageProps> = ({
         </AlertDialog>
       </Section>
     </Main>
+  );
+};
+
+const maximumRepetitionFormSchema = object({
+  exerciseId: nonOptional(string()),
+  weight: nonOptional(
+    number([minValue(0, "0以上の数値で入力してください")]),
+    "回数を入力してください",
+  ),
+});
+type MaximumRepetitionSectionProps = {
+  traineeId: string;
+  exerciseId: string;
+};
+const MaximumRepetitionSection: FC<MaximumRepetitionSectionProps> = ({
+  traineeId,
+  exerciseId,
+}) => {
+  const [form, fields] = useForm<Infer<typeof maximumRepetitionFormSchema>>({
+    shouldValidate: "onBlur",
+    shouldRevalidate: "onInput",
+    onValidate: ({ formData }) => {
+      return parseWithValibot(formData, {
+        schema: maximumRepetitionFormSchema,
+      });
+    },
+  });
+  const fetcher = useFetcher<typeof action>();
+
+  return (
+    <Section>
+      <Heading level={3} size="sm">
+        重量でトレーニングを検索
+      </Heading>
+      <fetcher.Form
+        method="post"
+        {...getFormProps(form)}
+        className="flex gap-2 items-center"
+      >
+        <input
+          {...getInputProps(fields.exerciseId, { type: "hidden" })}
+          value={exerciseId}
+        />
+        <Input
+          {...getInputProps(fields.weight, { type: "number", value: false })}
+          inputMode="decimal"
+          step="0.01"
+          placeholder="0.00"
+          className="flex-grow"
+        />
+        <span className="flex-none">kg</span>
+        <Button
+          type="submit"
+          name="actionType"
+          value="searchMaxReps"
+          className="flex-none"
+        >
+          検索
+        </Button>
+      </fetcher.Form>
+      {fetcher.data?.action === "searchMaxReps" && fetcher.data.success && (
+        <ol className="flex flex-col gap-8">
+          {fetcher.data.data.map((training) => (
+            <li key={training.id}>
+              <TrainingCard
+                traineeId={traineeId}
+                training={{
+                  ...training,
+                  date: new Date(training.date),
+                }}
+              />
+            </li>
+          ))}
+        </ol>
+      )}
+    </Section>
   );
 };
 
@@ -376,7 +465,9 @@ const MonthlyTrainingsSection: FC<MonthlyTrainingsSectionProps> = ({
   return (
     <Section>
       <header className="flex items-center justify-between">
-        <Heading level={2}>{format(defaultMonth, "M")}月のトレーニング</Heading>
+        <Heading level={3} size="sm">
+          {format(defaultMonth, "M")}月のトレーニング
+        </Heading>
         <div className="flex items-center gap-2">
           <Button size="icon" variant="ghost" onClick={setMonthPrev}>
             <ChevronLeft className="size-4" />
@@ -446,6 +537,34 @@ export const action = async ({
     }
     case "delete": {
       return deleteAction({ formData, context, trainee: validatedTrainee });
+    }
+    case "searchMaxReps": {
+      const exerciseId = formData.get("exerciseId")?.toString();
+      const weight = Number(formData.get("weight")?.toString());
+      if (!exerciseId || Number.isNaN(weight)) {
+        return json({
+          action: "searchMaxReps",
+          success: false as const,
+          description: 'get formData "exerciseId" or "weight" failed',
+        });
+      }
+      const result = await getExerciseTrainingsByWeight(context)(
+        exerciseId,
+        weight,
+      );
+      if (result.result === "failure") {
+        return json({
+          action: "searchMaxReps",
+          success: false as const,
+          description: "findMaximumRepsByWeight failed",
+        });
+      }
+
+      return json({
+        action: "searchMaxReps",
+        success: true as const,
+        data: result.data,
+      });
     }
     default: {
       throw new Response("Bad Request", { status: 400 });

@@ -16,6 +16,8 @@ type FindEstimatedMaximumWeightById = (
 >;
 type Payload = {
   estimatedMaximumWeight: number;
+  weight: number;
+  reps: number;
   training: {
     id: string;
     date: Date;
@@ -28,6 +30,8 @@ export const findEstimatedMaximumWeightById: FindEstimatedMaximumWeightById =
       const data = await database
         .select({
           estimatedMaximumWeight: max(trainingSets.estimatedMaximumWeight),
+          weight: trainingSets.weight,
+          reps: trainingSets.repetition,
           trainingId: trainings.id,
           trainingDate: trainings.date,
         })
@@ -48,6 +52,8 @@ export const findEstimatedMaximumWeightById: FindEstimatedMaximumWeightById =
         result: "found",
         data: {
           estimatedMaximumWeight: data.estimatedMaximumWeight,
+          weight: data.weight,
+          reps: data.reps,
           training: {
             id: data.trainingId,
             date: data.trainingDate,
