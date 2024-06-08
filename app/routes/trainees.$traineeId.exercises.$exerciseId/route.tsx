@@ -16,11 +16,11 @@ import {
 } from "@remix-run/react";
 import { ExerciseForm } from "app/features/exercise/exercise-form";
 import { findEstimatedMaximumWeightById } from "app/features/exercise/find-estimated-maximum-weight-by-id";
-import { findMaximumRepsByWeight } from "app/features/exercise/find-maximum-reps-by-weight";
 import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exercises-with-tags-by-trainee-id";
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { validateTrainee } from "app/features/trainee/schema";
-import { getTrainingsByExerciseId } from "app/features/training/get-trainings-by-exercise-id";
+import { getExerciseTrainingsByDateRange } from "app/features/training/get-exercise-trainings-by-date-range";
+import { getExerciseTrainingsByWeight } from "app/features/training/get-exercise-trainings-by-weight";
 import { TrainingCard } from "app/features/training/training-card";
 import { VolumeChart } from "app/routes/trainees.$traineeId.exercises.$exerciseId/volume-chart";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
@@ -47,6 +47,7 @@ import {
   DialogTrigger,
 } from "app/ui/dialog";
 import { Heading } from "app/ui/heading";
+import { Input } from "app/ui/input";
 import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "app/ui/tabs";
@@ -102,7 +103,7 @@ export const loader = ({ context, request, params }: LoaderFunctionArgs) => {
     ] = await Promise.all([
       getTagsByTraineeId(context)(trainee.id),
       getExercisesWithTagsByTraineeId(context)(trainee.id),
-      getTrainingsByExerciseId(context)(exerciseId, dateRange),
+      getExerciseTrainingsByDateRange(context)(exerciseId, dateRange),
       findEstimatedMaximumWeightById(context)(exerciseId),
     ]);
     if (
@@ -251,29 +252,51 @@ const ExercisePage: FC<ExercisePageProps> = ({
       </Section>
       {maxTraining && (
         <Section>
-          <Heading level={2}>記録</Heading>
-          <Section>
-            <Heading level={3} size="sm">
-              推定1RM
-            </Heading>
-            <span>
-              {maxTraining.estimatedMaximumWeight}kg （
-              {
-                <Link
-                  className="text-muted-foreground underline"
-                  to={`/trainees/${trainee.id}/trainings/${maxTraining.training.id}`}
-                >
-                  {format(maxTraining.training.date, "yyyy年MM月dd日")}
-                  のトレーニング
-                </Link>
-              }
-              ）
-            </span>
-          </Section>
-          <MaximumRepetitionSection exerciseId={exercise.id} />
+          <Heading level={2}>推定1RM</Heading>
+          <span>
+            {maxTraining.estimatedMaximumWeight}kg （
+            {
+              <Link
+                className="text-muted-foreground underline"
+                to={`/trainees/${trainee.id}/trainings/${maxTraining.training.id}`}
+              >
+                {format(maxTraining.training.date, "yyyy年MM月dd日")}
+                のトレーニング
+              </Link>
+            }
+            ）
+          </span>
         </Section>
       )}
-      <MonthlyTrainingsSection traineeId={trainee.id} trainings={trainings} />
+      <Section>
+        <Heading level={2}>トレーニング記録</Heading>
+        <Tabs defaultValue="date">
+          <TabsList className="w-full">
+            <TabsTrigger value="date" className="w-full">
+              日付
+            </TabsTrigger>
+            <TabsTrigger value="weight" className="w-full">
+              重量
+            </TabsTrigger>
+            <TabsTrigger value="reps" className="w-full">
+              回数
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="date">
+            <MonthlyTrainingsSection
+              traineeId={trainee.id}
+              trainings={trainings}
+            />
+          </TabsContent>
+          <TabsContent value="weight">
+            <MaximumRepetitionSection
+              traineeId={trainee.id}
+              exerciseId={exercise.id}
+            />
+          </TabsContent>
+          <TabsContent value="reps">test</TabsContent>
+        </Tabs>
+      </Section>
       <Section>
         <AlertDialog>
           <AlertDialogTrigger asChild>
@@ -315,9 +338,11 @@ const maximumRepetitionFormSchema = object({
   ),
 });
 type MaximumRepetitionSectionProps = {
+  traineeId: string;
   exerciseId: string;
 };
 const MaximumRepetitionSection: FC<MaximumRepetitionSectionProps> = ({
+  traineeId,
   exerciseId,
 }) => {
   const [form, fields] = useForm<Infer<typeof maximumRepetitionFormSchema>>({
@@ -334,25 +359,48 @@ const MaximumRepetitionSection: FC<MaximumRepetitionSectionProps> = ({
   return (
     <Section>
       <Heading level={3} size="sm">
-        重量あたりの最大回数
+        重量でトレーニングを検索
       </Heading>
-      <fetcher.Form method="post" {...getFormProps(form)}>
+      <fetcher.Form
+        method="post"
+        {...getFormProps(form)}
+        className="flex gap-2 items-center"
+      >
         <input
           {...getInputProps(fields.exerciseId, { type: "hidden" })}
           value={exerciseId}
         />
-        <input
+        <Input
           {...getInputProps(fields.weight, { type: "number", value: false })}
           inputMode="decimal"
           step="0.01"
           placeholder="0.00"
+          className="flex-grow"
         />
-        <Button type="submit" name="actionType" value="searchMaxReps">
+        <span className="flex-none">kg</span>
+        <Button
+          type="submit"
+          name="actionType"
+          value="searchMaxReps"
+          className="flex-none"
+        >
           検索
         </Button>
       </fetcher.Form>
       {fetcher.data?.action === "searchMaxReps" && fetcher.data.success && (
-        <p>{fetcher.data.data}</p>
+        <ol className="flex flex-col gap-8">
+          {fetcher.data.data.map((training) => (
+            <li key={training.id}>
+              <TrainingCard
+                traineeId={traineeId}
+                training={{
+                  ...training,
+                  date: new Date(training.date),
+                }}
+              />
+            </li>
+          ))}
+        </ol>
       )}
     </Section>
   );
@@ -417,7 +465,9 @@ const MonthlyTrainingsSection: FC<MonthlyTrainingsSectionProps> = ({
   return (
     <Section>
       <header className="flex items-center justify-between">
-        <Heading level={2}>{format(defaultMonth, "M")}月のトレーニング</Heading>
+        <Heading level={3} size="sm">
+          {format(defaultMonth, "M")}月のトレーニング
+        </Heading>
         <div className="flex items-center gap-2">
           <Button size="icon" variant="ghost" onClick={setMonthPrev}>
             <ChevronLeft className="size-4" />
@@ -490,18 +540,18 @@ export const action = async ({
     }
     case "searchMaxReps": {
       const exerciseId = formData.get("exerciseId")?.toString();
-      const weight = formData.get("weight")?.toString();
-      if (!(exerciseId && weight)) {
+      const weight = Number(formData.get("weight")?.toString());
+      if (!exerciseId || Number.isNaN(weight)) {
         return json({
           action: "searchMaxReps",
           success: false as const,
           description: 'get formData "exerciseId" or "weight" failed',
         });
       }
-      const result = await findMaximumRepsByWeight(context)({
+      const result = await getExerciseTrainingsByWeight(context)(
         exerciseId,
-        weight: Number(weight),
-      });
+        weight,
+      );
       if (result.result === "failure") {
         return json({
           action: "searchMaxReps",
@@ -513,7 +563,7 @@ export const action = async ({
       return json({
         action: "searchMaxReps",
         success: true as const,
-        data: result.result === "found" ? result.reps : undefined,
+        data: result.data,
       });
     }
     default: {
