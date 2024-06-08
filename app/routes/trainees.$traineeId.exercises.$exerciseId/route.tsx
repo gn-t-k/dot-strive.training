@@ -16,11 +16,11 @@ import {
 } from "@remix-run/react";
 import { ExerciseForm } from "app/features/exercise/exercise-form";
 import { findEstimatedMaximumWeightById } from "app/features/exercise/find-estimated-maximum-weight-by-id";
-import { findMaximumRepsByWeight } from "app/features/exercise/find-maximum-reps-by-weight";
 import { getExercisesWithTagsByTraineeId } from "app/features/exercise/get-exercises-with-tags-by-trainee-id";
 import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { validateTrainee } from "app/features/trainee/schema";
 import { getExerciseTrainingsByDateRange } from "app/features/training/get-exercise-trainings-by-date-range";
+import { getExerciseTrainingsByWeight } from "app/features/training/get-exercise-trainings-by-weight";
 import { TrainingCard } from "app/features/training/training-card";
 import { VolumeChart } from "app/routes/trainees.$traineeId.exercises.$exerciseId/volume-chart";
 import { loader as traineeLoader } from "app/routes/trainees.$traineeId/route";
@@ -289,7 +289,10 @@ const ExercisePage: FC<ExercisePageProps> = ({
             />
           </TabsContent>
           <TabsContent value="weight">
-            <MaximumRepetitionSection exerciseId={exercise.id} />
+            <MaximumRepetitionSection
+              traineeId={trainee.id}
+              exerciseId={exercise.id}
+            />
           </TabsContent>
           <TabsContent value="reps">test</TabsContent>
         </Tabs>
@@ -335,9 +338,11 @@ const maximumRepetitionFormSchema = object({
   ),
 });
 type MaximumRepetitionSectionProps = {
+  traineeId: string;
   exerciseId: string;
 };
 const MaximumRepetitionSection: FC<MaximumRepetitionSectionProps> = ({
+  traineeId,
   exerciseId,
 }) => {
   const [form, fields] = useForm<Infer<typeof maximumRepetitionFormSchema>>({
@@ -383,7 +388,19 @@ const MaximumRepetitionSection: FC<MaximumRepetitionSectionProps> = ({
         </Button>
       </fetcher.Form>
       {fetcher.data?.action === "searchMaxReps" && fetcher.data.success && (
-        <p>{fetcher.data.data}</p>
+        <ol className="flex flex-col gap-8">
+          {fetcher.data.data.map((training) => (
+            <li key={training.id}>
+              <TrainingCard
+                traineeId={traineeId}
+                training={{
+                  ...training,
+                  date: new Date(training.date),
+                }}
+              />
+            </li>
+          ))}
+        </ol>
       )}
     </Section>
   );
@@ -523,18 +540,18 @@ export const action = async ({
     }
     case "searchMaxReps": {
       const exerciseId = formData.get("exerciseId")?.toString();
-      const weight = formData.get("weight")?.toString();
-      if (!(exerciseId && weight)) {
+      const weight = Number(formData.get("weight")?.toString());
+      if (!exerciseId || Number.isNaN(weight)) {
         return json({
           action: "searchMaxReps",
           success: false as const,
           description: 'get formData "exerciseId" or "weight" failed',
         });
       }
-      const result = await findMaximumRepsByWeight(context)({
+      const result = await getExerciseTrainingsByWeight(context)(
         exerciseId,
-        weight: Number(weight),
-      });
+        weight,
+      );
       if (result.result === "failure") {
         return json({
           action: "searchMaxReps",
@@ -546,7 +563,7 @@ export const action = async ({
       return json({
         action: "searchMaxReps",
         success: true as const,
-        data: result.result === "found" ? result.reps : undefined,
+        data: result.data,
       });
     }
     default: {
