@@ -26,5 +26,15 @@
   "formatter": {
     "indentStyle": "space",
     "indentWidth": 2
+  },
+  "files": {
+    "ignore": [
+      // 自動生成されるファイルのため無視
+      "worker-configuration.d.ts",
+      // ファイル名で引っかかるが、自動生成のため無視
+      "functions/[[path]].ts",
+      // 自動生成されるファイルのため無視
+      "database/migrations/meta/*"
+    ]
   }
 }

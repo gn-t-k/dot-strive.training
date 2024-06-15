@@ -15,6 +15,7 @@ type DeleteTrainee = (
 ) => (props: { id: string }) => Promise<{ success: boolean }>;
 export const deleteTrainee: DeleteTrainee =
   (context) =>
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: そのうち直す
   async ({ id }) => {
     try {
       const database = drizzle(context.cloudflare["env"].DB);
