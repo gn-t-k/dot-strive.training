@@ -16,7 +16,7 @@
     "migrations:apply": "wrangler d1 migrations apply dot-strive-db --local",
     "migrations:drop": "drizzle-kit drop --config=./database/drizzle.config.ts",
     "test": "echo \"TODO: テスト書く\" && exit 0",
-    "lint": "biome ci ."
+    "lint": "biome ci . --config-path=biome.jsonc"
   },
   "dependencies": {
     "@conform-to/react": "1.1.4",

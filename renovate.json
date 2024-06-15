@@ -7,11 +7,6 @@
     ":timezone(Asia/Tokyo)"
   ],
   "platformAutomerge": true,
-  "schedule": [
-    "after 6:00",
-    "before 11:00"
-  ],
-  "ignorePaths": [
-    "**/node_modules/**"
-  ]
+  "schedule": ["after 6:00", "before 11:00"],
+  "ignorePaths": ["**/node_modules/**"]
 }
