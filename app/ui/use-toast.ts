@@ -1,15 +1,14 @@
-// Inspired by react-hot-toast library
-import * as React from "react";
-
 import type { ToastActionElement, ToastProps } from "app/ui/toast";
+// Inspired by react-hot-toast library
+import { type ReactNode, useEffect, useState } from "react";
 
 const TOAST_LIMIT = 1;
 const TOAST_REMOVE_DELAY = 1_000_000;
 
 type ToasterToast = ToastProps & {
   id: string;
-  title?: React.ReactNode;
-  description?: React.ReactNode;
+  title?: ReactNode;
+  description?: ReactNode;
   action?: ToastActionElement;
 };
 
@@ -172,10 +171,10 @@ const toast = (props: Toast) => {
 };
 
 const useToast = () => {
-  const [state, setState] = React.useState<State>(memoryState);
+  const [state, setState] = useState<State>(memoryState);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: shadcnでつくったまま（消しても動くかどうか後で見る）
-  React.useEffect(() => {
+  useEffect(() => {
     listeners.push(setState);
     return () => {
       const index = listeners.indexOf(setState);
