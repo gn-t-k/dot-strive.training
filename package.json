@@ -8,13 +8,15 @@
     "deploy": "bun run build && wrangler pages deploy ./build/client",
     "dev": "remix vite:dev --host",
     "start": "wrangler pages dev ./build/client",
-    "typecheck": "tsc",
-    "typegen": "wrangler types",
+    "type-check": "tsc",
+    "type-gen": "wrangler types",
     "preview": "bun run build && wrangler pages dev ./build/client",
     "build-cf-types": "wrangler types",
     "migrations:gen": "drizzle-kit generate --config=./database/drizzle.config.ts",
     "migrations:apply": "wrangler d1 migrations apply dot-strive-db --local",
-    "migrations:drop": "drizzle-kit drop --config=./database/drizzle.config.ts"
+    "migrations:drop": "drizzle-kit drop --config=./database/drizzle.config.ts",
+    "test": "echo \"TODO: テスト書く\" && exit 0",
+    "lint": "biome ci ."
   },
   "dependencies": {
     "@conform-to/react": "1.1.4",
