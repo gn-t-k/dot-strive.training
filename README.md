@@ -7,7 +7,7 @@
 Generate types for your Cloudflare bindings in `wrangler.toml`:
 
 ```sh
-npm run typegen
+npm run type-gen
 ```
 
 You will need to rerun typegen whenever you make changes to `wrangler.toml`.

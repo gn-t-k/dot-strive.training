@@ -1,6 +1,7 @@
 import { createPagesFunctionHandler } from "@remix-run/cloudflare-pages";
 
 // biome-ignore lint/style/noNamespaceImport: 公式に則る
+// @ts-ignore
 import * as build from "../build/server";
 import { getLoadContext } from "../load-context";
 
