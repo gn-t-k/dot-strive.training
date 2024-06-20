@@ -56,7 +56,7 @@
     "valibot": "0.33.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.8.1",
+    "@biomejs/biome": "1.8.2",
     "@cloudflare/workers-types": "4.20240614.0",
     "@remix-run/dev": "2.9.2",
     "@tsconfig/strictest": "2.0.5",
