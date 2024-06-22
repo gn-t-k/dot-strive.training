@@ -22,5 +22,18 @@
   "editor.codeActionsOnSave": {
     "quickfix.biome": "explicit",
     "source.organizeImports.biome": "explicit"
-  }
+  },
+  "cSpell.words": [
+    "automerge",
+    "biomejs",
+    "clsx",
+    "isbot",
+    "lucide",
+    "miniflare",
+    "paralleldrive",
+    "shadcn",
+    "tailwindcss",
+    "Typegen",
+    "Valibot"
+  ]
 }
