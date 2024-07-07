@@ -51,7 +51,7 @@
     "recharts": "2.12.7",
     "remix-auth": "3.7.0",
     "remix-auth-google": "2.0.0",
-    "tailwind-merge": "2.3.0",
+    "tailwind-merge": "2.4.0",
     "tailwindcss-animate": "1.0.7",
     "valibot": "0.35.0"
   },
