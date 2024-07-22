@@ -43,7 +43,7 @@
     "date-fns": "3.6.0",
     "drizzle-orm": "0.32.0",
     "isbot": "5.1.13",
-    "lucide-react": "0.412.0",
+    "lucide-react": "0.414.0",
     "miniflare": "3.20240718.0",
     "react": "18.3.1",
     "react-day-picker": "8.10.1",
