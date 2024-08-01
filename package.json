@@ -44,7 +44,7 @@
     "drizzle-orm": "0.32.1",
     "isbot": "5.1.13",
     "lucide-react": "0.418.0",
-    "miniflare": "3.20240718.1",
+    "miniflare": "3.20240725.0",
     "react": "18.3.1",
     "react-day-picker": "8.10.1",
     "react-dom": "18.3.1",
