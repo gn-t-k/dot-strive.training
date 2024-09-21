@@ -15,7 +15,9 @@
       },
       "correctness": {
         // CloudflareのEnvで使うため
-        "noUndeclaredVariables": "off"
+        "noUndeclaredVariables": "off",
+        "noUndeclaredDependencies": "off",
+        "useImportExtensions": "off"
       },
       "complexity": {
         // typescriptのnoPropertyAccessFromIndexSignatureを優先
