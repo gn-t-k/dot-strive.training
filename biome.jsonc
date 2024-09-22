@@ -11,7 +11,8 @@
         // Remixのrouteで使うため
         "noDefaultExport": "off",
         // asChildなど多用するため
-        "noImplicitBoolean": "off"
+        "noImplicitBoolean": "off",
+        "useDefaultSwitchClause": "off"
       },
       "correctness": {
         // CloudflareのEnvで使うため
@@ -22,6 +23,9 @@
       "complexity": {
         // typescriptのnoPropertyAccessFromIndexSignatureを優先
         "useLiteralKeys": "off"
+      },
+      "suspicious": {
+        "noReactSpecificProps": "off"
       }
     }
   },
