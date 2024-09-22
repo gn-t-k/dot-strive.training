@@ -11,15 +11,21 @@
         // Remixのrouteで使うため
         "noDefaultExport": "off",
         // asChildなど多用するため
-        "noImplicitBoolean": "off"
+        "noImplicitBoolean": "off",
+        "useDefaultSwitchClause": "off"
       },
       "correctness": {
         // CloudflareのEnvで使うため
-        "noUndeclaredVariables": "off"
+        "noUndeclaredVariables": "off",
+        "noUndeclaredDependencies": "off",
+        "useImportExtensions": "off"
       },
       "complexity": {
         // typescriptのnoPropertyAccessFromIndexSignatureを優先
         "useLiteralKeys": "off"
+      },
+      "suspicious": {
+        "noReactSpecificProps": "off"
       }
     }
   },
