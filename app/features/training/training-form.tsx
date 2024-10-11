@@ -350,14 +350,7 @@ const ExerciseField: FC<ExerciseFieldProps> = ({
           <SelectTrigger id={exerciseField.id}>
             <SelectValue placeholder="種目を選択する" />
           </SelectTrigger>
-          <SelectContent
-            // https://github.com/radix-ui/primitives/issues/1658
-            ref={(ref) =>
-              ref?.addEventListener("touchend", (event) =>
-                event.preventDefault(),
-              )
-            }
-          >
+          <SelectContent>
             {registeredExercises.map((exercise) => (
               <SelectItem
                 key={`${exercise.id}-${exercise.id}`}
