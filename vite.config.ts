@@ -20,9 +20,16 @@ export default defineConfig({
     remix({
       future: {
         // biome-ignore lint/style/useNamingConvention: ライブラリ指定のため
-        unstable_singleFetch: true,
+        v3_singleFetch: true,
       },
     }),
     tsconfigPaths(),
   ],
 });
+
+declare module "@remix-run/cloudflare" {
+  interface Future {
+    // biome-ignore lint/style/useNamingConvention: ライブラリ指定のため
+    v3_singleFetch: true;
+  }
+}

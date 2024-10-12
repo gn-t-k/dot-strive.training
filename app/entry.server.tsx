@@ -24,8 +24,8 @@ export default async function handleRequest(
     {
       signal: request.signal,
       onError(error: unknown) {
-        // Log streaming rendering errors from inside the shell
-        console.error(error);
+        // biome-ignore lint/suspicious/noConsole: エラーをログに出す
+        console.error(error); // Log streaming rendering errors from inside the shell
         status = 500;
       },
     },
