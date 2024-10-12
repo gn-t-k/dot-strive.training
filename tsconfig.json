@@ -14,8 +14,7 @@
     "types": [
       "@remix-run/cloudflare",
       "vite/client",
-      "@cloudflare/workers-types/2023-07-01",
-      "@remix-run/react/future/single-fetch.d.ts"
+      "@cloudflare/workers-types/2023-07-01"
     ],
     "isolatedModules": true,
     "esModuleInterop": true,
