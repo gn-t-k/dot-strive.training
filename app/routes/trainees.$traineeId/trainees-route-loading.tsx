@@ -17,24 +17,31 @@ export const TraineesRouteLoading: FC = () => {
 
   // TODO: ページごとにローディングコンポーネントを追加する
 
-  if (pathname.match(/^\/trainees\/[^\/]+\/?$/)) {
+  if (pathname.match(traineesPagePathnameRegex)) {
     return <TraineePageLoading />;
   }
-  if (pathname.match(/^\/trainees\/[^\/]+\/tags\/?$/)) {
+  if (pathname.match(tagsPagePathnameRegex)) {
     return <TagsPageLoading />;
   }
-  if (pathname.match(/^\/trainees\/[^\/]+\/tags\/[^\/]+\/?$/)) {
+  if (pathname.match(tagPagePathnameRegex)) {
     return <TagPageLoading />;
   }
-  if (pathname.match(/^\/trainees\/[^\/]+\/exercises\/?$/)) {
+  if (pathname.match(exercisesPagePathnameRegex)) {
     return <ExercisesPageLoading />;
   }
-  if (pathname.match(/^\/trainees\/[^\/]+\/exercises\/[^\/]+\/?$/)) {
+  if (pathname.match(exercisePagePathnameRegex)) {
     return <ExercisePageLoading />;
   }
-  if (pathname.match(/^\/trainees\/[^\/]+\/trainings\/?$/)) {
+  if (pathname.match(trainingsPagePathnameRegex)) {
     return <TrainingsPageLoading />;
   }
 
   return <GenericSkeleton />;
 };
+
+const traineesPagePathnameRegex = /^\/trainees\/[^\/]+\/?$/;
+const tagsPagePathnameRegex = /^\/trainees\/[^\/]+\/tags\/?$/;
+const tagPagePathnameRegex = /^\/trainees\/[^\/]+\/tags\/[^\/]+\/?$/;
+const exercisesPagePathnameRegex = /^\/trainees\/[^\/]+\/exercises\/?$/;
+const exercisePagePathnameRegex = /^\/trainees\/[^\/]+\/exercises\/[^\/]+\/?$/;
+const trainingsPagePathnameRegex = /^\/trainees\/[^\/]+\/trainings\/?$/;
