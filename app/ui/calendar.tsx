@@ -68,9 +68,9 @@ const Calendar = ({
       }}
       components={{
         // biome-ignore lint/style/useNamingConvention: ライブラリ指定のため
-        PreviousMonthButton: (_props) => <ChevronLeft className="size-4" />,
+        IconLeft: (_props) => <ChevronLeft className="size-4" />,
         // biome-ignore lint/style/useNamingConvention: ライブラリ指定のため
-        NextMonthButton: (_props) => <ChevronRight className="size-4" />,
+        IconRight: (_props) => <ChevronRight className="size-4" />,
       }}
       modifiersClassNames={{
         events:
