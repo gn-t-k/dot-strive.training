@@ -133,7 +133,11 @@ const Page: FC<PageProps> = ({ traineeId, tags, exercises }) => {
       <PageSummary />
       <Section>
         <RegisterExercisesButtonAndDialog
-          form={({ children }) => <Form method="POST">{children}</Form>}
+          form={({ children, ...props }) => (
+            <Form {...props} method="POST">
+              {children}
+            </Form>
+          )}
           registeredTags={tags}
           registeredExercises={exercises}
         />

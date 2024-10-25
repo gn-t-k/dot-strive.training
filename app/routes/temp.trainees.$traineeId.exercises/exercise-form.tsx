@@ -50,25 +50,28 @@ export const getExerciseFormSchema = ({
       ),
       "種目の名前を入力してください",
     ),
-    tags: union([
-      // 複数選択している場合
-      pipe(
-        array(
-          pipe(
-            string(),
-            minLength(1),
-            check((value) => registeredTags.some((tag) => tag.id === value)),
+    tags: union(
+      [
+        // 複数選択している場合
+        pipe(
+          array(
+            pipe(
+              string(),
+              minLength(1),
+              check((value) => registeredTags.some((tag) => tag.id === value)),
+            ),
           ),
+          minLength(1, "種目に紐付けるタグを選択してください"),
         ),
-        minLength(1, "種目に紐付けるタグを選択してください"),
-      ),
-      // 単一選択している場合
-      pipe(
-        string(),
-        minLength(1),
-        check((value) => registeredTags.some((tag) => tag.id === value)),
-      ),
-    ]),
+        // 単一選択している場合
+        pipe(
+          string(),
+          minLength(1),
+          check((value) => registeredTags.some((tag) => tag.id === value)),
+        ),
+      ],
+      "種目に紐付けるタグを選択してください",
+    ),
   });
 type Exercise = { id: string; name: string };
 type Tag = { id: string; name: string };
