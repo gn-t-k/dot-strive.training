@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, gte, lte, sql } from "drizzle-orm";
-import { array, date, number, object, string } from "valibot";
+import {} from "valibot";
 
 import { exercises } from "database/tables/exercises";
 import { trainingSessions } from "database/tables/training-sessions";
@@ -10,7 +10,6 @@ import type { AppLoadContext } from "@remix-run/cloudflare";
 import { tagExerciseMappings } from "database/tables/tag-exercise-mappings";
 import { tags } from "database/tables/tags";
 import { drizzle } from "drizzle-orm/d1";
-import type { InferInput } from "valibot";
 import { deserializeTraining } from "./deserialize-training";
 
 type GetTrainings = (
@@ -23,42 +22,29 @@ type GetTrainings = (
     | { exerciseId: string; weight: number },
 ) => Promise<{ result: "success"; data: Payload } | { result: "failure" }>;
 type DateRange = { from: Date; to: Date };
-type Payload = InferInput<typeof payloadSchema>;
-const exerciseSchema = object({
-  id: string(),
-  name: string(),
-});
-const trainingSchema = object({
-  id: string(),
-  date: date(),
-});
-const sessionSchema = object({
-  id: string(),
-  memo: string(),
-});
-const setSchema = object({
-  id: string(),
-  weight: number(),
-  repetition: number(),
-  rpe: number(),
-  estimatedMaximumWeight: number(),
-});
-const payloadSchema = array(
-  object({
-    ...trainingSchema.entries,
-    ...object({
-      sessions: array(
-        object({
-          ...sessionSchema.entries,
-          ...object({
-            exercise: exerciseSchema,
-            sets: array(setSchema),
-          }).entries,
-        }),
-      ),
-    }).entries,
-  }),
-);
+type Payload = Training[];
+type Training = {
+  id: string;
+  date: Date;
+  sessions: Session[];
+};
+type Session = {
+  id: string;
+  memo: string;
+  exercise: Exercise;
+  sets: Set[];
+};
+type Exercise = {
+  id: string;
+  name: string;
+};
+type Set = {
+  id: string;
+  weight: number;
+  repetition: number;
+  rpe: number;
+  estimatedMaximumWeight: number;
+};
 
 export const getTrainings: GetTrainings = (context) => async (props) => {
   try {
