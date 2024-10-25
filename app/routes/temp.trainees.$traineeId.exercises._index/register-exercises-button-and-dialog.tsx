@@ -7,26 +7,26 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "app/ui/dialog";
-import type { FC, FormHTMLAttributes } from "react";
+import type { FC, PropsWithChildren } from "react";
 import { ExerciseForm } from "../temp.trainees.$traineeId.exercises/exercise-form";
 type Props = {
-  form: FC<FormHTMLAttributes<HTMLFormElement>>;
+  form: FC<PropsWithChildren>;
   registeredTags: { id: string; name: string }[] | undefined;
   registeredExercises: { id: string; name: string }[] | undefined;
 };
 export const RegisterExercisesButtonAndDialog: FC<Props> = ({
-  form: Form,
+  form,
   registeredTags,
   registeredExercises,
 }) => {
   if (registeredTags === undefined || registeredExercises === undefined) {
-    return <TriggerButton />;
+    return <Button variant="secondary">種目を登録する</Button>;
   }
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <TriggerButton />
+        <Button variant="secondary">種目を登録する</Button>
       </DialogTrigger>
       <DialogContent className="max-h-dvh overflow-auto">
         <DialogHeader>
@@ -34,15 +34,11 @@ export const RegisterExercisesButtonAndDialog: FC<Props> = ({
           <DialogClose />
         </DialogHeader>
         <ExerciseForm
-          form={Form}
+          form={form}
           registeredTags={registeredTags}
           registeredExercises={registeredExercises}
         />
       </DialogContent>
     </Dialog>
   );
-};
-
-const TriggerButton: FC = () => {
-  return <Button variant="secondary">種目を登録する</Button>;
 };
