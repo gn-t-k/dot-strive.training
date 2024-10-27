@@ -1,5 +1,4 @@
-import { and, asc, desc, eq, gte, lte, sql } from "drizzle-orm";
-import {} from "valibot";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 
 import { exercises } from "database/tables/exercises";
 import { trainingSessions } from "database/tables/training-sessions";
@@ -7,21 +6,24 @@ import { trainingSets } from "database/tables/training-sets";
 import { trainings } from "database/tables/trainings";
 
 import type { AppLoadContext } from "@remix-run/cloudflare";
+import { determineDateFormat } from "app/utils/determin-date-format";
 import { tagExerciseMappings } from "database/tables/tag-exercise-mappings";
 import { tags } from "database/tables/tags";
+import { addDays } from "date-fns";
 import { drizzle } from "drizzle-orm/d1";
 import { deserializeTraining } from "./deserialize-training";
 
 type GetTrainings = (
   context: AppLoadContext,
 ) => (
-  props:
-    | { tagId: string; dateRange: DateRange }
-    | { traineeId: string; dateRange: DateRange }
-    | { exerciseId: string; dateRange: DateRange }
-    | { exerciseId: string; weight: number },
+  props: Pagination &
+    (
+      | { tagId: string }
+      | { traineeId: string }
+      | { exerciseId: string; weight?: number }
+    ),
 ) => Promise<{ result: "success"; data: Payload } | { result: "failure" }>;
-type DateRange = { from: Date; to: Date };
+type Pagination = { cursor: Date; limit?: number } | { date: string };
 type Payload = Training[];
 type Training = {
   id: string;
@@ -118,17 +120,27 @@ export const getTrainings: GetTrainings = (context) => async (props) => {
           : [...exerciseIdFiltered.conditions],
     };
 
-    const dateRangeFiltered = {
-      query: weightFiltered.query,
-      conditions:
-        "dateRange" in props
+    // const dateRangeFiltered = {
+    //   query: weightFiltered.query,
+    //   conditions:
+    //     "dateRange" in props
+    //       ? [
+    //           ...weightFiltered.conditions,
+    //           gte(trainings.date, props.dateRange.from),
+    //           lte(trainings.date, props.dateRange.to),
+    //         ]
+    //       : [...weightFiltered.conditions],
+    // };
+    const dateRangeFiltered = (() => {
+      const query = weightFiltered.query;
+      const [from, to] =
+        "cursor" in props
           ? [
-              ...weightFiltered.conditions,
-              gte(trainings.date, props.dateRange.from),
-              lte(trainings.date, props.dateRange.to),
+              addDays(props.cursor, 1),
+              addDays(props.cursor, 1 + (props.limit ?? 10)),
             ]
-          : [...weightFiltered.conditions],
-    };
+          : determineDateFormat();
+    })();
 
     const data = await dateRangeFiltered.query
       .where(and(...dateRangeFiltered.conditions))
