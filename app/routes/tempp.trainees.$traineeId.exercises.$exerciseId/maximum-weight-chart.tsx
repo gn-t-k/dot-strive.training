@@ -1,4 +1,4 @@
-import { determineDateFormat } from "app/utils/determin-date-format";
+import { determineDateFormat } from "app/utils/determine-date-format";
 import { format, getDaysInMonth, setDate } from "date-fns";
 import { type FC, useCallback, useMemo } from "react";
 import {
