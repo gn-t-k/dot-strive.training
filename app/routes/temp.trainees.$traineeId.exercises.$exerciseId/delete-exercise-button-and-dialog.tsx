@@ -10,6 +10,7 @@ import {
   AlertDialogTrigger,
 } from "app/ui/alert-dialog";
 import { Button } from "app/ui/button";
+import { Trash } from "lucide-react";
 import type { FC, PropsWithChildren } from "react";
 
 type Props = {
@@ -21,13 +22,19 @@ export const DeleteExerciseButtonAndDialog: FC<Props> = ({
   form: Form,
 }) => {
   if (exercise === undefined) {
-    return <Button variant="destructive">種目を削除する</Button>;
+    return (
+      <Button size="icon" variant="destructive">
+        <Trash className="size-4" />
+      </Button>
+    );
   }
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive">種目を削除する</Button>
+        <Button size="icon" variant="ghost">
+          <Trash className="size-4" />
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
