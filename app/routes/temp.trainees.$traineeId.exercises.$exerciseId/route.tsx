@@ -1,4 +1,8 @@
-import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+} from "@remix-run/cloudflare";
+import { redirect } from "@remix-run/cloudflare";
 import {
   Await,
   Form,
@@ -14,8 +18,11 @@ import { Heading } from "app/ui/heading";
 import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
 import { type FC, Suspense } from "react";
+import { deleteAction } from "./delete-action";
+import { DeleteExerciseButtonAndDialog } from "./delete-exercise-button-and-dialog";
 import { EditExerciseButtonAndDialog } from "./edit-exercise-button-and-dialog";
 import { ExerciseSummary } from "./exercise-summary";
+import { updateAction } from "./update-action";
 
 export const loader = ({ context, request, params }: LoaderFunctionArgs) => {
   const user = getAuthenticator(context, request).isAuthenticated(request);
@@ -136,16 +143,26 @@ const Page: FC<Props> = ({
       <Section>
         <header className="flex justify-between">
           <ExerciseSummary traineeId={traineeId} exercise={exercise} />
-          <EditExerciseButtonAndDialog
-            form={({ children, ...props }) => (
-              <Form {...props} method="PUT">
-                {children}
-              </Form>
-            )}
-            registeredTags={registeredTags}
-            registeredExercises={registeredExercises}
-            exercise={exercise}
-          />
+          <div className="flex gap-2">
+            <EditExerciseButtonAndDialog
+              form={({ children, ...props }) => (
+                <Form {...props} method="PUT">
+                  {children}
+                </Form>
+              )}
+              registeredTags={registeredTags}
+              registeredExercises={registeredExercises}
+              exercise={exercise}
+            />
+            <DeleteExerciseButtonAndDialog
+              exercise={exercise}
+              form={({ children, ...props }) => (
+                <Form {...props} method="DELETE">
+                  {children}
+                </Form>
+              )}
+            />
+          </div>
         </header>
       </Section>
       <Section>
@@ -154,4 +171,38 @@ const Page: FC<Props> = ({
       </Section>
     </Main>
   );
+};
+
+export const action = async ({
+  request,
+  context,
+  params,
+}: ActionFunctionArgs) => {
+  const [user, formData] = await Promise.all([
+    getAuthenticator(context, request).isAuthenticated(request),
+    request.formData(),
+  ]);
+
+  if (!user) {
+    throw redirect("/login");
+  }
+
+  // biome-ignore lint/style/noNonNullAssertion: Remixが保証してくれてる
+  const traineeIdParam = params["traineeId"]!;
+
+  switch (request.method) {
+    case "PUT": {
+      if (traineeIdParam !== user.id) {
+        throw new Response("Bad Request", { status: 400 });
+      }
+
+      return updateAction({ formData, context, traineeId: traineeIdParam });
+    }
+    case "DELETE": {
+      return deleteAction({ formData, context, traineeId: traineeIdParam });
+    }
+    default: {
+      throw new Response("Bad Request", { status: 400 });
+    }
+  }
 };
