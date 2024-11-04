@@ -23,7 +23,7 @@ export const DeleteExerciseButtonAndDialog: FC<Props> = ({
 }) => {
   if (exercise === undefined) {
     return (
-      <Button size="icon" variant="destructive">
+      <Button size="icon" variant="ghost">
         <Trash className="size-4" />
       </Button>
     );
