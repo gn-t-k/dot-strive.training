@@ -4,6 +4,7 @@ import { getAuthenticator } from "app/features/auth/get-authenticator.server";
 import { getTrainings } from "app/features/training/get-trainings";
 import { TrainingCard } from "app/features/training/training-card";
 import { useInViewport } from "app/ui/use-in-viewport";
+import { isValidNumberString } from "app/utils/is-valid-number-string";
 import { addDays, format } from "date-fns";
 import { type FC, useEffect, useRef, useState } from "react";
 
@@ -28,12 +29,17 @@ export const loader = async ({
 
   const { searchParams } = new URL(request.url);
   const cursorParam = searchParams.get("cursor");
+  const weightParam = searchParams.get("weight");
 
   const defaultCursor = addDays(new Date(), 1);
 
   const getTrainingsResult = await getTrainings(context)({
     exerciseId,
     cursor: cursorParam !== null ? new Date(cursorParam) : defaultCursor,
+    weight:
+      weightParam !== null && isValidNumberString(weightParam)
+        ? Number(weightParam)
+        : undefined,
     size: LIMIT,
   });
   if (getTrainingsResult.result === "failure") {
