@@ -169,10 +169,6 @@ export const action = async ({
 
   switch (request.method) {
     case "POST": {
-      if (traineeIdParam !== user.id) {
-        throw new Response("Bad Request", { status: 400 });
-      }
-
       return createAction({ formData, context, traineeId: traineeIdParam });
     }
     default: {

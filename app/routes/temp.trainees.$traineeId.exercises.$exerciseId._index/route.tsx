@@ -39,18 +39,21 @@ export const loader = async ({
   if (getTrainingsResult.result === "failure") {
     throw new Error("Internal Server Error");
   }
-  const edge = getTrainingsResult.data;
-  const cursor = format(
-    edge.reduce((oldest, training) =>
-      training.date < oldest.date ? training : oldest,
-    ).date,
-    "yyyy-MM-dd",
-  );
-  const hasMore = edge.length === LIMIT;
+  const edges = getTrainingsResult.data;
+  const cursor =
+    edges.length === 0
+      ? null
+      : format(
+          edges.reduce((oldest, training) =>
+            training.date < oldest.date ? training : oldest,
+          ).date,
+          "yyyy-MM-dd",
+        );
+  const hasMore = edges.length === LIMIT;
 
   return {
     traineeId,
-    edge,
+    edges,
     cursor,
     hasMore,
   };
@@ -59,15 +62,20 @@ export const loader = async ({
 const Page: FC = () => {
   const { traineeId, ...initial } = useLoaderData<typeof loader>();
 
-  const [trainings, setTrainings] = useState(initial.edge);
-  const [cursor, setCursor] = useState<string>(initial.cursor);
-  const [hasMore, setHasMore] = useState(initial.edge.length === LIMIT);
+  const [trainings, setTrainings] = useState(initial.edges);
+  const [cursor, setCursor] = useState<string | null>(initial.cursor);
+  const [hasMore, setHasMore] = useState(initial.edges.length === LIMIT);
   const anchorRef = useRef<HTMLDivElement>(null);
 
   const fetcher = useFetcher<typeof loader>();
 
   useInViewport(anchorRef, (entry) => {
-    if (entry.isIntersecting && hasMore && fetcher.state === "idle") {
+    if (
+      entry.isIntersecting &&
+      hasMore &&
+      fetcher.state === "idle" &&
+      cursor !== null
+    ) {
       fetcher.submit({ cursor });
     }
   });
@@ -76,7 +84,7 @@ const Page: FC = () => {
     if (fetcher.data === undefined) {
       return;
     }
-    const { edge, cursor, hasMore } = fetcher.data;
+    const { edges: edge, cursor, hasMore } = fetcher.data;
 
     setTrainings((prev) => [...prev, ...edge]);
     setCursor(cursor);

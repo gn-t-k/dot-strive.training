@@ -2,11 +2,12 @@ import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
 } from "@remix-run/cloudflare";
-import { redirect } from "@remix-run/cloudflare";
 import {
   Await,
   Form,
   Outlet,
+  redirect,
+  useActionData,
   useLoaderData,
   useNavigate,
   useNavigation,
@@ -17,7 +18,8 @@ import { getTagsByTraineeId } from "app/features/tag/get-tags-by-trainee-id";
 import { Heading } from "app/ui/heading";
 import { Main } from "app/ui/main";
 import { Section } from "app/ui/section";
-import { type FC, Suspense } from "react";
+import { useToast } from "app/ui/use-toast";
+import { type FC, Suspense, useEffect } from "react";
 import { deleteAction } from "./delete-action";
 import { DeleteExerciseButtonAndDialog } from "./delete-exercise-button-and-dialog";
 import { EditExerciseButtonAndDialog } from "./edit-exercise-button-and-dialog";
@@ -138,6 +140,37 @@ const Page: FC<Props> = ({
   registeredTags,
   registeredExercises,
 }) => {
+  const actionData = useActionData<typeof action>();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!actionData) {
+      return;
+    }
+    switch (actionData.action) {
+      case "update": {
+        if (actionData.success) {
+          toast({ title: "種目を更新しました" });
+        } else {
+          toast({ title: "種目の更新に失敗しました", variant: "destructive" });
+        }
+
+        return;
+      }
+      case "delete": {
+        if (actionData.success) {
+          toast({ title: "種目を削除しました" });
+          navigate(`/trainees/${traineeId}/exercises`);
+        } else {
+          toast({ title: "種目の削除に失敗しました", variant: "destructive" });
+        }
+
+        return;
+      }
+    }
+  }, [actionData, traineeId, navigate, toast]);
+
   return (
     <Main>
       <Section>
@@ -192,10 +225,6 @@ export const action = async ({
 
   switch (request.method) {
     case "PUT": {
-      if (traineeIdParam !== user.id) {
-        throw new Response("Bad Request", { status: 400 });
-      }
-
       return updateAction({ formData, context, traineeId: traineeIdParam });
     }
     case "DELETE": {
