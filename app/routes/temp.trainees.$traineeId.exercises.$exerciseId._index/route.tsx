@@ -29,18 +29,32 @@ export const loader = async ({
 
   const { searchParams } = new URL(request.url);
   const cursorParam = searchParams.get("cursor");
+  const dateParam = searchParams.get("date");
   const weightParam = searchParams.get("weight");
+  const repetitionParam = searchParams.get("repetition");
 
-  const defaultCursor = addDays(new Date(), 1);
+  const pagination =
+    dateParam !== null
+      ? { date: dateParam }
+      : {
+          cursor:
+            cursorParam !== null
+              ? new Date(cursorParam)
+              : addDays(new Date(), 1),
+          size: LIMIT,
+        };
 
   const getTrainingsResult = await getTrainings(context)({
     exerciseId,
-    cursor: cursorParam !== null ? new Date(cursorParam) : defaultCursor,
+    ...pagination,
     weight:
       weightParam !== null && isValidNumberString(weightParam)
         ? Number(weightParam)
         : undefined,
-    size: LIMIT,
+    repetition:
+      repetitionParam !== null && isValidNumberString(repetitionParam)
+        ? Number(repetitionParam)
+        : undefined,
   });
   if (getTrainingsResult.result === "failure") {
     throw new Error("Internal Server Error");
