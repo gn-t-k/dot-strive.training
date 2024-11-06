@@ -15,13 +15,16 @@ import { deserializeTraining } from "./deserialize-training";
 type GetTrainings = (
   context: AppLoadContext,
 ) => (
-  props: Pagination &
-    (
-      | { tagId: string }
-      | { traineeId: string }
-      | { exerciseId: string; weight?: number | undefined }
-    ),
+  props: Identifier & SetAttributes & Pagination,
 ) => Promise<{ result: "success"; data: Payload } | { result: "failure" }>;
+type Identifier =
+  | { tagId: string }
+  | { traineeId: string }
+  | { exerciseId: string };
+type SetAttributes = {
+  weight?: number | undefined;
+  repetition?: number | undefined;
+};
 type Pagination = { cursor: Date; size: number } | { date: string };
 type Payload = Training[];
 type Training = {
@@ -80,45 +83,39 @@ export const getTrainings: GetTrainings = (context) => async (props) => {
       "weight" in props &&
         props.weight !== undefined &&
         eq(trainingSets.weight, props.weight),
+      "repetition" in props &&
+        props.repetition !== undefined &&
+        eq(trainingSets.repetition, props.repetition),
+      "cursor" in props && lt(trainings.date, startOfDay(props.cursor)),
+      "date" in props &&
+        (() => {
+          const dateFormat = determineDateFormat(props.date);
+          const dateConditions = {
+            "yyyy-MM": [
+              gte(trainings.date, startOfMonth(props.date)),
+              lte(trainings.date, endOfMonth(props.date)),
+            ],
+            "yyyy-MM-dd": [
+              gte(trainings.date, startOfDay(props.date)),
+              lte(trainings.date, endOfDay(props.date)),
+            ],
+            invalid: [],
+          }[dateFormat];
+          return and(...dateConditions);
+        })(),
     ].filter((filter) => filter !== false);
-
-    if ("date" in props) {
-      const dateFormat = determineDateFormat(props.date);
-      const dateConditions =
-        {
-          "yyyy-MM": [
-            gte(trainings.date, startOfMonth(props.date)),
-            lte(trainings.date, endOfMonth(props.date)),
-          ],
-          "yyyy-MM-dd": [
-            gte(trainings.date, startOfDay(props.date)),
-            lte(trainings.date, endOfDay(props.date)),
-          ],
-          invalid: [],
-        }[dateFormat] || [];
-      filters.push(...dateConditions);
-    }
-
-    if ("cursor" in props) {
-      const cursorConditions = [lt(trainings.date, startOfDay(props.cursor))];
-      filters.push(...cursorConditions);
-    }
-
     const filteredQuery = baseQuery.where(and(...filters));
+
     const orderedQuery = filteredQuery.orderBy(
       desc(trainings.date),
       asc(trainingSessions.order),
       asc(trainingSets.order),
     );
+
     const limitedQuery =
       "cursor" in props ? filteredQuery.limit(props.size) : orderedQuery;
-    const data = await limitedQuery
-      .where(and(...filters))
-      .orderBy(
-        desc(trainings.date),
-        asc(trainingSessions.order),
-        asc(trainingSets.order),
-      );
+
+    const data = await limitedQuery;
 
     const payload = deserializeTraining(data);
 
