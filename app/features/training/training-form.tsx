@@ -37,7 +37,6 @@ import {
   DropdownMenuTrigger,
 } from "app/ui/dropdown-menu";
 import { FormErrorMessage } from "app/ui/form-error-message";
-import { Input } from "app/ui/input";
 import { Label } from "app/ui/label";
 import {
   Select,
@@ -53,6 +52,8 @@ import type { FieldMetadata, FormMetadata } from "@conform-to/react";
 import { Popover, PopoverContent, PopoverTrigger } from "app/ui/popover";
 import type { FC } from "react";
 import type { InferInput } from "valibot";
+import { RepetitionField, repetitionFieldSchema } from "./repetition-field";
+import { WeightField, weightFieldSchema } from "./weight-field";
 
 export const getTrainingFormSchema = (registeredExercises: Exercise[]) =>
   object({
@@ -90,14 +91,8 @@ const getSessionSchema = (registeredExercises: Exercise[]) =>
     ),
   });
 const setSchema = object({
-  weight: nonOptional(
-    pipe(number(), minValue(0, "0以上の数値で入力してください")),
-    "重量を入力してください",
-  ),
-  reps: nonOptional(
-    pipe(number(), minValue(0, "0以上の数値で入力してください")),
-    "回数を入力してください",
-  ),
+  weight: weightFieldSchema,
+  reps: repetitionFieldSchema,
   rpe: optional(
     pipe(
       number(),
@@ -484,163 +479,18 @@ const SetFields: FC<SetFieldsProps> = ({
           <X className="size-4" />
         </Button>
       </header>
-      <WeightField weightField={setFields.weight} lastValue={lastWeightValue} />
-      <RepsField repsField={setFields.reps} lastValue={lastRepsValue} />
-      <RPEField rpeField={setFields.rpe} />
+      <div className="flex flex-col gap-2 pl-2">
+        <WeightField
+          fieldMetadata={setFields.weight}
+          initialValue={lastWeightValue}
+        />
+        <RepetitionField
+          fieldMetadata={setFields.reps}
+          initialValue={lastRepsValue}
+        />
+        <RPEField rpeField={setFields.rpe} />
+      </div>
     </fieldset>
-  );
-};
-
-type WeightFieldProps = {
-  weightField: FieldMetadata<SetFieldsType["weight"]>;
-  lastValue: string | undefined;
-};
-const WeightField: FC<WeightFieldProps> = ({ weightField, lastValue }) => {
-  const { value: value_, change } = useInputControl({
-    ...weightField,
-    initialValue: weightField.initialValue ?? lastValue,
-    formId: weightField.formId,
-  });
-  const value = value_ ?? "";
-  const decrease = useCallback(() => {
-    if (value === undefined || Number.isNaN(Number(value))) {
-      return;
-    }
-    const next = Number(value) - 2.5;
-    if (next < 0) {
-      return;
-    }
-    change(next.toString());
-  }, [change, value]);
-  const increase = useCallback(() => {
-    if (value === undefined || Number.isNaN(Number(value))) {
-      return;
-    }
-    change((Number(value) + 2.5).toString());
-  }, [change, value]);
-
-  const { key, ...props } = getInputProps(weightField, {
-    type: "number",
-    value: false,
-  });
-
-  return (
-    <div className="flex flex-col gap-2 pl-2">
-      <div className="grid grid-cols-5 items-center gap-2">
-        <Label htmlFor={weightField.id} className="col-span-1">
-          重量
-        </Label>
-        <div className="col-span-2 flex items-center gap-1">
-          <Input
-            key={key}
-            {...props}
-            value={value}
-            onChange={(event) => change(event.target.value)}
-            inputMode="decimal"
-            step="0.01"
-            placeholder="0.00"
-          />
-          <span>kg</span>
-        </div>
-        <div className="col-span-2 flex items-center justify-end gap-1">
-          <Button
-            onClick={decrease}
-            size="icon"
-            variant="outline"
-            type="button"
-          >
-            -2.5
-          </Button>
-          <Button
-            onClick={increase}
-            size="icon"
-            variant="outline"
-            type="button"
-          >
-            +2.5
-          </Button>
-        </div>
-      </div>
-      {weightField.errors?.map((error) => (
-        <FormErrorMessage key={error} message={error} />
-      ))}
-    </div>
-  );
-};
-
-type RepsFieldProps = {
-  repsField: FieldMetadata<SetFieldsType["reps"]>;
-  lastValue: string | undefined;
-};
-const RepsField: FC<RepsFieldProps> = ({ repsField, lastValue }) => {
-  const { value: value_, change } = useInputControl({
-    ...repsField,
-    initialValue: repsField.initialValue ?? lastValue,
-    formId: repsField.formId,
-  });
-  const value = value_ ?? "";
-  const decrease = useCallback(() => {
-    if (value === undefined || Number.isNaN(Number(value))) {
-      return;
-    }
-    const next = Number(value) - 1;
-    if (next < 0) {
-      return;
-    }
-    change(next.toString());
-  }, [change, value]);
-  const increase = useCallback(() => {
-    if (value === undefined || Number.isNaN(Number(value))) {
-      return;
-    }
-    change((Number(value) + 1).toString());
-  }, [change, value]);
-
-  const { key, ...props } = getInputProps(repsField, {
-    type: "number",
-    value: false,
-  });
-
-  return (
-    <div className="flex flex-col gap-2 pl-2">
-      <div className="grid grid-cols-5 items-center gap-2">
-        <Label htmlFor={repsField.id} className="col-span-1">
-          回数
-        </Label>
-        <div className="col-span-2 flex items-center gap-1">
-          <Input
-            key={key}
-            {...props}
-            value={value}
-            onChange={(event) => change(event.target.value)}
-            pattern="[0-9]*"
-            placeholder="000"
-          />
-          <span>回</span>
-        </div>
-        <div className="col-span-2 flex items-center justify-end gap-1">
-          <Button
-            onClick={decrease}
-            size="icon"
-            variant="outline"
-            type="button"
-          >
-            -1
-          </Button>
-          <Button
-            onClick={increase}
-            size="icon"
-            variant="outline"
-            type="button"
-          >
-            +1
-          </Button>
-        </div>
-      </div>
-      {repsField.errors?.map((error) => (
-        <FormErrorMessage key={error} message={error} />
-      ))}
-    </div>
   );
 };
 
@@ -664,7 +514,7 @@ const RPEField: FC<RPEFieldProps> = ({ rpeField }) => {
   const sliderValue = value === undefined ? {} : { value: [Number(value)] };
 
   return (
-    <div className="flex flex-col gap-2 pl-2">
+    <div className="flex flex-col gap-2">
       <div className="grid grid-cols-5 items-center gap-2">
         <Label className="col-span-1">RPE</Label>
         <Slider
