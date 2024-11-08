@@ -61,21 +61,19 @@ export const loader = async ({
   }
   const edges = getTrainingsResult.data;
   const cursor =
-    edges.length === 0
-      ? null
-      : format(
+    edges.length > 0
+      ? format(
           edges.reduce((oldest, training) =>
             training.date < oldest.date ? training : oldest,
           ).date,
           "yyyy-MM-dd",
-        );
-  const hasMore = edges.length > 0;
+        )
+      : null;
 
   return {
     traineeId,
     edges,
     cursor,
-    hasMore,
   };
 };
 
@@ -84,18 +82,12 @@ const Page: FC = () => {
 
   const [trainings, setTrainings] = useState(initial.edges);
   const [cursor, setCursor] = useState<string | null>(initial.cursor);
-  const [hasMore, setHasMore] = useState(initial.edges.length === LIMIT);
   const anchorRef = useRef<HTMLDivElement>(null);
 
   const fetcher = useFetcher<typeof loader>();
 
   useInViewport(anchorRef, (entry) => {
-    if (
-      entry.isIntersecting &&
-      hasMore &&
-      fetcher.state === "idle" &&
-      cursor !== null
-    ) {
+    if (entry.isIntersecting && fetcher.state === "idle" && cursor !== null) {
       fetcher.submit({ cursor });
     }
   });
@@ -104,11 +96,10 @@ const Page: FC = () => {
     if (fetcher.data === undefined) {
       return;
     }
-    const { edges: edge, cursor, hasMore } = fetcher.data;
+    const { edges: edge, cursor } = fetcher.data;
 
     setTrainings((prev) => [...prev, ...edge]);
     setCursor(cursor);
-    setHasMore(hasMore);
   }, [fetcher.data]);
 
   return (
