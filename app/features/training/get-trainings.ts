@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, lt, lte, sql } from "drizzle-orm";
+import { type SQL, and, asc, desc, eq, gte, lt, lte, sql } from "drizzle-orm";
 
 import { exercises } from "database/tables/exercises";
 import { trainingSessions } from "database/tables/training-sessions";
@@ -76,7 +76,7 @@ export const getTrainings: GetTrainings = (context) => async (props) => {
       .leftJoin(exercises, eq(trainingSessions.exerciseId, exercises.id))
       .$dynamic();
 
-    const filters = [
+    const filters: SQL[] = [
       "tagId" in props && eq(tags.id, props.tagId),
       "traineeId" in props && eq(trainings.traineeId, props.traineeId),
       "exerciseId" in props && eq(exercises.id, props.exerciseId),
@@ -103,7 +103,7 @@ export const getTrainings: GetTrainings = (context) => async (props) => {
           }[dateFormat];
           return and(...dateConditions);
         })(),
-    ].filter((filter) => filter !== false);
+    ].filter((filter): filter is SQL => filter !== false);
     const filteredQuery = baseQuery.where(and(...filters));
 
     const orderedQuery = filteredQuery.orderBy(
@@ -113,7 +113,7 @@ export const getTrainings: GetTrainings = (context) => async (props) => {
     );
 
     const limitedQuery =
-      "cursor" in props ? filteredQuery.limit(props.size) : orderedQuery;
+      "cursor" in props ? orderedQuery.limit(props.size) : orderedQuery;
 
     const data = await limitedQuery;
 
