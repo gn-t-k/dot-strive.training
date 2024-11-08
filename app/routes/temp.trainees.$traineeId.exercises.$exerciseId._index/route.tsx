@@ -69,7 +69,7 @@ export const loader = async ({
           ).date,
           "yyyy-MM-dd",
         );
-  const hasMore = edges.length === LIMIT;
+  const hasMore = edges.length > 0;
 
   return {
     traineeId,
