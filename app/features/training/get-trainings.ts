@@ -112,14 +112,21 @@ export const getTrainings: GetTrainings = (context) => async (props) => {
       asc(trainingSets.order),
     );
 
-    const limitedQuery =
-      "cursor" in props ? orderedQuery.limit(props.size) : orderedQuery;
+    /**
+     * クエリの単位は1セットだが、レスポンスの単位は1セッション
+     * たとえばsizeが10の場合10セッションをレスポンスとして返す必要がある
+     * 1セッション20セット超えることはそうそうないだろうと仮定して、多めに20セットクエリして、deserialize後にsizeの大きさにsliceする
+     */
+    const data = await ("cursor" in props
+      ? orderedQuery.limit(props.size * 20)
+      : orderedQuery
+    )
+      .then((result) => deserializeTraining(result))
+      .then((result) =>
+        "cursor" in props ? result.slice(0, props.size) : result,
+      );
 
-    const data = await limitedQuery;
-
-    const payload = deserializeTraining(data);
-
-    return { result: "success", data: payload };
+    return { result: "success", data };
   } catch (error) {
     return {
       result: "failure",
