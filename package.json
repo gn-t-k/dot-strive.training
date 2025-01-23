@@ -39,7 +39,7 @@
     "@remix-run/react": "2.15.2",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
-    "conform-to-valibot": "1.13.0",
+    "conform-to-valibot": "1.14.0",
     "date-fns": "4.1.0",
     "drizzle-orm": "0.38.4",
     "isbot": "5.1.21",
