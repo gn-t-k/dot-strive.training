@@ -93,13 +93,10 @@ const getSessionSchema = (registeredExercises: Exercise[]) =>
 const setSchema = object({
   weight: weightFieldSchema,
   reps: repetitionFieldSchema,
-  rpe: optional(
-    pipe(
-      number(),
-      minValue(0, "1以上の数値で入力してください"),
-      maxValue(10, "10以下の数値で入力してください"),
-    ),
-    0,
+  rpe: pipe(
+    optional(number(), 0),
+    minValue(0, "1以上の数値で入力してください"),
+    maxValue(10, "10以下の数値で入力してください"),
   ),
 });
 
