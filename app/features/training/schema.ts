@@ -7,6 +7,7 @@ import {
   minValue,
   number,
   object,
+  optional,
   safeParse,
   string,
 } from "valibot";
@@ -28,7 +29,7 @@ export const training = pipe(
             weight: pipe(number(), minValue(0, "weight min value")),
             reps: pipe(number(), minValue(0, "reps min value")),
             rpe: pipe(
-              number(),
+              optional(number(), 0),
               minValue(0, "rpe min value"),
               maxValue(10, "rpe max value"),
             ),
