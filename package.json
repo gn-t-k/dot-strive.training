@@ -60,7 +60,7 @@
     "@cloudflare/workers-types": "4.20250321.0",
     "@remix-run/dev": "2.16.2",
     "@tsconfig/strictest": "2.0.5",
-    "@types/react": "18.3.19",
+    "@types/react": "18.3.20",
     "@types/react-dom": "18.3.5",
     "autoprefixer": "10.4.21",
     "drizzle-kit": "0.30.5",
