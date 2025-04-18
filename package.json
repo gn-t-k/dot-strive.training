@@ -48,7 +48,7 @@
     "react": "18.3.1",
     "react-day-picker": "9.6.7",
     "react-dom": "18.3.1",
-    "recharts": "2.15.2",
+    "recharts": "2.15.3",
     "remix-auth": "3.7.0",
     "remix-auth-google": "2.0.0",
     "tailwind-merge": "2.6.0",
