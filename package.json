@@ -46,7 +46,7 @@
     "lucide-react": "0.510.0",
     "miniflare": "3.20250408.1",
     "react": "18.3.1",
-    "react-day-picker": "9.6.7",
+    "react-day-picker": "9.7.0",
     "react-dom": "18.3.1",
     "recharts": "2.15.3",
     "remix-auth": "3.7.0",
